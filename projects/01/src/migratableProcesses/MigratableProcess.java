@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 public interface MigratableProcess extends Runnable, Serializable{
 	/**
-	 * void Suspend(void):
+	 * void suspend(void):
 	 * Allows the object to enter a safe state before it is serialized.
 	 */
 	public void suspend();
