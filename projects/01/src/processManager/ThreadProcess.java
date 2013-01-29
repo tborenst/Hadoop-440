@@ -13,9 +13,9 @@ public class ThreadProcess {
 	private MigratableProcess process;
 	private Thread thread;
 	
-	public ThreadProcess(MigratableProcess migratableProcess){
-		process = migratableProcess;
-		thread = new Thread(process);
+	public ThreadProcess(MigratableProcess process){
+		this.process = process;
+		this.thread = new Thread(process);
 	}
 	
 	/**
