@@ -42,9 +42,13 @@ public class ServerSocketIO {
 			public void run(){
 				while(alive){
 					try {
-						Socket socket = serverSocket.accept();
-						IncomingSocket inSocket = new IncomingSocket(socket);
-						connections.add(inSocket);		
+						synchronized(serverSocket){
+							Socket socket = serverSocket.accept();
+							IncomingSocket inSocket = new IncomingSocket(socket);
+							synchronized(connections){
+								connections.add(inSocket);
+							}
+						}		
 					} catch (IOException e) {
 						System.out.println("Coud not accept connection on port: " + port + ".");
 						e.printStackTrace();
@@ -78,10 +82,19 @@ public class ServerSocketIO {
 	private class IncomingSocket{
 		private Socket socket;
 		private Boolean alive;
+		private DataInputStream in;
+		private DataOutputStream out;
 		
 		public IncomingSocket(Socket socket){
 			this.socket = socket;
 			this.alive = true;
+			try {
+				this.in = new DataInputStream(this.socket.getInputStream());
+				this.out = new DataOutputStream(this.socket.getOutputStream());
+			} catch (IOException e) {
+				System.out.println("Could not get socket input/output stream.");
+				e.printStackTrace();
+			}
 			go();
 		}
 		
@@ -95,33 +108,26 @@ public class ServerSocketIO {
 				@Override
 				public void run(){
 					//all the object we need to communicate with the socket
-					DataInputStream in;
-					DataOutputStream out;
-					try {
-						//try communicating with the socket
-						in = new DataInputStream(socket.getInputStream());
-						out = new DataOutputStream(socket.getOutputStream());
-						while(alive){
-							if(!socket.isConnected()){
-								//socket disconnected
-								alive = false;
-								System.out.println("Socket disconnected.");
-							} else {
-								//read in SokcetIOMessage object and retrieve message
+					while(alive){
+						if(!socket.isConnected()){
+						//socket disconnected
+							alive = false;
+							System.out.println("Socket disconnected.");
+						} else {
+							//read in SokcetIOMessage object and retrieve message
+							try {
 								System.out.println(in.readUTF());
+							} catch (IOException e) {
+								System.out.print("Could not read from socket.");
+								e.printStackTrace();
 							}
 						}
-					} catch (IOException e) {
-						System.out.println("Could not get socket input/output stream.");
-						e.printStackTrace();
 					}
 				}
 			};
-			
 			//start listening in a new thread
 			new Thread(listen).start();
 		}
-		
 	}
 }
 

@@ -3,10 +3,6 @@ package networking;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -14,6 +10,8 @@ public class ClientSocketIO {
 	private String hostname;
 	private Integer port;
 	private Socket socket;
+	private DataInputStream in;
+	private DataOutputStream out;
 	
 	public ClientSocketIO(String hostname, Integer port){
 		this.hostname = hostname;
@@ -30,13 +28,14 @@ public class ClientSocketIO {
 		go();
 	}
 	
+	/**
+	 * void go(void):
+	 * Spawn a thread to communicate with the server.
+	 */
 	private void go(){
 		Runnable listen = new Runnable(){
 			@Override 
 			public void run(){
-				//all the objects we need to communicate with the server
-				DataInputStream in;
-				DataOutputStream out;
 				try {
 					//try communicating with the server
 					in = new DataInputStream(socket.getInputStream());
@@ -50,4 +49,5 @@ public class ClientSocketIO {
 		};
 		new Thread(listen).start();
 	}
+
 }
