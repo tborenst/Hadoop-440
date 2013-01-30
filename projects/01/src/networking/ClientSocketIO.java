@@ -1,5 +1,7 @@
 package networking;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -33,21 +35,13 @@ public class ClientSocketIO {
 			@Override 
 			public void run(){
 				//all the objects we need to communicate with the server
-				InputStream in;
-				OutputStream out;
-				ObjectInputStream objInStream;
-				ObjectOutputStream objOutStream;
-				Object obj;
-				//try communicating with the server
+				DataInputStream in;
+				DataOutputStream out;
 				try {
-					in = socket.getInputStream();
-					out = socket.getOutputStream();
-					//objInStream = new ObjectInputStream(in);
-					//objOutStream = new ObjectOutputStream(out);
-					System.out.println("Hello!!!!!!");
-//					obj = (SocketIOMessage) new SocketIOMessage("Hello there, server!!!");
-//					objOutStream.writeObject(obj);
-					System.out.println("Sent message!");
+					//try communicating with the server
+					in = new DataInputStream(socket.getInputStream());
+					out = new DataOutputStream(socket.getOutputStream());
+					out.writeUTF("Hello there server!");
 				} catch (IOException e) {
 					System.out.println("Could not get socket input/output stream.");
 					e.printStackTrace();

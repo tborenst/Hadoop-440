@@ -3,20 +3,18 @@
  */
 package networking;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import networking.SocketIOMessage;
 
 public class ServerSocketIO {
 	private Integer port;
 	private ServerSocket serverSocket;
 	private ArrayList<IncomingSocket> connections;
+	private Boolean alive;
 	
 	/**
 	 * Create a Server socket that is listening to connections on a certain port.
@@ -25,6 +23,7 @@ public class ServerSocketIO {
 	public ServerSocketIO(Integer port){
 		this.port = port;
 		this.connections = new ArrayList<IncomingSocket>();
+		this.alive = true;
 		try {
 			this.serverSocket = new ServerSocket(port);
 		} catch (IOException e) {
@@ -41,7 +40,7 @@ public class ServerSocketIO {
 		Runnable listen = new Runnable(){
 			@Override
 			public void run(){
-				while(true){
+				while(alive){
 					try {
 						Socket socket = serverSocket.accept();
 						IncomingSocket inSocket = new IncomingSocket(socket);
@@ -63,6 +62,7 @@ public class ServerSocketIO {
 	 */
 	public void close(){
 		try {
+			alive = false;
 			serverSocket.close();
 		} catch (IOException e) {
 			System.out.println("Could not close server on port: " + port + ".");
@@ -95,42 +95,24 @@ public class ServerSocketIO {
 				@Override
 				public void run(){
 					//all the object we need to communicate with the socket
-					InputStream in;
-					OutputStream out;
-					ObjectInputStream objInStream;
-					ObjectOutputStream objOutStream;
-					Object obj;
+					DataInputStream in;
+					DataOutputStream out;
 					try {
 						//try communicating with the socket
-						in = socket.getInputStream();
-						out = socket.getOutputStream();
-						objInStream = new ObjectInputStream(in);
-						objOutStream = new ObjectOutputStream(out);
+						in = new DataInputStream(socket.getInputStream());
+						out = new DataOutputStream(socket.getOutputStream());
 						while(alive){
-							System.out.println("Hello???");
 							if(!socket.isConnected()){
 								//socket disconnected
 								alive = false;
 								System.out.println("Socket disconnected.");
 							} else {
 								//read in SokcetIOMessage object and retrieve message
-								obj = objInStream.readObject();
-								System.out.println("Got message: " + obj.toString());
-								if(obj.getClass().getName() == "SocketIOMessage"){
-									SocketIOMessage siom = (SocketIOMessage)obj;
-									String message = siom.getMessage();
-									//echo message
-									System.out.println("Socket: " + message + ".");
-								} else {
-									//ignore message
-								}
+								System.out.println(in.readUTF());
 							}
 						}
 					} catch (IOException e) {
 						System.out.println("Could not get socket input/output stream.");
-						e.printStackTrace();
-					} catch (ClassNotFoundException e) {
-						System.out.println("Could not find class of object.");
 						e.printStackTrace();
 					}
 				}
