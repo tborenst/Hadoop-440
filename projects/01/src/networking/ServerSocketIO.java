@@ -9,12 +9,14 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ServerSocketIO {
-	private Integer port;
-	private ServerSocket serverSocket;
-	private ArrayList<IncomingSocket> connections;
-	private Boolean alive;
+	private Integer port;                          //the port to listen on
+	private ServerSocket serverSocket;             //the server socket
+	private ArrayList<IncomingSocket> connections; //incoming sockets
+	private Boolean alive;                         //has the socket server been closed?
+	private HashMap<String, Runnable> bindings;    //maps Strings to Runnable objects
 	
 	/**
 	 * Create a Server socket that is listening to connections on a certain port.
@@ -23,31 +25,32 @@ public class ServerSocketIO {
 	public ServerSocketIO(Integer port){
 		this.port = port;
 		this.connections = new ArrayList<IncomingSocket>();
-		this.alive = true;
+		this.bindings = new HashMap<String, Runnable>();
 		try {
 			this.serverSocket = new ServerSocket(port);
+			this.alive = true;
 		} catch (IOException e) {
 			System.out.println("Could not initiate a server socket on port: " + port + ".");
 			e.printStackTrace();
 		}
+		listen();
 	}
+	
 	
 	/**
 	 * void listen(void):
 	 * Start listening for incoming connections.
 	 */
-	public void listen(){
+	private void listen(){
 		Runnable listen = new Runnable(){
 			@Override
 			public void run(){
 				while(alive){
 					try {
-						synchronized(serverSocket){
-							Socket socket = serverSocket.accept();
-							IncomingSocket inSocket = new IncomingSocket(socket);
-							synchronized(connections){
-								connections.add(inSocket);
-							}
+						Socket socket = serverSocket.accept();
+						IncomingSocket inSocket = new IncomingSocket(socket);
+						synchronized(connections){
+							connections.add(inSocket);
 						}		
 					} catch (IOException e) {
 						System.out.println("Coud not accept connection on port: " + port + ".");
@@ -75,6 +78,15 @@ public class ServerSocketIO {
 	}
 	
 	/**
+	 * void broadcast(String):
+	 * Send a message to all open incoming connections.
+	 * @param message - the message to send to all incoming sockets
+	 */
+	public void broadcast(String message){
+		
+	}
+	
+	/**
 	 * class IncomingSocket:
 	 * Holds a Socket and listens to its open connection.
 	 * It is possible to bind Runnable objects to certain Strings on this socket for an "event-like" socket system.
@@ -95,28 +107,33 @@ public class ServerSocketIO {
 				System.out.println("Could not get socket input/output stream.");
 				e.printStackTrace();
 			}
-			go();
+			listen();
 		}
 		
 		/**
-		 * void go(void):
+		 * void listen(void):
 		 * Spawns a new Thread in which to communicate with the socket in a non-blocking manner.
 		 */
-		private void go(){
+		private void listen(){
 			//the listening process
 			Runnable listen = new Runnable(){
 				@Override
 				public void run(){
 					//all the object we need to communicate with the socket
-					while(alive){
+					while(true){
 						if(!socket.isConnected()){
 						//socket disconnected
-							alive = false;
-							System.out.println("Socket disconnected.");
+							synchronized(alive){
+								alive = false;
+								System.out.println("Socket disconnected.");
+								break; //exit the loop if the socket isn't alive
+							}
 						} else {
 							//read in SokcetIOMessage object and retrieve message
 							try {
-								System.out.println(in.readUTF());
+								synchronized(in){
+									System.out.println(in.readUTF());
+								}
 							} catch (IOException e) {
 								System.out.print("Could not read from socket.");
 								e.printStackTrace();
@@ -127,6 +144,26 @@ public class ServerSocketIO {
 			};
 			//start listening in a new thread
 			new Thread(listen).start();
+		}
+		
+		/**
+		 * void sendMessage(String):
+		 * Send a message to this individual socket.
+		 * @param message - the message to be sent.
+		 */
+		public void sendMessage(String message){
+			synchronized(alive){
+				if(alive){
+					synchronized(out){
+						try {
+							out.writeUTF(message);
+						} catch (IOException e) {
+							System.out.println("Could not send message ['" + message + "'] to socket.");
+							e.printStackTrace();
+						}
+					}
+				}
+			}
 		}
 	}
 }

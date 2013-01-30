@@ -10,6 +10,7 @@ public class ClientSocketIO {
 	private String hostname;
 	private Integer port;
 	private Socket socket;
+	private Boolean alive;
 	private DataInputStream in;
 	private DataOutputStream out;
 	
@@ -18,6 +19,9 @@ public class ClientSocketIO {
 		this.port = port;
 		try {
 			this.socket = new Socket(hostname, port);
+			this.alive = true;
+			this.in = new DataInputStream(this.socket.getInputStream());
+			this.out = new DataOutputStream(this.socket.getOutputStream());
 		} catch (UnknownHostException e) {
 			System.out.print("Socket attempted to connect to unknown host: " + hostname + ".");
 			e.printStackTrace();
@@ -25,29 +29,36 @@ public class ClientSocketIO {
 			System.out.println("Sokcet failed to connect to host: " + hostname +" at port: " + port + ".");
 			e.printStackTrace();
 		}
-		go();
+		listen();
 	}
 	
 	/**
-	 * void go(void):
+	 * void listen(void):
 	 * Spawn a thread to communicate with the server.
 	 */
-	private void go(){
+	private void listen(){
 		Runnable listen = new Runnable(){
 			@Override 
-			public void run(){
-				try {
-					//try communicating with the server
-					in = new DataInputStream(socket.getInputStream());
-					out = new DataOutputStream(socket.getOutputStream());
-					out.writeUTF("Hello there server!");
-				} catch (IOException e) {
-					System.out.println("Could not get socket input/output stream.");
-					e.printStackTrace();
-				}
+			public void run(){		
+				
 			}
 		};
 		new Thread(listen).start();
 	}
-
+	
+	/**
+	 * void close(void):
+	 * Close socket.
+	 */
+	public void close(){
+		synchronized(alive){
+			this.alive = false;
+		}
+		try {
+			socket.close();
+		} catch (IOException e) {
+			System.out.println("Could not close socket.");
+			e.printStackTrace();
+		}
+	}
 }
