@@ -13,6 +13,7 @@ public class Testing {
 		System.out.println("Server is listening...");
 		System.out.println("Start client up!");
 		ClientSocketIO client = new ClientSocketIO(host, 15237);
+		System.out.println("POO{");
 	}
 	
 }
