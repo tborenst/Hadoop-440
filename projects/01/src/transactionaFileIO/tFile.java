@@ -1,9 +1,6 @@
 package transactionaFileIO;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 
 public class tFile {
 	private File file;
@@ -30,6 +27,36 @@ public class tFile {
 				return new RandomAccessFile(file, "rw");
 			} catch (FileNotFoundException e) {
 				System.out.println("tFile.open(): couldn't open file: "+file.getPath());
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	private ObjectOutputStream openWriteStream() {
+		if(file != null) {			
+			try {
+				return new ObjectOutputStream(new FileOutputStream(file.getPath()));
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	private ObjectInputStream openReadStream() {
+		if(file != null) {			
+			try {
+				return new ObjectInputStream(new FileInputStream(file.getPath()));
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -121,6 +148,21 @@ public class tFile {
 		}
 	}
 	
+	public void writeObj(Object o) {
+		ObjectOutputStream s = openWriteStream();
+		if(s != null) {
+			try {
+				s.writeObject(o);
+				s.flush();
+				s.close();
+			} catch (IOException e) {
+				System.out.println("tFile.writeObj: error writing object "+o.toString());
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
 	/**
 	 * String read(void):
 	 * Reads from beginning of file and then closes the connection.
@@ -145,13 +187,29 @@ public class tFile {
 		return "";
 	}
 	
+	public Object readObj() {
+		ObjectInputStream s = openReadStream();
+		if(s != null) {
+			try {
+				Object ret = s.readObject();				
+				s.close();
+				return ret;
+			} catch (ClassNotFoundException | IOException e) {
+				System.out.println("tFile.readObj: reading object from file: "+file.getPath());
+				e.printStackTrace();
+			}
+			
+		}
+		return null;
+	}
+	
 	//testing
 	public static void main(String[] args) {
-		tFile test = new tFile("./asdf.txt");
-		tFile test2 = new tFile("./asdf.txt");
-		test.writeTo("candyman wrote this 2", 0);
+		tFile test = new tFile("./obj.txt");
+		tFile test2 = new tFile("./obj.txt");
+		test.writeObj((Object) "candyman wrote this 2");
 		System.out.println(test2.read());
-		test2.writeTo("candyman wrote this 1", 0);
+		test2.writeObj((Object) "candyman wrote this 1");
 		System.out.println(test2.read());
 		System.out.println(test.read());
 		
