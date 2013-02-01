@@ -1,6 +1,10 @@
 package transactionaFileIO;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.*;
+
+import javax.imageio.ImageIO;
 
 public class tFile {
 	private File file;
@@ -142,12 +146,29 @@ public class tFile {
 				raf.writeBytes(s);
 				raf.close();
 			} catch (IOException e) {
-				System.out.println("tFile.writeTo(): error accessing/writing file: "+file.getPath());
+				System.out.println("tFile.writeTo: error accessing/writing file: "+file.getPath());
 				e.printStackTrace();
 			}
 		}
 	}
 	
+	/**
+	 * void writeImg(Image, String):
+	 * Writes image to file in the given format.
+	 */
+	public void writeImg(RenderedImage img, String format) {
+		try {
+			ImageIO.write(img, format, file);
+		} catch (IOException e) {
+			System.out.println("tFile.writeImg: error writing "+format+" to "+file.getPath());
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * void writeObj(Object):
+	 * Serializes an Object o to file.
+	 */
 	public void writeObj(Object o) {
 		ObjectOutputStream s = openWriteStream();
 		if(s != null) {
@@ -187,6 +208,24 @@ public class tFile {
 		return "";
 	}
 	
+	/**
+	 * Image readImg(void):
+	 * Reads image from file.
+	 */
+	public BufferedImage readImg() {
+		try {
+			return ImageIO.read(file);
+		} catch (IOException e) {
+			System.out.println("tFile.readImg: failed to read image file: "+file.getPath());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * Object readObj(void):
+	 * Reads a serialized object from the file.
+	 */
 	public Object readObj() {
 		ObjectInputStream s = openReadStream();
 		if(s != null) {
@@ -194,7 +233,10 @@ public class tFile {
 				Object ret = s.readObject();				
 				s.close();
 				return ret;
-			} catch (ClassNotFoundException | IOException e) {
+			} catch (ClassNotFoundException e) {
+				System.out.println("tFile.readObj: reading object from file: "+file.getPath());
+				e.printStackTrace();
+			} catch (IOException e) {
 				System.out.println("tFile.readObj: reading object from file: "+file.getPath());
 				e.printStackTrace();
 			}
