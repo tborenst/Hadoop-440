@@ -16,7 +16,8 @@ public class Poop implements Runnable {
 	}
 	
 	/**
-	 * 
+	 * void addNode(String id):
+	 * Average grayscales the a pixel at (x,y) in BufferedImage img .
 	 * @param id
 	 */
 	public void addNode(String id) {

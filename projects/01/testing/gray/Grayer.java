@@ -1,3 +1,7 @@
+/**
+ * The Grayer class takes in a String path and String format of an existing image to grayscale the image pixel by pixel.
+ */
+
 package gray;
 
 import java.awt.image.BufferedImage;
@@ -12,7 +16,6 @@ public class Grayer implements MigratableProcess{
 	private int pixelX; //col
 	private int pixelY; //row
 	private String format;
-	//private BufferedImage img;
 	private tFile file;
 	
 	private static final long serialVersionUID = 4L;
@@ -21,7 +24,6 @@ public class Grayer implements MigratableProcess{
 	public Grayer(String path, String format) {
 		this.path = path;
 		this.file = new tFile(path);
-		//this.img = file.readImg();
 		this.format = format;
 		this.pixelX = 0;
 		this.pixelY = 0;
@@ -29,6 +31,13 @@ public class Grayer implements MigratableProcess{
 		this.suspended = false;
 	}
 	
+	/**
+	 * void grayPixel(BufferedImage img, int x, int y):
+	 * Average grayscales the a pixel at (x,y) in BufferedImage img .
+	 * @param img
+	 * @param x
+	 * @param y
+	 */
 	private void grayPixel(BufferedImage img, int x, int y) {
 		if(0 <= x && x < img.getWidth() && 0 <= y && y < img.getHeight()) {
 			int rgb = img.getRGB(x,y);
@@ -43,28 +52,41 @@ public class Grayer implements MigratableProcess{
 		
 	}
 	
+	/**
+	 * void saveImg(BufferedImage img):
+	 * Writes the BufferedImage img to file.
+	 * @param img
+	 */
 	private void saveImg(BufferedImage img) {
 		System.out.println("Saving Img");
 		file.writeImg(img, format);
 		System.out.println("Saved Img");
 	}
 	
-
+	/**
+	 * void run(void):
+	 * Reads the image from file and runs grayPixel one pixel at a time.
+	 */
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 		BufferedImage img = file.readImg();
 		while(!suspended && pixelY < img.getHeight()) {
+			//iterate through the image first by column and then by row
 			if(pixelX == img.getWidth()-1) {pixelX = 0; pixelY++;}
 			else {pixelX++;}
 			
 			grayPixel(img, pixelX, pixelY);
 		}
+		
 		saveImg(img);
 		suspended = false;
 		
 	}
 
+	/**
+	 * void suspend(void):
+	 * Suspends run().
+	 */
 	@Override
 	public void suspend() {
 		System.out.println("Suspended!");
@@ -72,10 +94,9 @@ public class Grayer implements MigratableProcess{
 		while(suspended){System.out.println("asdf");}
 	}
 	
+	//testing
 	public static void main(String[] args) throws InterruptedException {
-		Grayer g = new Grayer("testing/gray/test.jpg", "jpeg");
-		ThreadProcess gt = new ThreadProcess((MigratableProcess) g);
-		
+		ThreadProcess gt = new ThreadProcess((MigratableProcess) new Grayer("testing/gray/test.jpg", "jpeg"));
 		
 		gt.start();
 		System.out.println("running...");
@@ -90,9 +111,8 @@ public class Grayer implements MigratableProcess{
 		
 		System.out.println("deserializing...");
 		tFile serFile = new tFile("img.ser");
-		Grayer gRevival = (Grayer) serFile.readObj();
-		ThreadProcess gRevivalT = new ThreadProcess((MigratableProcess) gRevival);
-		gRevivalT.start();
+		ThreadProcess gtRevival = new ThreadProcess((MigratableProcess) serFile.readObj());
+		gtRevival.start();
 	}
 
 }

@@ -43,6 +43,10 @@ public class tFile implements Serializable{
 		return null;
 	}
 	
+	/**
+	 * ObjectOutputStream openWriteStream(void):
+	 * Creates a ObjectOutputStream from File file.
+	 */
 	private ObjectOutputStream openWriteStream() {
 		if(file != null) {			
 			try {
@@ -58,6 +62,10 @@ public class tFile implements Serializable{
 		return null;
 	}
 	
+	/**
+	 * ObjectInputStream openReadStream(void):
+	 * Creates a ObjectInputStream from File file.
+	 */
 	private ObjectInputStream openReadStream() {
 		if(file != null) {			
 			try {
@@ -74,8 +82,9 @@ public class tFile implements Serializable{
 	}
 	
 	/**
-	 * boolean move(String):
+	 * boolean move(String destPath):
 	 * Moves file to the new specified destination.
+	 * @param destPath
 	 */
 	public boolean move(String destPath) {
 		boolean success = false;
@@ -121,8 +130,9 @@ public class tFile implements Serializable{
 	}
 	
 	/**
-	 * void write(String):
+	 * void write(String s):
 	 * Writes from the end of the file and then closes the connection.
+	 * @param s
 	 */
 	public void write(String s) {
 		long fileLength = 0;
@@ -141,8 +151,10 @@ public class tFile implements Serializable{
 	}
 	
 	/**
-	 * void writeTo(String, long):
+	 * void writeTo(String s, long location):
 	 * Writes from the specified location and then closes the connection.
+	 * @param s
+	 * @param location
 	 */
 	public void writeTo(String s, long location) {
 		RandomAccessFile raf = open();
@@ -159,8 +171,10 @@ public class tFile implements Serializable{
 	}
 	
 	/**
-	 * void writeImg(Image, String):
+	 * void writeImg(RenderedImage img, String format):
 	 * Writes image to file in the given format.
+	 * @param img
+	 * @param format
 	 */
 	public void writeImg(RenderedImage img, String format) {
 		try {
@@ -172,8 +186,9 @@ public class tFile implements Serializable{
 	}
 	
 	/**
-	 * void writeObj(Object):
+	 * void writeObj(Object o):
 	 * Serializes an Object o to file.
+	 * @param o
 	 */
 	public void writeObj(Object o) {
 		ObjectOutputStream s = openWriteStream();
