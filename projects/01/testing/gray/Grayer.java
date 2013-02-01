@@ -1,21 +1,26 @@
 package gray;
 
 import java.awt.image.BufferedImage;
+
+import person.Person;
 import migratableProcesses.MigratableProcess;
 import transactionaFileIO.tFile;
 
 public class Grayer implements MigratableProcess{
-	private BufferedImage img;
-	private tFile file;
+	private String path;
 	private int pixelX; //col
 	private int pixelY; //row
 	private String format;
+	//private BufferedImage img;
+	private tFile file;
 	
+	private static final long serialVersionUID = 4L;
 	private boolean suspended;
 	
 	public Grayer(String path, String format) {
+		this.path = path;
 		this.file = new tFile(path);
-		this.img = file.readImg();
+		//this.img = file.readImg();
 		this.format = format;
 		this.pixelX = 0;
 		this.pixelY = 0;
@@ -23,7 +28,7 @@ public class Grayer implements MigratableProcess{
 		this.suspended = false;
 	}
 	
-	private void grayPixel(int x, int y) {
+	private void grayPixel(BufferedImage img, int x, int y) {
 		if(0 <= x && x < img.getWidth() && 0 <= y && y < img.getHeight()) {
 			int rgb = img.getRGB(x,y);
 			int colorMask = 255;
@@ -37,29 +42,24 @@ public class Grayer implements MigratableProcess{
 		
 	}
 	
-	private void saveImg() {
+	private void saveImg(BufferedImage img) {
 		System.out.println("Saving Img");
 		file.writeImg(img, format);
+		System.out.println("Saved Img");
 	}
 	
 
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		
+		BufferedImage img = file.readImg();
 		while(!suspended && pixelY < img.getHeight()) {
 			if(pixelX == img.getWidth()-1) {pixelX = 0; pixelY++;}
 			else {pixelX++;}
-			grayPixel(pixelX, pixelY);
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
+			grayPixel(img, pixelX, pixelY);
 		}
-		
-		saveImg();
+		saveImg(img);
 		suspended = false;
 		
 	}
@@ -68,47 +68,34 @@ public class Grayer implements MigratableProcess{
 	public void suspend() {
 		System.out.println("Suspended!");
 		suspended = true;
-		while(suspended);		
+		while(suspended){System.out.println("asdf");}
 	}
 	
-	public static void main(String[] args) {
-		Grayer g = new Grayer("testing/gray/test2.jpg", "jpeg");
+	public static void main(String[] args) throws InterruptedException {
+		Grayer g = new Grayer("testing/gray/test.jpg", "jpeg");
 		Thread gt = new Thread(g);
-		gt.start();
+		tFile serFile = new tFile("img.ser");
 		
+		
+		gt.start();
 		System.out.println("running...");
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		Thread.sleep(1000);		
 		
 		System.out.println("suspending...");
 		g.suspend();
 		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		System.out.println("check image!!");
+		Thread.sleep(100000);
 		
-		gt.start();
+		System.out.println("serializing...");
+		serFile.writeObj(g);
 		
-		System.out.println("running...");
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Thread.sleep(100);
 		
-		System.out.println("suspending...");
-		g.suspend();
-		
-		gt.start();
-		
-		System.out.println("finishing...");	
+		System.out.println("deserializing...");
+		Grayer gRevival = (Grayer) serFile.readObj();
+		Thread gRevivalT = new Thread(gRevival);
+		gRevivalT.start();
 	}
 }

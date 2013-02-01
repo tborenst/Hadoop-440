@@ -6,8 +6,9 @@ import java.io.*;
 
 import javax.imageio.ImageIO;
 
-public class tFile {
+public class tFile implements Serializable{
 	private File file;
+	private static final long serialVersionUID = 3L;
 	
 	public tFile(String path) {
 		this.file = new File(path);
