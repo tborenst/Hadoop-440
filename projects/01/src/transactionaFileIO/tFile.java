@@ -194,7 +194,10 @@ public class tFile {
 				Object ret = s.readObject();				
 				s.close();
 				return ret;
-			} catch (ClassNotFoundException | IOException e) {
+			} catch (ClassNotFoundException e) {
+				System.out.println("tFile.readObj: reading object from file: "+file.getPath());
+				e.printStackTrace();
+			} catch(IOException e){
 				System.out.println("tFile.readObj: reading object from file: "+file.getPath());
 				e.printStackTrace();
 			}

@@ -169,6 +169,7 @@ public class ServerSocketIO {
 		private Boolean alive;
 		private DataInputStream in;
 		private DataOutputStream out;
+		
 		public IncomingSocket(Socket socket){
 			this.socket = socket;
 			this.alive = true;
