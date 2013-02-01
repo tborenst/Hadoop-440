@@ -9,14 +9,16 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class ServerSocketIO {
 	private Integer port;                          //the port to listen on
 	private ServerSocket serverSocket;             //the server socket
 	private ArrayList<IncomingSocket> connections; //incoming sockets
 	private Boolean alive;                         //has the socket server been closed?
-	private HashMap<String, Runnable> bindings;    //maps Strings to Runnable objects
+	private HashMap<String, SIOCommand> bindings;  //maps Strings to SIOCommand objects
 	
 	/**
 	 * Create a Server socket that is listening to connections on a certain port.
@@ -25,7 +27,7 @@ public class ServerSocketIO {
 	public ServerSocketIO(Integer port){
 		this.port = port;
 		this.connections = new ArrayList<IncomingSocket>();
-		this.bindings = new HashMap<String, Runnable>();
+		this.bindings = new HashMap<String, SIOCommand>();
 		try {
 			this.serverSocket = new ServerSocket(port);
 			this.alive = true;
@@ -36,6 +38,17 @@ public class ServerSocketIO {
 		listen();
 	}
 	
+	/**
+	 * void on(String, SIOCommand):
+	 * Tell the server to run a certain SIOCommand upon receiving a certain message.
+	 * @param message - the message to active the Runnable.
+	 * @param command - the SIOCOmmand to be run.
+	 */
+	public void on(String message, SIOCommand command){
+		synchronized(bindings){
+			bindings.put(message, command);
+		}
+	}
 	
 	/**
 	 * void listen(void):
@@ -45,11 +58,20 @@ public class ServerSocketIO {
 		Runnable listen = new Runnable(){
 			@Override
 			public void run(){
-				while(alive){
+				while(true){
+					//clean up dead sockets every iteration
+					cleanUp();
+					synchronized(alive){
+						if(!alive){
+							break; //if server socket has been closed, break out of the loop
+						}
+					}
 					try {
+						//wait for a socket to connect
 						Socket socket = serverSocket.accept();
 						IncomingSocket inSocket = new IncomingSocket(socket);
 						synchronized(connections){
+							//add socket to list
 							connections.add(inSocket);
 						}		
 					} catch (IOException e) {
@@ -59,7 +81,6 @@ public class ServerSocketIO {
 				}
 			}
 		};
-		
 		new Thread(listen).start();
 	}
 	
@@ -68,12 +89,16 @@ public class ServerSocketIO {
 	 * Closes the server socket.
 	 */
 	public void close(){
-		try {
+		synchronized(alive){
 			alive = false;
-			serverSocket.close();
-		} catch (IOException e) {
-			System.out.println("Could not close server on port: " + port + ".");
-			e.printStackTrace();
+			synchronized(serverSocket){
+				try {
+					serverSocket.close();
+				} catch (IOException e) {
+					System.out.println("Could not close server on port: " + port + ".");
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	
@@ -83,7 +108,54 @@ public class ServerSocketIO {
 	 * @param message - the message to send to all incoming sockets
 	 */
 	public void broadcast(String message){
-		
+		synchronized(connections){
+			Iterator<IncomingSocket> sockets = connections.iterator();
+			while(sockets.hasNext()){
+				IncomingSocket socket = (IncomingSocket) sockets.next();
+				socket.sendMessage(message);
+			}
+		}
+	}
+	
+	/**
+	 * void emit(Integer, String):
+	 * Send a message to a particular socket with a certain id.
+	 * @param id - id of socket to send message to.
+	 * @param message - message to be sent.
+	 */
+	public void emit(Integer id, String message){
+		synchronized(connections){
+			Iterator<IncomingSocket> sockets = connections.iterator();
+			//iterate over all sockets
+			while(sockets.hasNext()){
+				IncomingSocket socket = sockets.next();
+				if(socket.getId() == id){
+					//found socket, send message
+					socket.sendMessage(message);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * void cleanUp(void):
+	 * Removes any dead IncomingSocket objects from the connections list
+	 */
+	private void cleanUp(){
+		synchronized(connections){
+			ArrayList<IncomingSocket> cleanedList = new ArrayList<IncomingSocket>(); //will contain only live sockets
+			Iterator<IncomingSocket> sockets = connections.iterator();
+			//iterate over all sockets
+			while(sockets.hasNext()){
+				IncomingSocket socket = sockets.next();
+				if(socket.isAlive()){
+					//socket is alive, add it to the new list
+					cleanedList.add(socket);
+				}
+			}
+			//replace old connection list with new, clean list
+			connections = cleanedList;
+		}
 	}
 	
 	/**
@@ -92,14 +164,15 @@ public class ServerSocketIO {
 	 * It is possible to bind Runnable objects to certain Strings on this socket for an "event-like" socket system.
 	 */
 	private class IncomingSocket{
+		private Integer id;
 		private Socket socket;
 		private Boolean alive;
 		private DataInputStream in;
 		private DataOutputStream out;
-		
 		public IncomingSocket(Socket socket){
 			this.socket = socket;
 			this.alive = true;
+			this.id = 0 + (int)(Math.random() * ((1000 - 0) + 1)); //generate random id
 			try {
 				this.in = new DataInputStream(this.socket.getInputStream());
 				this.out = new DataOutputStream(this.socket.getOutputStream());
@@ -119,25 +192,41 @@ public class ServerSocketIO {
 			Runnable listen = new Runnable(){
 				@Override
 				public void run(){
-					//all the object we need to communicate with the socket
 					while(true){
-						if(!socket.isConnected()){
-						//socket disconnected
+						synchronized(socket){
+							if(!socket.isConnected()){
+							//socket disconnected
+								synchronized(alive){
+									alive = false;
+									System.out.println("Socket disconnected.");
+									break; //exit the loop if the socket isn't alive
+								}
+							} 
+						}
+						//read message from socket
+						try {
+							synchronized(in){
+								String[] message = in.readUTF().split(">");
+								String commandName = message[0]; //get command name
+								synchronized(bindings){
+									SIOCommand command = bindings.get(commandName);
+									if(command != null){
+										String[] parameters = Arrays.copyOfRange(message, 1, message.length); //cut commandName from message
+										command.parameters(parameters); //pass parameters into command
+										try{
+											command.run(); //run command
+										} catch(Exception e){
+											System.out.println("Failed to run command: " + commandName + ".");
+										}
+									}
+								}
+							}
+						} catch (IOException e) {
+							System.out.print("Could not read input from socket. Killing socket.");
 							synchronized(alive){
 								alive = false;
-								System.out.println("Socket disconnected.");
-								break; //exit the loop if the socket isn't alive
 							}
-						} else {
-							//read in SokcetIOMessage object and retrieve message
-							try {
-								synchronized(in){
-									System.out.println(in.readUTF());
-								}
-							} catch (IOException e) {
-								System.out.print("Could not read from socket.");
-								e.printStackTrace();
-							}
+							return;
 						}
 					}
 				}
@@ -164,6 +253,24 @@ public class ServerSocketIO {
 					}
 				}
 			}
+		}
+		
+		/**
+		 * Boolean isAlive(void):
+		 * Returns true if the socket is alive, false if dead.
+		 * @return - is the socket still alive?
+		 */
+		public Boolean isAlive(){
+			return alive;
+		}
+		
+		/**
+		 * Integer getId(void):
+		 * Returns the id of this socket.
+		 * @return - the id of this socket.
+		 */
+		public Integer getId(){
+			return id;
 		}
 	}
 }
