@@ -1,3 +1,8 @@
+/**
+ * The tFile class takes in a path String and creates a new File object. It provides several public methods
+ * to control the file similar to the File class. tFile immediately closes the file after read/write sessions.
+ */
+
 package transactionaFileIO;
 
 import java.awt.image.BufferedImage;
@@ -43,10 +48,10 @@ public class tFile implements Serializable{
 			try {
 				return new ObjectOutputStream(new FileOutputStream(file.getPath()));
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
+				System.out.println("tFile.openWriteStream: unable to create FileOutputStream: "+file.getPath());
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				System.out.println("tFile.openWriteStream: unable to create ObjectOutputStream: "+file.getPath());
 				e.printStackTrace();
 			}
 		}
@@ -58,10 +63,10 @@ public class tFile implements Serializable{
 			try {
 				return new ObjectInputStream(new FileInputStream(file.getPath()));
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
+				System.out.println("tFile.openReadStream: unable to create FileInputStream: "+file.getPath());
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				System.out.println("tFile.openReadStream: unable to create ObjectInputStream: "+file.getPath());
 				e.printStackTrace();
 			}
 		}

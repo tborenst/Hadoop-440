@@ -3,6 +3,7 @@ package gray;
 import java.awt.image.BufferedImage;
 
 import person.Person;
+import processManager.ThreadProcess;
 import migratableProcesses.MigratableProcess;
 import transactionaFileIO.tFile;
 
@@ -73,8 +74,7 @@ public class Grayer implements MigratableProcess{
 	
 	public static void main(String[] args) throws InterruptedException {
 		Grayer g = new Grayer("testing/gray/test.jpg", "jpeg");
-		Thread gt = new Thread(g);
-		tFile serFile = new tFile("img.ser");
+		ThreadProcess gt = new ThreadProcess((MigratableProcess) g);
 		
 		
 		gt.start();
@@ -83,19 +83,16 @@ public class Grayer implements MigratableProcess{
 		Thread.sleep(1000);		
 		
 		System.out.println("suspending...");
-		g.suspend();
+		gt.serialize("img.ser");
 		
 		System.out.println("check image!!");
-		Thread.sleep(100000);
-		
-		System.out.println("serializing...");
-		serFile.writeObj(g);
-		
-		Thread.sleep(100);
+		Thread.sleep(10000);
 		
 		System.out.println("deserializing...");
+		tFile serFile = new tFile("img.ser");
 		Grayer gRevival = (Grayer) serFile.readObj();
-		Thread gRevivalT = new Thread(gRevival);
+		ThreadProcess gRevivalT = new ThreadProcess((MigratableProcess) gRevival);
 		gRevivalT.start();
 	}
+
 }
