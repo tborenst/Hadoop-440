@@ -22,6 +22,10 @@ public class NodeProxy {
 		processes.add(process);
 	}
 	
+	public int getId(){
+		return id;
+	}
+	
 	public ProcessProxy setFinished(int id){
 		Iterator<ProcessProxy> iterator = processes.iterator();
 		while(iterator.hasNext()){
