@@ -1,5 +1,5 @@
 /**
- * The ClientSocketIO class is the client-side wrapper for SocketIO. It can connect to a server, listen to events from that server, and bind to
+ * The SIOClient class is the client-side wrapper for SocketIO. It can connect to a server, listen to events from that server, and bind to
  * SIOCommand objects that will be run on cue from certain events.
  */
 package networking;
@@ -106,7 +106,7 @@ public class SIOClient {
 								}
 							}
 						} catch (IOException e) {
-							System.out.println("Could not read ainput from socket. Killing socket.");
+							System.out.println("CLIENT: could not connect to server. Killing self.");
 							synchronized(alive){
 								alive = false;
 							}

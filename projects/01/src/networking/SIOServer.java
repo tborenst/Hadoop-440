@@ -1,5 +1,5 @@
 /**
- * The ServerSokcetIO class provides a wrapper that is easy to use to accept connections from ClinetSokcetIO objects.
+ * The SIOServer class provides a wrapper that is easy to use to accept connections from ClinetSokcetIO objects.
  */
 package networking;
 
@@ -268,10 +268,24 @@ public class SIOServer {
 									}
 								}
 							}
-						} catch (IOException e) {
-							System.out.print("Could not read input from socket. Killing socket.");
+						} catch (IOException e1) {
+							System.out.println("SERVER: could not reach socket. Killing socket.");
 							synchronized(alive){
 								alive = false;
+							}
+							synchronized(bindings){
+								//call "disconnect" SIOCommand
+								SIOCommand command = bindings.get("disconnect");
+								if(command != null){
+									String[] parameters = {((Integer)id).toString()};
+									command.parameters(parameters);
+									try{
+										command.run(); //run command
+									} catch(Exception e2){
+										System.out.println("Failed to run command: disconnect.");
+									}
+								}
+								
 							}
 							return;
 						}

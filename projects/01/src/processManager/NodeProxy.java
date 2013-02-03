@@ -17,30 +17,74 @@ public class NodeProxy {
 		this.processes = new ArrayList<ProcessProxy>();
 	}
 	
-	public void addProcess(int id, String name){
-		ProcessProxy process = new ProcessProxy(id, name);
-		processes.add(process);
+	/**
+	 * int getNumberOfProcesses(void):
+	 * Returns the number of processes running on this node.
+	 * @return
+	 */
+	public int getNumberOfProcesses(){
+		synchronized(processes){
+			return processes.size();
+		}
 	}
 	
-	public void setFinished(int id){
-		Iterator<ProcessProxy> iterator = processes.iterator();
-		while(iterator.hasNext()){
-			ProcessProxy process = iterator.next();
-			if(process.getId() == id){
-				process.setFinished();
-				return;
+	public void addNewProcess(int id, String name){
+		synchronized(processes){
+			ProcessProxy process = new ProcessProxy(id, name);
+			processes.add(process);
+		}
+	}
+	
+	public void addExistingProcess(ProcessProxy process){
+		synchronized(processes){
+			processes.add(process);
+		}
+	}
+	
+	public ProcessProxy setFinished(int id){
+		synchronized(processes){
+			Iterator<ProcessProxy> iterator = processes.iterator();
+			while(iterator.hasNext()){
+				ProcessProxy process = iterator.next();
+				if(process.getId() == id){
+					process.setFinished();
+					return process;
+				}
 			}
+			return null;
+		}
+	}
+	
+	public int getId(){
+		return id;
+	}
+	
+	/**
+	 * ProcessProxy getRandomProcess(void):
+	 * Returns a random (not dead) process from processes list, but does not remove it.
+	 * @return - random process.
+	 */
+	public ProcessProxy getRandomProcess(){
+		synchronized(processes){
+			cleanUp();
+			int index = (int)(Math.random() * ((processes.size() - 0) + 1));
+			return processes.get(index);
 		}
 	}
 	
 	/**
-	 * ProcessProxy removeProcess(void):
-	 * Removes oldest process from processes list and returns it.
-	 * @return - oldest process.
+	 * ProcessProxy removeProcessById(int):
+	 * Removes a process with a certain id from the list and returns it.
+	 * @param id
+	 * @return - removed process.
 	 */
-	public ProcessProxy removeOldestProcess(){
-		cleanUp();
-		return processes.remove(0);
+	public ProcessProxy removeProcessById(int id){
+		synchronized(processes){
+			ProcessProxy process = setFinished(id);
+			cleanUp();
+			return process;
+		}
+		
 	}
 	
 	/**
@@ -48,6 +92,7 @@ public class NodeProxy {
 	 * Removes any finished processes from the list.
 	 */
 	public void cleanUp(){
+		synchronized(processes){
 			ArrayList<ProcessProxy> cleanList = new ArrayList<ProcessProxy>();
 			Iterator<ProcessProxy> iterator = processes.iterator();
 			while(iterator.hasNext()){
@@ -58,6 +103,7 @@ public class NodeProxy {
 				}
 			}
 			processes = cleanList;
+		}
 	}
 	
 	
