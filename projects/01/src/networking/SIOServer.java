@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class ServerSocketIO {
-	private Integer port;                          //the port to listen on
+public class SIOServer {
+	private int port;                              //the port to listen on
 	private ServerSocket serverSocket;             //the server socket
 	private ArrayList<IncomingSocket> connections; //incoming sockets
 	private Boolean alive;                         //has the socket server been closed?
@@ -24,7 +24,7 @@ public class ServerSocketIO {
 	 * Create a Server socket that is listening to connections on a certain port.
 	 * @param port - the port the server will be listening on.
 	 */
-	public ServerSocketIO(Integer port){
+	public SIOServer(int port){
 		this.port = port;
 		this.connections = new ArrayList<IncomingSocket>();
 		this.bindings = new HashMap<String, SIOCommand>();
@@ -41,6 +41,8 @@ public class ServerSocketIO {
 	/**
 	 * void on(String, SIOCommand):
 	 * Tell the server to run a certain SIOCommand upon receiving a certain message.
+	 * Note: the SIOCommand bound to the String "connection" will get called every time 
+	 * a new connection comes in with that socket's id.
 	 * @param message - the message to active the Runnable.
 	 * @param command - the SIOCOmmand to be run.
 	 */
@@ -74,6 +76,19 @@ public class ServerSocketIO {
 							//add socket to list
 							connections.add(inSocket);
 						}		
+						synchronized(bindings){
+							//invoke the "connection" SIOCommand
+							SIOCommand command = bindings.get("connection");
+							if(command != null){
+								String[] parameters = {String.valueOf(inSocket.getId())};
+								command.parameters(parameters);
+								try{
+									command.run();
+								} catch(Exception e){
+									System.out.println("Failed to run command: connection.");
+								}
+							}
+						}
 					} catch (IOException e) {
 						System.out.println("Coud not accept connection on port: " + port + ".");
 						e.printStackTrace();
@@ -82,6 +97,25 @@ public class ServerSocketIO {
 			}
 		};
 		new Thread(listen).start();
+	}
+
+	/**
+	 * Boolean hashId(int):
+	 * Returns true if there is a connected socket with a particular id.
+	 * @param id - the id to check against.
+	 */
+	public Boolean hasId(int id){
+		synchronized(connections){
+			Iterator<IncomingSocket> sockets = connections.iterator();
+			while(sockets.hasNext()){
+				IncomingSocket socket = sockets.next();
+				if(socket.getId() == id){
+					return true;
+				}
+			}
+			//no socket with this id found
+			return false;
+		}
 	}
 	
 	/**
@@ -116,14 +150,14 @@ public class ServerSocketIO {
 			}
 		}
 	}
-	
+
 	/**
-	 * void emit(Integer, String):
+	 * void emit(int, String):
 	 * Send a message to a particular socket with a certain id.
 	 * @param id - id of socket to send message to.
 	 * @param message - message to be sent.
 	 */
-	public void emit(Integer id, String message){
+	public void emit(int id, String message){
 		synchronized(connections){
 			Iterator<IncomingSocket> sockets = connections.iterator();
 			//iterate over all sockets
@@ -164,15 +198,20 @@ public class ServerSocketIO {
 	 * It is possible to bind Runnable objects to certain Strings on this socket for an "event-like" socket system.
 	 */
 	private class IncomingSocket{
-		private Integer id;
+		private int id;
 		private Socket socket;
 		private Boolean alive;
 		private DataInputStream in;
 		private DataOutputStream out;
+		
 		public IncomingSocket(Socket socket){
 			this.socket = socket;
 			this.alive = true;
 			this.id = 0 + (int)(Math.random() * ((1000 - 0) + 1)); //generate random id
+			while(hasId(this.id)){
+				//make sure socket's id is unique
+				this.id = 0 + (int)(Math.random() * ((1000 - 0) + 1));
+			}
 			try {
 				this.in = new DataInputStream(this.socket.getInputStream());
 				this.out = new DataOutputStream(this.socket.getOutputStream());
@@ -265,11 +304,11 @@ public class ServerSocketIO {
 		}
 		
 		/**
-		 * Integer getId(void):
+		 * int getId(void):
 		 * Returns the id of this socket.
 		 * @return - the id of this socket.
 		 */
-		public Integer getId(){
+		public int getId(){
 			return id;
 		}
 	}

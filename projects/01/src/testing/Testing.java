@@ -5,37 +5,23 @@ import networking.*;
 public class Testing {
 	
 	public static void main(String[] args) throws InterruptedException{
-		String host = "192.168.1.10";
-		Integer port = 1234;
+		String hostname = "192.168.1.10";
+		Integer port = 15237;
 		
-		final ServerSocketIO server = new ServerSocketIO(port);
-		final ClientSocketIO client = new ClientSocketIO(host, port);
+		final SIOServer server = new SIOServer(port);
 		
-		server.on("echo", new SIOCommand(){
+		server.on("connection", new SIOCommand(){
 			public void run(){
-				System.out.println("ECHO: " + args[0]);
+				System.out.println("New Incoming Socket, ID: " + args[0] + ".");
 			}
 		});
 		
-		client.on("heartbeat", new SIOCommand(){
-			public void run(){
-				client.emit("echo>I'm alive!!!");
-			}
-		});
+		Thread.sleep(1000);
 		
-		System.out.println("...");
-		Thread.sleep(300);
-		System.out.println("...");
-		Thread.sleep(300);
-		System.out.println("...");
-		Thread.sleep(300);
-		System.out.println("...");
-		Thread.sleep(300);
-		System.out.println("...");
-		Thread.sleep(300);
-		
-		server.broadcast("heartbeat");
-		
-		
+		final SIOClient client1 = new SIOClient(hostname, port);
+		final SIOClient client2 = new SIOClient(hostname, port);
+		final SIOClient client3 = new SIOClient(hostname, port);
+		final SIOClient client4 = new SIOClient(hostname, port);
+		final SIOClient client5 = new SIOClient(hostname, port);
 	}
 }

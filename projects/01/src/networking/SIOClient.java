@@ -12,16 +12,16 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class ClientSocketIO {
+public class SIOClient {
 	private String hostname;                      //the hostname to connect to
-	private Integer port;                         //the port to connect to
+	private int port;                             //the port to connect to
 	private Socket socket;                        //the socket object
 	private Boolean alive;                        //has the socket been disconnected?
 	private DataInputStream in;                   
 	private DataOutputStream out; 
 	private HashMap<String, SIOCommand> bindings; //maps Strings to SIOCommand objects
 	
-	public ClientSocketIO(String hostname, Integer port){
+	public SIOClient(String hostname, int port){
 		this.hostname = hostname;
 		this.port = port;
 		this.bindings = new HashMap<String, SIOCommand>();
@@ -147,11 +147,11 @@ public class ClientSocketIO {
 	}
 	
 	/**
-	 * Integer getPort(void):
+	 * int getPort(void):
 	 * Returns the port the socket is connected to.
 	 * @return - the port.
 	 */
-	public Integer getPort(){
+	public int getPort(){
 		return port;
 	}
 }

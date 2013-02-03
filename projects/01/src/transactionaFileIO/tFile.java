@@ -257,7 +257,11 @@ public class tFile implements Serializable{
 			} catch (ClassNotFoundException e) {
 				System.out.println("tFile.readObj: reading object from file: "+file.getPath());
 				e.printStackTrace();
+<<<<<<< HEAD
+			} catch(IOException e){
+=======
 			} catch (IOException e) {
+>>>>>>> 725d5804f7d286f24339fd80000dc0a2bc5cfefb
 				System.out.println("tFile.readObj: reading object from file: "+file.getPath());
 				e.printStackTrace();
 			}
