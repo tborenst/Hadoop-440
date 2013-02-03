@@ -6,19 +6,19 @@
 package processManager;
 
 import networking.SIOCommand;
-import networking.ServerSocketIO;
+import networking.SIOServer;
 
 public class NodeManager implements Runnable {
-	private static ProxyManager nodeProxyManager;
+	private static NodeProxyManager nodeProxyManager;
 	private static boolean runLoadBalancing;
-	private static ServerSocketIO serverSocket;
+	private static SIOServer serverSocket;
 	
 	public NodeManager() {
-		this.nodeProxyManager = new ProxyManager();
+		this.nodeProxyManager = new NodeProxyManager();
 		this.runLoadBalancing = true;
-		this.serverSocket = new ServerSocketIO(4313);
+		this.serverSocket = new SIOServer(4313);
 		
-		//ServerSocketIO Events
+		//SIOServer Events
 		serverSocket.on("onconnection",  new SIOCommand(){
 			public void run(){
 				addNode(args[0]);
@@ -37,7 +37,7 @@ public class NodeManager implements Runnable {
 			}
 		});
 		
-		socketServer.on("removeDeadProcess", new SIOCommand() {
+		serverSocket.on("removeDeadProcess", new SIOCommand() {
 			public void run() {
 				killProcess(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 			}

@@ -17,6 +17,17 @@ public class NodeProxy {
 		this.processes = new ArrayList<ProcessProxy>();
 	}
 	
+	/**
+	 * int getNumberOfProcesses(void):
+	 * Returns the number of processes running on this node.
+	 * @return
+	 */
+	public int getNumberOfProcesses(){
+		synchronized(processes){
+			return processes.size();
+		}
+	}
+	
 	public void addNewProcess(int id, String name){
 		synchronized(processes){
 			ProcessProxy process = new ProcessProxy(id, name);

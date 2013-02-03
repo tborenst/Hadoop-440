@@ -1,5 +1,5 @@
 /**
- * The ServerSokcetIO class provides a wrapper that is easy to use to accept connections from ClinetSokcetIO objects.
+ * The SIOServer class provides a wrapper that is easy to use to accept connections from ClinetSokcetIO objects.
  */
 package networking;
 

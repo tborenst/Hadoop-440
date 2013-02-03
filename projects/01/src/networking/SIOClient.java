@@ -1,5 +1,5 @@
 /**
- * The ClientSocketIO class is the client-side wrapper for SocketIO. It can connect to a server, listen to events from that server, and bind to
+ * The SIOClient class is the client-side wrapper for SocketIO. It can connect to a server, listen to events from that server, and bind to
  * SIOCommand objects that will be run on cue from certain events.
  */
 package networking;
