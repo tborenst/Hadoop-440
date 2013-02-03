@@ -106,7 +106,7 @@ public class SIOClient {
 								}
 							}
 						} catch (IOException e) {
-							System.out.println("Could not read ainput from socket. Killing socket.");
+							System.out.println("CLIENT: could not connect to server. Killing self.");
 							synchronized(alive){
 								alive = false;
 							}
