@@ -6,6 +6,8 @@ package gray;
 
 import java.awt.image.BufferedImage;
 
+import networking.SIOCommand;
+
 import person.Person;
 import processManager.ThreadProcess;
 import migratableProcesses.MigratableProcess;
@@ -68,7 +70,7 @@ public class Grayer implements MigratableProcess{
 	 * Reads the image from file and runs grayPixel one pixel at a time.
 	 */
 	@Override
-	public void run() {
+	public void run() {		
 		BufferedImage img = file.readImg();
 		while(!suspended && pixelY < img.getHeight()) {
 			//iterate through the image first by column and then by row
@@ -91,11 +93,17 @@ public class Grayer implements MigratableProcess{
 	public void suspend() {
 		System.out.println("Suspended!");
 		suspended = true;
-		while(suspended){System.out.println("asdf");}
+		while(suspended){
+			//System.out.println("asdf");
+		}
 	}
 	
 	//testing
 	public static void main(String[] args) throws InterruptedException {
+		
+		
+		
+		//TODO: include id
 		ThreadProcess gt = new ThreadProcess((MigratableProcess) new Grayer("testing/gray/test.jpg", "jpeg"));
 		
 		gt.start();

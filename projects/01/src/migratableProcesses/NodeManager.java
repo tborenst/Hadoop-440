@@ -5,40 +5,93 @@
 
 package migratableProcesses;
 
+import networking.SIOCommand;
+import networking.ServerSocketIO;
+
 public class NodeManager implements Runnable {
-	private ProxyManager proxyManager;
-	private boolean runLoadBalancing;
+	private static ProxyManager nodeProxyManager;
+	private static boolean runLoadBalancing;
+	private static ServerSocketIO serverSocket;
 	
 	public NodeManager() {
-		this.proxyManager = new ProxyManager();
+		this.nodeProxyManager = new ProxyManager();
 		this.runLoadBalancing = true;
+		this.serverSocket = new ServerSocketIO(4313);
+		
+		//ServerSocketIO Events
+		serverSocket.on("onconnection",  new SIOCommand(){
+			public void run(){
+				addNode(args[0]);
+			}
+		});
+		
+		serverSocket.on("addProcess", new SIOCommand() {
+			public void run() {
+				
+			}
+		})
+		
+		serverSocket.on("addNewProcess", new SIOCommand(){
+			public void run() {
+				addNewProcess(args[0], Integer.parseInt(args[1]));
+			}
+		});
+		
+		socketServer.on("removeDeadProcess", new SIOCommand() {
+			public void run() {
+				killProcess(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+			}
+		});
+		
 		run();
 	}
+	
 	
 	/**
 	 * void addNode(String id):
 	 * @param id
 	 */
 	public void addNode(String id) {
-		Proxy free = proxyManager.addNode(id);
+		Proxy free = nodeProxyManager.addNode(id);
 		loadBalanceFreeNode(free);
 	}
 	
 	public void removeNode(String id) {
-		proxyManager.removeNode(id);
+		nodeProxyManager.removeNode(id);
+	}
+	
+	public void killProcess(int nodeId, int processId) {
+		serverSocket.emit(nodeId, "killProcess>"+processId);
+		removeProxyProcess(nodeId, processId);
+	}
+	
+	public void removeProxyProcess(int nodeId, int processId) {
+		nodeProxyManager.getProxyById(nodeId).removeProcessById(processId);
+	}
+	
+	public void addExistingProcess(String processName, int processId, String serPath, int oldNodeId) {
+		NodeProxy free = nodeProxyManager.getLeastBusyProxy();
+		serverSocket.emit(free.getId(), "addExistingProcess>"+processName+">"+processId+">"+serPath);
+		ThreadProcessProxy p = nodeProxyManager.getProxyById(oldNodeId).removeProcessById(processId);
+		free.addProcess(p);
+		//this should only be called for moving processes, so the proxy already has the existingProcess
+		//ie no need to update the NodeProxy free
+	}
+	
+	public void addNewProcess(String processName, int processId) {
+		NodeProxy free = nodeProxyManager.getLeastBusyProxy();
+		free.addNewProcess(processName, processId);
+		serverSocket.emit(free.getId(), "newProcess>"+processName+">"+processId);
 	}
 	
 	public void loadBalance() {
-		loadBalanceFreeNode(proxyManager.getLeastBusyProxy());
-	}
-	
-	public void loadBalanceFreeNode(Proxy free) {
-		Proxy busy = proxyManager.getBusiestProxy();
+		NodeProxy free = nodeProxyManager.getLeastBusyProxy(); //may not be the node to which this process gets added to
+		NodeProxy busy = nodeProxyManager.getBusiestProxy();
 		if(busy.getId() != free.getId() && busy.getNumProcesses() >= free.getNumProcesses()+5) {
 			
-			Process p = busy.getRandomProcess();
-			busy.socket.emit(busy.getId(), "moveProcess>"+p.getId()+">"+free.getId());
-			//once ser file is saved, slave node emits to master to tell free node to pick up process
+			ThreadProcessProxy p = busy.removeRandomProcess();
+			serverSocket.emit(busy.getId(), "moveProcess>"+p.getId());
+			//once ser file is saved, slave node emits to master to assign process to a free node
 		}
 	}
 	
