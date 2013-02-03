@@ -44,6 +44,17 @@ public class NodeProxy {
 		return processes.remove(0);
 	}
 	
+	/**
+	 * ProcessProxy removeRandomProcess(void):
+	 * Removes a random (not dead) process from processes list and returns it.
+	 * @return - random process.
+	 */
+	public ProcessProxy removeRandomProcess(){
+		cleanUp();
+		int index = (int)(Math.random() * ((processes.size() - 0) + 1));
+		return processes.remove(index);
+	}
+	
 	public ProcessProxy removeProcessById(int id){
 		ProcessProxy process = setFinished(id);
 		cleanUp();
