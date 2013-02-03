@@ -29,7 +29,7 @@ public class NodeManager implements Runnable {
 			public void run() {
 				
 			}
-		})
+		});
 		
 		serverSocket.on("addNewProcess", new SIOCommand(){
 			public void run() {

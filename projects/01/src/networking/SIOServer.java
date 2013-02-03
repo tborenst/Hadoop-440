@@ -152,12 +152,13 @@ public class SIOServer {
 	}
 
 	/**
-	 * void emit(int, String):
+	 * Boolean emit(int, String):
 	 * Send a message to a particular socket with a certain id.
+	 * If the socket is dead or is not found, emit returns false. It returns true otherwise.
 	 * @param id - id of socket to send message to.
 	 * @param message - message to be sent.
 	 */
-	public void emit(int id, String message){
+	public Boolean emit(int id, String message){
 		synchronized(connections){
 			Iterator<IncomingSocket> sockets = connections.iterator();
 			//iterate over all sockets
@@ -165,9 +166,16 @@ public class SIOServer {
 				IncomingSocket socket = sockets.next();
 				if(socket.getId() == id){
 					//found socket, send message
-					socket.sendMessage(message);
+					if(socket.isAlive()){
+						socket.sendMessage(message);
+						return true;
+					} else {
+						return false;
+					}
 				}
 			}
+			//socket not found
+			return false;
 		}
 	}
 	
