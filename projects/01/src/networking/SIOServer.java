@@ -98,6 +98,25 @@ public class SIOServer {
 		};
 		new Thread(listen).start();
 	}
+
+	/**
+	 * Boolean hashId(int):
+	 * Returns true if there is a connected socket with a particular id.
+	 * @param id - the id to check against.
+	 */
+	public Boolean hasId(int id){
+		synchronized(connections){
+			Iterator<IncomingSocket> sockets = connections.iterator();
+			while(sockets.hasNext()){
+				IncomingSocket socket = sockets.next();
+				if(socket.getId() == id){
+					return true;
+				}
+			}
+			//no socket with this id found
+			return false;
+		}
+	}
 	
 	/**
 	 * void close(void):
@@ -131,7 +150,7 @@ public class SIOServer {
 			}
 		}
 	}
-	
+
 	/**
 	 * void emit(int, String):
 	 * Send a message to a particular socket with a certain id.
@@ -189,6 +208,10 @@ public class SIOServer {
 			this.socket = socket;
 			this.alive = true;
 			this.id = 0 + (int)(Math.random() * ((1000 - 0) + 1)); //generate random id
+			while(hasId(this.id)){
+				//make sure socket's id is unique
+				this.id = 0 + (int)(Math.random() * ((1000 - 0) + 1));
+			}
 			try {
 				this.in = new DataInputStream(this.socket.getInputStream());
 				this.out = new DataOutputStream(this.socket.getOutputStream());

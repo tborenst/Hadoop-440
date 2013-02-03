@@ -12,9 +12,11 @@ import java.io.IOException;
 public class ThreadProcess {
 	private MigratableProcess process;
 	private Thread thread;
+	private int id;
 	
-	public ThreadProcess(MigratableProcess process){
+	public ThreadProcess(MigratableProcess process, int id){
 		this.process = process;
+		this.id = id;
 		this.thread = new Thread(process);
 	}
 	
@@ -32,6 +34,14 @@ public class ThreadProcess {
 	 */
 	public void start(){
 		thread.start();
+	}
+	
+	/**
+	 * int getId(void):
+	 * Return the process' id.
+	 */
+	public int getId(){
+		return id;
 	}
 	
 	/**
