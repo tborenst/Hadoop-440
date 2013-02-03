@@ -1,9 +1,19 @@
+/**
+ * The tFile class takes in a path String and creates a new File object. It provides several public methods
+ * to control the file similar to the File class. tFile immediately closes the file after read/write sessions.
+ */
+
 package transactionaFileIO;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.*;
 
-public class tFile {
+import javax.imageio.ImageIO;
+
+public class tFile implements Serializable{
 	private File file;
+	private static final long serialVersionUID = 3L;
 	
 	public tFile(String path) {
 		this.file = new File(path);
@@ -33,30 +43,19 @@ public class tFile {
 		return null;
 	}
 	
+	/**
+	 * ObjectOutputStream openWriteStream(void):
+	 * Creates a ObjectOutputStream from File file.
+	 */
 	private ObjectOutputStream openWriteStream() {
 		if(file != null) {			
 			try {
 				return new ObjectOutputStream(new FileOutputStream(file.getPath()));
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
+				System.out.println("tFile.openWriteStream: unable to create FileOutputStream: "+file.getPath());
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
-	
-	private ObjectInputStream openReadStream() {
-		if(file != null) {			
-			try {
-				return new ObjectInputStream(new FileInputStream(file.getPath()));
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				System.out.println("tFile.openWriteStream: unable to create ObjectOutputStream: "+file.getPath());
 				e.printStackTrace();
 			}
 		}
@@ -64,8 +63,28 @@ public class tFile {
 	}
 	
 	/**
-	 * boolean move(String):
+	 * ObjectInputStream openReadStream(void):
+	 * Creates a ObjectInputStream from File file.
+	 */
+	private ObjectInputStream openReadStream() {
+		if(file != null) {			
+			try {
+				return new ObjectInputStream(new FileInputStream(file.getPath()));
+			} catch (FileNotFoundException e) {
+				System.out.println("tFile.openReadStream: unable to create FileInputStream: "+file.getPath());
+				e.printStackTrace();
+			} catch (IOException e) {
+				System.out.println("tFile.openReadStream: unable to create ObjectInputStream: "+file.getPath());
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * boolean move(String destPath):
 	 * Moves file to the new specified destination.
+	 * @param destPath
 	 */
 	public boolean move(String destPath) {
 		boolean success = false;
@@ -111,8 +130,9 @@ public class tFile {
 	}
 	
 	/**
-	 * void write(String):
+	 * void write(String s):
 	 * Writes from the end of the file and then closes the connection.
+	 * @param s
 	 */
 	public void write(String s) {
 		long fileLength = 0;
@@ -131,8 +151,10 @@ public class tFile {
 	}
 	
 	/**
-	 * void writeTo(String, long):
+	 * void writeTo(String s, long location):
 	 * Writes from the specified location and then closes the connection.
+	 * @param s
+	 * @param location
 	 */
 	public void writeTo(String s, long location) {
 		RandomAccessFile raf = open();
@@ -142,12 +164,32 @@ public class tFile {
 				raf.writeBytes(s);
 				raf.close();
 			} catch (IOException e) {
-				System.out.println("tFile.writeTo(): error accessing/writing file: "+file.getPath());
+				System.out.println("tFile.writeTo: error accessing/writing file: "+file.getPath());
 				e.printStackTrace();
 			}
 		}
 	}
 	
+	/**
+	 * void writeImg(RenderedImage img, String format):
+	 * Writes image to file in the given format.
+	 * @param img
+	 * @param format
+	 */
+	public void writeImg(RenderedImage img, String format) {
+		try {
+			ImageIO.write(img, format, file);
+		} catch (IOException e) {
+			System.out.println("tFile.writeImg: error writing "+format+" to "+file.getPath());
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * void writeObj(Object o):
+	 * Serializes an Object o to file.
+	 * @param o
+	 */
 	public void writeObj(Object o) {
 		ObjectOutputStream s = openWriteStream();
 		if(s != null) {
@@ -187,6 +229,24 @@ public class tFile {
 		return "";
 	}
 	
+	/**
+	 * Image readImg(void):
+	 * Reads image from file.
+	 */
+	public BufferedImage readImg() {
+		try {
+			return ImageIO.read(file);
+		} catch (IOException e) {
+			System.out.println("tFile.readImg: failed to read image file: "+file.getPath());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * Object readObj(void):
+	 * Reads a serialized object from the file.
+	 */
 	public Object readObj() {
 		ObjectInputStream s = openReadStream();
 		if(s != null) {
@@ -197,7 +257,11 @@ public class tFile {
 			} catch (ClassNotFoundException e) {
 				System.out.println("tFile.readObj: reading object from file: "+file.getPath());
 				e.printStackTrace();
+<<<<<<< HEAD
 			} catch(IOException e){
+=======
+			} catch (IOException e) {
+>>>>>>> 725d5804f7d286f24339fd80000dc0a2bc5cfefb
 				System.out.println("tFile.readObj: reading object from file: "+file.getPath());
 				e.printStackTrace();
 			}

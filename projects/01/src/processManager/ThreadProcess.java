@@ -2,12 +2,15 @@
  * The ThreadProcess class takes in a MigratableProcess object and creates a new Thread object in which to run. It provides several public methods
  * to control the thread that's running the process. ThereadProcess keeps track of both the Thread and the Runnable it's running.
  */
+
 package processManager;
 
 import migratableProcesses.MigratableProcess;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
+
+import transactionaFileIO.tFile;
 
 public class ThreadProcess {
 	private MigratableProcess process;
@@ -51,7 +54,11 @@ public class ThreadProcess {
 	//TODO: change this to use TransactionalFileIO
 	public void serialize(String path){
 		process.suspend();
-		try{
+		
+		tFile serFile = new tFile(path);
+		serFile.writeObj((Object) process);
+		
+		/*try{
 			FileOutputStream fileOut = new FileOutputStream(path);
 			ObjectOutputStream objOut = new ObjectOutputStream(fileOut);
 			objOut.writeObject(process);
@@ -59,7 +66,7 @@ public class ThreadProcess {
 		} catch (IOException e){
 			System.out.println("Could not serialize the following process:");
 			System.out.println(process.toString());
-		}
+		}*/
 	}
 	
 }
