@@ -5,6 +5,7 @@
 
 package processManager;
 
+import processManager.NodeProxy.ProcessProxy;
 import networking.SIOCommand;
 import networking.SIOServer;
 
@@ -15,7 +16,7 @@ public class NodeManager {
 	private static int loadBalanceThreshold;
 	private static int loadBalanceInterval;
 	private int processCounter;
-	private static Prompt prompt;
+	//private static Prompt prompt;
 	
 	public NodeManager(int loadBalanceThreshold, int loadBalanceInterval) {
 		this.nodeProxyManager = new NodeProxyManager();
@@ -24,16 +25,16 @@ public class NodeManager {
 		this.loadBalanceThreshold = loadBalanceThreshold;
 		this.loadBalanceInterval = loadBalanceInterval;
 		this.processCounter = 0;
-		this.prompt = new Prompt(); //check if process exists in prompt Class.forName
-		
+		//this.prompt = new Prompt(); //check if process exists in prompt Class.forName
+
 		//ServerSocketIO Events
-		serverSocket.on("onconnection",  new SIOCommand(){
+		serverSocket.on("connection",  new SIOCommand(){
 			public void run(){
 				addNode(Integer.parseInt(args[0]));
 			}
 		});
 		
-		serverSocket.on("ondisconnect", new SIOCommand() {
+		serverSocket.on("disconnect", new SIOCommand() {
 			public void run() {
 				removeDeadNode(Integer.parseInt(args[0]));
 			}
@@ -58,20 +59,20 @@ public class NodeManager {
 			}
 		});
 		
-		runLoadBalancing();
+		//runLoadBalancing();
 	}
 	
-	//ps
-	public String ps() {
-		prompt.emit(nodeManager.getAllProcesses);
-	}
+//	//ps
+//	public String ps() {
+//		prompt.emit(nodeManager.getAllProcesses);
+//	}
 	
 	//quit
 	public void quit() {
-		ps();
-		prompt.emit("closing nodes...");
+		//ps();
+		//prompt.emit("closing nodes...");
 		serverSocket.broadcast("quit");
-		prompt.emit("bye, bye... *I'll be baac*");
+		//prompt.emit("bye, bye... *I'll be back*");
 		System.exit(1);
 		
 	}
@@ -86,7 +87,7 @@ public class NodeManager {
 	 * @param id
 	 */
 	public void addNode(int nodeId) {
-		NodeProxy free = nodeProxyManager.addNodeProxy(nodeId);
+		NodeProxy free = nodeProxyManager.addNode(nodeId);
 		loadBalanceWithNode(free);
 	}
 	
@@ -96,7 +97,7 @@ public class NodeManager {
 	 * @param nodeId
 	 */
 	public void removeDeadNode(int nodeId) {
-		nodeProxyManager.removeNodeProxyById(nodeId);
+		nodeProxyManager.removeNodeById(nodeId);
 	}
 	
 	//--------------------------
@@ -109,7 +110,7 @@ public class NodeManager {
 	 * @param processName
 	 */
 	public void addNewProcess(String processName) {
-		NodeProxy free = nodeProxyManager.getLeastBusyNodeProxy();
+		NodeProxy free = nodeProxyManager.getLeastBusyNode();
 		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processName+">"+processCounter);
 		if(emitSent) {
 			free.addNewProcess(processCounter, processName);
@@ -157,7 +158,7 @@ public class NodeManager {
 	 * @param processId
 	 */
 	public void cleanDeadProcessProxy(int nodeId, int processId) {
-		NodeProxy p = nodeProxyManager.getNodeProxyById(nodeId);
+		NodeProxy p = nodeProxyManager.getNodeById(nodeId);
 		if(p != null) {p.removeProcessById(processId);}
 	}
 	
@@ -166,7 +167,7 @@ public class NodeManager {
 	 * Load balances with the least busy node
 	 */
 	public void loadBalance() {
-		NodeProxy free = nodeProxyManager.getLeastBusiesNodeProxy(); //may not be the node to which this process gets added to
+		NodeProxy free = nodeProxyManager.getLeastBusyNode(); //may not be the node to which this process gets added to
 		loadBalanceWithNode(free);
 	}
 	
@@ -178,9 +179,9 @@ public class NodeManager {
 	 * @param free
 	 */
 	public void loadBalanceWithNode(NodeProxy free) {
-		NodeProxy busy = nodeProxyManager.getBusiestNodeProxy();
+		NodeProxy busy = nodeProxyManager.getBusiestNode();
 		if(free != null && busy != null && busy.getId() != free.getId() &&
-				busy.getNumProcesses() >= free.getNumProcesses()+loadBalanceThreshold) {
+				busy.getNumberOfProcesses() >= free.getNumberOfProcesses()+loadBalanceThreshold) {
 			
 			ProcessProxy p = busy.getRandomProcess();
 			if(p != null) {
@@ -202,7 +203,11 @@ public class NodeManager {
 	public void runLoadBalancing() {
 		while(runLoadBalancing) {
 			loadBalance();
-			Thread.sleep(loadBalanceInterval);
+			try {
+				Thread.sleep(loadBalanceInterval);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		runLoadBalancing = true;
