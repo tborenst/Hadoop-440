@@ -17,12 +17,12 @@ public class NodeProxy {
 		this.processes = new ArrayList<ProcessProxy>();
 	}
 	
-	public void addProcess(int id, String name){
+	public void addNewProcess(int id, String name){
 		ProcessProxy process = new ProcessProxy(id, name);
 		processes.add(process);
 	}
 	
-	public void addProcess(ProcessProxy process){
+	public void addExistingProcess(ProcessProxy process){
 		processes.add(process);
 	}
 	
