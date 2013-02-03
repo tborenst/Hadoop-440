@@ -3,7 +3,7 @@
  * to control the distributed system's processes from the master node.
  */
 
-package migratableProcesses;
+package processManager;
 
 import networking.SIOCommand;
 import networking.ServerSocketIO;
@@ -21,15 +21,21 @@ public class NodeManager implements Runnable {
 		//ServerSocketIO Events
 		serverSocket.on("onconnection",  new SIOCommand(){
 			public void run(){
-				addNode(args[0]);
+				addNode(Integer.parseInt(args[0]));
 			}
 		});
+		
+		serverSocket.on("ondisconnect", new SIOCommand() {
+			public void run() {
+				removeNode(Integer.parseInt(args[0]));
+			}
+		})
 		
 		serverSocket.on("addProcess", new SIOCommand() {
 			public void run() {
 				
 			}
-		})
+		});
 		
 		serverSocket.on("addNewProcess", new SIOCommand(){
 			public void run() {
@@ -66,7 +72,8 @@ public class NodeManager implements Runnable {
 	}
 	
 	public void removeProxyProcess(int nodeId, int processId) {
-		nodeProxyManager.getProxyById(nodeId).removeProcessById(processId);
+		NodeProxy p = nodeProxyManager.getProxyById(nodeId);
+		if(p != null){p.removeProcessById(processId);}
 	}
 	
 	public void addExistingProcess(String processName, int processId, String serPath, int oldNodeId) {
