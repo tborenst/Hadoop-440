@@ -22,25 +22,32 @@ public class NodeProxy {
 		processes.add(process);
 	}
 	
-	public void setFinished(int id){
+	public ProcessProxy setFinished(int id){
 		Iterator<ProcessProxy> iterator = processes.iterator();
 		while(iterator.hasNext()){
 			ProcessProxy process = iterator.next();
 			if(process.getId() == id){
 				process.setFinished();
-				return;
+				return process;
 			}
 		}
+		return null;
 	}
 	
 	/**
-	 * ProcessProxy removeProcess(void):
+	 * ProcessProxy removeOldestProcess(void):
 	 * Removes oldest process from processes list and returns it.
 	 * @return - oldest process.
 	 */
 	public ProcessProxy removeOldestProcess(){
 		cleanUp();
 		return processes.remove(0);
+	}
+	
+	public ProcessProxy removeProcessById(int id){
+		ProcessProxy process = setFinished(id);
+		cleanUp();
+		return process;
 	}
 	
 	/**
