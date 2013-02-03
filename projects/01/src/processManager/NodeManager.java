@@ -3,7 +3,7 @@
  * to control the distributed system's processes from the master node.
  */
 
-package migratableProcesses;
+package processManager;
 
 import networking.SIOCommand;
 import networking.ServerSocketIO;
