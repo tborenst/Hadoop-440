@@ -62,8 +62,19 @@ public class NodeManager {
 	}
 	
 	//ps
+	public String ps() {
+		prompt.emit(nodeManager.getAllProcesses);
+	}
 	
 	//quit
+	public void quit() {
+		ps();
+		prompt.emit("closing nodes...");
+		serverSocket.broadcast("quit");
+		prompt.emit("bye, bye... *I'll be baac*");
+		System.exit(1);
+		
+	}
 	
 	
 	//-----------------------
