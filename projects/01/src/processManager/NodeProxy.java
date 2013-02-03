@@ -18,24 +18,30 @@ public class NodeProxy {
 	}
 	
 	public void addNewProcess(int id, String name){
-		ProcessProxy process = new ProcessProxy(id, name);
-		processes.add(process);
+		synchronized(processes){
+			ProcessProxy process = new ProcessProxy(id, name);
+			processes.add(process);
+		}
 	}
 	
 	public void addExistingProcess(ProcessProxy process){
-		processes.add(process);
+		synchronized(processes){
+			processes.add(process);
+		}
 	}
 	
 	public ProcessProxy setFinished(int id){
-		Iterator<ProcessProxy> iterator = processes.iterator();
-		while(iterator.hasNext()){
-			ProcessProxy process = iterator.next();
-			if(process.getId() == id){
-				process.setFinished();
-				return process;
+		synchronized(processes){
+			Iterator<ProcessProxy> iterator = processes.iterator();
+			while(iterator.hasNext()){
+				ProcessProxy process = iterator.next();
+				if(process.getId() == id){
+					process.setFinished();
+					return process;
+				}
 			}
+			return null;
 		}
-		return null;
 	}
 	
 	public int getId(){
@@ -48,9 +54,11 @@ public class NodeProxy {
 	 * @return - random process.
 	 */
 	public ProcessProxy getRandomProcess(){
-		cleanUp();
-		int index = (int)(Math.random() * ((processes.size() - 0) + 1));
-		return processes.get(index);
+		synchronized(processes){
+			cleanUp();
+			int index = (int)(Math.random() * ((processes.size() - 0) + 1));
+			return processes.get(index);
+		}
 	}
 	
 	/**
@@ -60,9 +68,12 @@ public class NodeProxy {
 	 * @return - removed process.
 	 */
 	public ProcessProxy removeProcessById(int id){
-		ProcessProxy process = setFinished(id);
-		cleanUp();
-		return process;
+		synchronized(processes){
+			ProcessProxy process = setFinished(id);
+			cleanUp();
+			return process;
+		}
+		
 	}
 	
 	/**
@@ -70,6 +81,7 @@ public class NodeProxy {
 	 * Removes any finished processes from the list.
 	 */
 	public void cleanUp(){
+		synchronized(processes){
 			ArrayList<ProcessProxy> cleanList = new ArrayList<ProcessProxy>();
 			Iterator<ProcessProxy> iterator = processes.iterator();
 			while(iterator.hasNext()){
@@ -80,6 +92,7 @@ public class NodeProxy {
 				}
 			}
 			processes = cleanList;
+		}
 	}
 	
 	
