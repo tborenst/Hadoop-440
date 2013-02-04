@@ -6,6 +6,8 @@ package processManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import processManager.NodeProxy.ProcessProxy;
+
 public class NodeProxyManager {
 	ArrayList<NodeProxy> proxies;
 	
@@ -36,6 +38,22 @@ public class NodeProxyManager {
 			}
 		}
 		return string;
+	}
+	
+	public ProcessProxy getProcessById(int processId){
+		synchronized(proxies){
+			Iterator<NodeProxy> iterator = proxies.iterator();
+			while(iterator.hasNext()){
+				NodeProxy node = iterator.next();
+				ProcessProxy process = node.getProcessById(processId);
+				if(process != null){
+					//process found
+					return process;
+				}
+			}
+			//process not found
+			return null;
+		}
 	}
 	
 	/**
