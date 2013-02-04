@@ -50,8 +50,7 @@ public class SlaveNode {
 		//ClientSocketIO Events
 		clientSocket.on("addNewProcess", new SIOCommand() {
 			public void run() {
-				//+processCounter+">"+processCounter+">"+args"
-				addNewProcess(Integer.parseInt(args[0]), args[1], Util.destringifyArray(args[0]));
+				addNewProcess(Integer.parseInt(args[0]), args[1], Util.destringifyArray(args[2]));
 			}
 		});
 		

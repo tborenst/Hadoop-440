@@ -2,14 +2,11 @@
  * The Grayer class takes in a String path and String format of an existing image to grayscale the image pixel by pixel.
  */
 
-package testing.gray;
+package migratableProcesses;
 
 import java.awt.image.BufferedImage;
 
-import networking.SIOCommand;
-
 import processManager.ThreadProcess;
-import migratableProcesses.MigratableProcess;
 import transactionaFileIO.tFile;
 
 public class Grayer implements MigratableProcess{
@@ -22,9 +19,16 @@ public class Grayer implements MigratableProcess{
 	private static final long serialVersionUID = 4L;
 	private boolean suspended;
 	
+	public Grayer(String[] args) {
+		this(args[0], args[1]);
+	}
+	
 	public Grayer(String path, String format) {
 		this.path = path;
 		this.file = new tFile(path, false);
+		if(this.file == null) {
+			
+		}
 		this.format = format;
 		this.pixelX = 0;
 		this.pixelY = 0;
@@ -59,9 +63,11 @@ public class Grayer implements MigratableProcess{
 	 * @param img
 	 */
 	private void saveImg(BufferedImage img) {
-		System.out.println("Saving Img");
-		file.writeImg(img, format);
-		System.out.println("Saved Img");
+		System.out.println("Trying to Save Img");
+		if(file != null) {
+			file.writeImg(img, format);
+			System.out.println("Saved Img");
+		}
 	}
 	
 	/**
@@ -69,17 +75,22 @@ public class Grayer implements MigratableProcess{
 	 * Reads the image from file and runs grayPixel one pixel at a time.
 	 */
 	@Override
-	public void run() {		
-		BufferedImage img = file.readImg();
-		while(!suspended && pixelY < img.getHeight()) {
-			//iterate through the image first by column and then by row
-			if(pixelX == img.getWidth()-1) {pixelX = 0; pixelY++;}
-			else {pixelX++;}
+	public void run() {
+		if(file == null) {file = new tFile(path, false);}
+		if(file != null) {
+			BufferedImage img = file.readImg();
+			while(!suspended && pixelY < img.getHeight()) {
+				//iterate through the image first by column and then by row
+				if(pixelX == img.getWidth()-1) {pixelX = 0; pixelY++;}
+				else {pixelX++;}
+				
+				grayPixel(img, pixelX, pixelY);
+			}
 			
-			grayPixel(img, pixelX, pixelY);
+			//suspended
+			saveImg(img);
+			file = null;
 		}
-		
-		saveImg(img);
 		suspended = false;
 		
 	}
@@ -93,14 +104,20 @@ public class Grayer implements MigratableProcess{
 		System.out.println("Suspended!");
 		suspended = true;
 		while(suspended){
-			//do nothing...
+			try {
+				Thread.sleep(0);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
 	//testing
 	public static void main(String[] args) throws InterruptedException {
-		String[] foo = {"src/testing/gray/test.jpg", "jpeg"};
-		ThreadProcess gt = new ThreadProcess("Grayer", 98, foo);
+		String[] foo = {"testing/test.jpg", "jpeg"};
+		ThreadProcess gt = new ThreadProcess("migratableProcesses.Grayer", 98, foo);
+		
 		gt.start();
 		System.out.println("running...");
 		
@@ -112,8 +129,10 @@ public class Grayer implements MigratableProcess{
 		System.out.println("check image!!");
 		Thread.sleep(10000);
 		
-		System.out.println("deserializing...");
-		ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "Grayer", true);
+		System.out.println("reviving...");
+		ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "testing.Grayer", true);
+		
+		System.out.println("rerunning...");
 		gtRevival.start();
 	}
 
