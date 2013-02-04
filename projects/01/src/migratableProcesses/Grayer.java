@@ -89,7 +89,6 @@ public class Grayer implements MigratableProcess{
 			file = null;
 		}
 		suspended = false;
-		
 	}
 
 	/**

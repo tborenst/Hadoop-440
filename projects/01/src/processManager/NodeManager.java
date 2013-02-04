@@ -187,7 +187,9 @@ public class NodeManager {
 	 * @param nodeId
 	 * @param processId
 	 */
-	public void cleanDeadProcessProxy(int nodeId, int processId) {
+	public void cleanDeadProcessProxy(int processId, int nodeId) {
+		System.out.println("hello???");
+		System.out.println("PID: " + processId + " nodeId: " + nodeId);
 		NodeProxy n = nodeProxyManager.getNodeById(nodeId);
 		if(n != null) {
 			ProcessProxy p = n.removeProcessById(processId);

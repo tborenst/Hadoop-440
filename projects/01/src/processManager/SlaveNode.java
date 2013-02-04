@@ -32,7 +32,7 @@ public class SlaveNode {
 				cleanProcesses();
 			}
 		});
-		this.runProcessCleaning = false;
+		this.runProcessCleaning = true;
 		this.cleanProcessInterval = cleanProcessInterval;
 		
 		File serDir = new File(serDirectoryPath);
@@ -98,7 +98,7 @@ public class SlaveNode {
 			}
 		});
 		
-		processCleaner.run();
+		processCleaner.start();
 	}
 	
 	public void setNodeId(int nodeId) {

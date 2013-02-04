@@ -114,7 +114,9 @@ public class ThreadProcess {
 	 * @return Boolean
 	 */
 	public Boolean isAlive() {
-		return thread.isAlive();
+		Thread.State tState = thread.getState();
+		System.out.print(tState.equals(Thread.State.TERMINATED));
+		return !tState.equals(Thread.State.TERMINATED);
 	}
 	
 	/**
