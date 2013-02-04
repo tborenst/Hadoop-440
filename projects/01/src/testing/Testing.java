@@ -33,5 +33,15 @@ public class Testing {
 //		Thread.sleep(1000);
 //		manager.quit();
 		CommandPrompt prompt = new CommandPrompt();
+		prompt.on("ps", new SIOCommand(){
+			public void run(){
+				System.out.println("PS...");
+			}
+		});
+		prompt.on("quit", new SIOCommand(){
+			public void run(){
+				System.exit(0);
+			}
+		});
 	}
 }

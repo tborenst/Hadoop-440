@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import util.Util;
+
 import networking.SIOCommand;
 
 public class CommandPrompt {
@@ -79,10 +81,21 @@ public class CommandPrompt {
 	private void analayzeInput(String input){
 		//analyze input
 		String[] inputArray = input.split(" ");
-		String className = "migratableProcesses." + inputArray[0];         //get process name
+		String arg1 = inputArray[0];
+		//ps, quit, or a process name?
+		if(arg1.equals("ps")){
+			ps();
+			givePrompt(); //TODO: take this out later...
+			return;
+		} else if(arg1.equals("quit")){
+			quit();
+			return;
+		}
+		String className = "migratableProcesses." + inputArray[0]; //get process name
+		String[] argsArray = Arrays.copyOfRange(inputArray, 0, inputArray.length);
 		//check if the class exist
 		try {
-			Class<?> process = Class.forName(className);
+			Class.forName(className); //see if you can find a class of name className
 			System.out.println("Executing '" + className + "'...");
 			synchronized(bindings){
 				SIOCommand addNewProcess = bindings.get("addNewProcess");
@@ -90,7 +103,9 @@ public class CommandPrompt {
 					System.out.println("Failed to execute process '" + className + "'.");
 					givePrompt();
 				} else {
-					addNewProcess.parameters(inputArray);
+					//set up parameters
+					String[] parameters = {className, Util.stringifyArray(argsArray)};
+					addNewProcess.parameters(parameters);
 					try{
 						addNewProcess.run();
 					} catch (Exception e){
@@ -102,6 +117,38 @@ public class CommandPrompt {
 		} catch (ClassNotFoundException e) {
 			System.out.println("Process '" + className + "' not found.");
 			givePrompt();
+		}
+	}
+	
+	/**
+	 * void ps(void):
+	 * Runs the SIOCommand associated with the String "ps".
+	 */
+	private void ps(){
+		synchronized(bindings){
+			SIOCommand ps = bindings.get("ps");
+			try{
+				ps.run();
+			} catch(Exception e) {
+				System.out.println("Could not retrieve list of processes.");
+				givePrompt();
+			}
+		}
+	}
+	
+	/**
+	 * void quit(void):
+	 * Runs the SIOCommand associated with the String "quit".
+	 */
+	private void quit(){
+		synchronized(bindings){
+			SIOCommand quit = bindings.get("quit");
+			try{
+				quit.run();
+			} catch (Exception e){
+				System.out.println("Could not quit ProcessManagaer.");
+				givePrompt();
+			}
 		}
 	}
 }

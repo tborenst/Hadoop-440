@@ -5,17 +5,20 @@
 
 package processManager;
 
+import java.util.Arrays;
+
 import processManager.NodeProxy.ProcessProxy;
 import networking.SIOCommand;
 import networking.SIOServer;
 
 public class NodeManager {
-	private static NodeProxyManager nodeProxyManager;
-	private static boolean runLoadBalancing;
-	private static SIOServer serverSocket;
-	private static int loadBalanceThreshold;
-	private static int loadBalanceInterval;
+	private NodeProxyManager nodeProxyManager;
+	private boolean runLoadBalancing;
+	private SIOServer serverSocket;
+	private int loadBalanceThreshold;
+	private int loadBalanceInterval;
 	private int processCounter;
+	private Thread loadBalanceThread;
 	private CommandPrompt prompt;
 	
 	public NodeManager(int loadBalanceThreshold, int loadBalanceInterval) {
@@ -26,6 +29,25 @@ public class NodeManager {
 		this.loadBalanceInterval = loadBalanceInterval;
 		this.processCounter = 0;
 		this.prompt = new CommandPrompt(); //check if process exists in prompt Class.forName
+		
+		//CommandPrompt Events
+		prompt.on("ps", new SIOCommand() {
+			public void run() {
+				ps();
+			}
+		});
+		
+		prompt.on("quit", new SIOCommand() {
+			public void run() {
+				quit();
+			}
+		});
+		
+		prompt.on("addNewProcess", new SIOCommand() {
+			public void run() {
+				addNewProcess(args[0], args[1]);
+			}
+		});
 
 		//ServerSocketIO Events
 		serverSocket.on("connection",  new SIOCommand(){
@@ -42,7 +64,7 @@ public class NodeManager {
 		
 		serverSocket.on("addNewProcess", new SIOCommand(){
 			public void run() {
-				addNewProcess(args[0]);
+				addNewProcess(args[0], args[1]);
 			}
 		});
 		
@@ -59,11 +81,15 @@ public class NodeManager {
 			}
 		});
 		
-		//runLoadBalancing();
+		this.loadBalanceThread = new Thread(new Runnable() {
+			public void run() {
+				runLoadBalancing();
+			}
+		});
 	}
 	
 	public String ps() {
-		prompt.emit(nodeManager.getAllProcesses);
+		prompt.emit(nodeProxyManager.getAllProcesses());
 	}
 	
 	//quit
@@ -108,17 +134,18 @@ public class NodeManager {
 	 * if emit is successfully sent, edit the NodeProxy if not try again.
 	 * @param processName
 	 */
-	public void addNewProcess(String processName) {
+	public void addNewProcess(String processName, String args) {
 		NodeProxy free = nodeProxyManager.getLeastBusyNode();
-		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processName+">"+processCounter);
+		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processCounter+">"+args);
 		if(emitSent) {
 			free.addNewProcess(processCounter, processName);
 			processCounter++;
+			//prompt.emit("launched process: "+processName+"on node: "+free.getId());
 		}
 		else {
-			addNewProcess(processName); //dangerous chance of endless recursive cycle
+			//addNewProcess(processName, args); //dangerous chance of endless recursive cycle
+			//prompt.emit("failed to launch process: "+processName);
 		}
-		
 	}
 	
 	/**

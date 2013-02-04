@@ -1,4 +1,3 @@
-
 /**
  * The tFile class takes in a path String and creates a new File object. It provides several public methods
  * to control the file similar to the File class. tFile immediately closes the file after read/write sessions.
