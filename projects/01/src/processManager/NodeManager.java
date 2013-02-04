@@ -5,6 +5,8 @@
 
 package processManager;
 
+import java.util.Arrays;
+
 import processManager.NodeProxy.ProcessProxy;
 import networking.SIOCommand;
 import networking.SIOServer;
@@ -37,7 +39,7 @@ public class NodeManager {
 		
 		prompt.on("quit", new SIOCommand() {
 			public void run() {
-				ps();
+				quit();
 			}
 		});
 		
@@ -133,15 +135,17 @@ public class NodeManager {
 	 * if emit is successfully sent, edit the NodeProxy if not try again.
 	 * @param processName
 	 */
-	public void addNewProcess(String processName, String[] args) {
+	public void addNewProcess(String processName, String args) {
 		NodeProxy free = nodeProxyManager.getLeastBusyNode();
-		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processCounter+">"+stringifyArray(args));
+		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processCounter+">"+args);
 		if(emitSent) {
 			free.addNewProcess(processCounter, processName);
 			processCounter++;
+			//prompt.emit("launched process: "+processName+"on node: "+free.getId());
 		}
 		else {
-			addNewProcess(processName, args); //dangerous chance of endless recursive cycle
+			//addNewProcess(processName, args); //dangerous chance of endless recursive cycle
+			//prompt.emit("failed to launch process: "+processName);
 		}
 	}
 	
@@ -243,38 +247,6 @@ public class NodeManager {
 	public void suspendLoadBalancing() {
 		runLoadBalancing = false;
 		while(!runLoadBalancing);
-	}
-	
-	
-	//----------------------
-	//----Util Functions----
-	//----------------------
-	/**
-	 * String stringifyArray(String[] args):
-	 * Converts a String[] to its string representation (for socket transport).
-	 * @param args
-	 * @return
-	 */
-	private String stringifyArray(String[] args) {
-		if(args.length < 1) {return "[]";}
-		else {
-			String result = "["+args[0];
-			for(int a = 1; a < args.length; a++) {
-				result += ","+args[a];
-			}
-			result += "]";
-			return result;			
-		}		
-	}
-	
-	/**
-	 * String[] destrinifyArray(String args):
-	 * Converts a String assumed to be an array in string representation (from socket transport).
-	 * @param args
-	 * @return
-	 */
-	private String[] destringifyArray(String args) {
-		return args.substring(1, args.length()-1).split(",");
 	}
 }
 

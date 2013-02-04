@@ -2,6 +2,8 @@ package processManager;
 
 import java.util.ArrayList;
 
+import util.Util;
+
 import networking.SIOClient;
 
 public class SlaveNode {
@@ -22,6 +24,15 @@ public class SlaveNode {
 	//createNewProcess
 	
 	//add process
+	public void addNewProcess(int id, String name, String[] args) {
+		ThreadProcess p = launchProcess(id, name, args);
+		if(p != null) {processes.add(p);}
+	}
+	
+	private ThreadProcess launchProcess(int id, String name, String[] args) {
+		//Util.destringify();
+	}
+	
 	//add existing process (from move)
 	//remove process
 	//move process

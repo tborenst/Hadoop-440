@@ -6,6 +6,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import transactionaFileIO.tFile;
 
@@ -89,6 +90,7 @@ public class Person implements Runnable, java.io.Serializable{
 		System.out.println(sString);
 		String[] s2 = p.destringifyArray(sString);
 		System.out.println(p.stringifyArray(s2));
+		System.out.println(p.stringifyArray(Arrays.copyOfRange(s, 1, s.length)));
 		
 		
 		/*
