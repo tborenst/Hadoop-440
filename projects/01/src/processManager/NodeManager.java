@@ -68,6 +68,12 @@ public class NodeManager {
 			}
 		});
 		
+		serverSocket.on("moveProcess", new SIOCommand() {
+			public void run() {
+				moveProcessFrom(Integer.parseInt(args[0]), args[1], args[2], Integer.parseInt(args[3]));
+			}
+		});
+		
 		serverSocket.on("moveProcessCallback", new SIOCommand() {
 			public void run() {
 				//int processId, String processName, String serPath, int nodeId
@@ -136,7 +142,7 @@ public class NodeManager {
 	 */
 	public void addNewProcess(String processName, String args) {
 		NodeProxy free = nodeProxyManager.getLeastBusyNode();
-		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processCounter+">"+args);
+		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processName+">"+args);
 		if(emitSent) {
 			free.addNewProcess(processCounter, processName);
 			processCounter++;
@@ -146,6 +152,22 @@ public class NodeManager {
 			//addNewProcess(processName, args); //dangerous chance of endless recursive cycle
 			//prompt.emit("failed to launch process: "+processName);
 		}
+	}
+	
+	public void moveProcessFrom(int processId, String processName, String serPath, int nodeId) {
+		NodeProxy free = nodeProxyManager.getLeastBusyNode();
+		if(moveProcessTo(processId, processName, serPath, free.getId())) {
+			NodeProxy oldNode = nodeProxyManager.getNodeById(nodeId);
+			if(oldNode != null) {
+				ProcessProxy p = oldNode.removeProcessById(processId);
+				if(p != null) {
+					free.addExistingProcess(p);
+					return;
+				}
+			}
+			free.addNewProcess(processId, processName);
+		}
+		
 	}
 	
 	/**
@@ -158,8 +180,8 @@ public class NodeManager {
 	 * @param serPath
 	 * @param nodeId
 	 */
-	public void moveProcessTo(int processId, String processName, String serPath, int nodeId) {
-		serverSocket.emit(nodeId, "addExistingProcess>"+processId+">"+processName+">"+serPath);
+	public Boolean moveProcessTo(int processId, String processName, String serPath, int nodeId) {
+		return serverSocket.emit(nodeId, "addExistingProcess>"+processId+">"+processName+">"+serPath);
 		
 		//this should only be called for moving processes, so the proxy already has the existingProcess
 		//ie no need to update the NodeProxy with nodeId
@@ -184,8 +206,13 @@ public class NodeManager {
 	 * @param processId
 	 */
 	public void cleanDeadProcessProxy(int nodeId, int processId) {
-		NodeProxy p = nodeProxyManager.getNodeById(nodeId);
-		if(p != null) {p.removeProcessById(processId);}
+		NodeProxy n = nodeProxyManager.getNodeById(nodeId);
+		if(n != null) {
+			ProcessProxy p = n.removeProcessById(processId);
+			if(p != null) {
+				prompt.emit("Terminated Process: "+p.getName()+" id: "+p.getId());
+			}
+		}
 	}
 	
 	/**
@@ -212,7 +239,7 @@ public class NodeManager {
 			ProcessProxy p = busy.getRandomProcess();
 			if(p != null) {
 				//once process is serialized, slave node emits to master to assign process to a free node
-				Boolean emitSent = serverSocket.emit(busy.getId(), "moveProcess>"+p.getId());
+				Boolean emitSent = serverSocket.emit(busy.getId(), "moveProcess>"+p.getId()+">"+free.getId());
 				if(emitSent) {
 					busy.removeProcessById(p.getId());
 					free.addExistingProcess(p);
