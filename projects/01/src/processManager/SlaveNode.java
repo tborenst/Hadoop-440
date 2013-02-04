@@ -84,7 +84,18 @@ public class SlaveNode {
 	 * Emits the locally running processes in a readable format.
 	 */
 	public void ps() {
-		prompt.emit("slave ps");
+		synchronized(processes){
+			String string = "----------------------------------------------------\n"
+					      + "Locally (physically) Running Processes:\n"
+					      + "----------------------------------------------------\n";
+			Iterator<ThreadProcess> iterator = processes.iterator();
+			while(iterator.hasNext()){
+				ThreadProcess process = iterator.next();
+				string += "Process: " + process.getId() + " | " + process.getName() + "\n";
+			}
+			string += "----------------------------------------------------\n";
+			prompt.emit(string);
+		}
 	}
 	
 	/**

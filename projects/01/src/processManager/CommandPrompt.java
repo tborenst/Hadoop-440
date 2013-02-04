@@ -41,7 +41,6 @@ public class CommandPrompt {
 		synchronized(printLock){
 			System.out.println("\n");
 			System.out.println(message);
-			System.out.print("> ");
 			givePrompt();
 		}
 	}
@@ -87,7 +86,6 @@ public class CommandPrompt {
 		//ps, quit, or a process name?
 		if(arg1.equals("ps")){
 			ps();
-			givePrompt(); //TODO: take this out later...
 			return;
 		} else if(arg1.equals("quit")){
 			quit();

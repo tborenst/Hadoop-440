@@ -30,7 +30,7 @@ public class NodeProxy {
 			Iterator<ProcessProxy> iterator = processes.iterator();
 			while(iterator.hasNext()){
 				ProcessProxy process = iterator.next();
-				String temp = "Prcess: " + process.getId() + " | " + process.getName() + "\n";
+				String temp = "Process: " + process.getId() + " | " + process.getName() + "\n";
 				string += temp;
 			}
 			string += "----------------------------------------------------\n";
