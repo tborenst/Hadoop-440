@@ -109,6 +109,15 @@ public class ThreadProcess {
 	}
 	
 	/**
+	 * Boolean isAlive(void):
+	 * Return the thread.isAlive().
+	 * @return Boolean
+	 */
+	public Boolean isAlive() {
+		return thread.isAlive();
+	}
+	
+	/**
 	 * tFile serialize(String path):
 	 * Forces the process into a safe state and then serializes it into a file saved to "path".
 	 */

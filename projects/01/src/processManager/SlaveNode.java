@@ -1,7 +1,6 @@
 package processManager;
 
 import java.io.File;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
@@ -17,11 +16,25 @@ public class SlaveNode {
 	private SIOClient clientSocket;
 	private CommandPrompt prompt;
 	private String serDirectoryPath;
+	private Thread processCleaner;
+	private boolean runProcessCleaning;
+	private int nodeId;
+	private int cleanProcessInterval;
 	
-	public SlaveNode(String serverHostname, int serverPort, String serDirectoryPath) {
+	public SlaveNode(String serverHostname, int serverPort, String serDirectoryPath, int cleanProcessInterval) {
+		this.nodeId = -1;
 		this.processes = new ArrayList<ThreadProcess>();
 		this.clientSocket = new SIOClient(serverHostname, serverPort);
-		prompt = new CommandPrompt();
+		this.prompt = new CommandPrompt();
+		this.processCleaner = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				cleanProcesses();
+			}
+		});
+		this.runProcessCleaning = false;
+		this.cleanProcessInterval = cleanProcessInterval;
+		
 		File serDir = new File(serDirectoryPath);
 		if(serDir.exists() && serDir.isDirectory()) {
 			this.serDirectoryPath = serDirectoryPath;
@@ -48,6 +61,18 @@ public class SlaveNode {
 		});
 		
 		//ClientSocketIO Events
+		clientSocket.on("nodeId", new SIOCommand() {
+			public void run() {
+				setNodeId(Integer.parseInt(args[0]));
+			}
+		});
+		
+		clientSocket.on("quit", new SIOCommand() {
+			public void run() {
+				quit();
+			}
+		});
+		
 		clientSocket.on("addNewProcess", new SIOCommand() {
 			public void run() {
 				addNewProcess(Integer.parseInt(args[0]), args[1], Util.destringifyArray(args[2]));
@@ -72,8 +97,13 @@ public class SlaveNode {
 				moveProcessTo(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 			}
 		});
+		
+		processCleaner.run();
 	}
 	
+	public void setNodeId(int nodeId) {
+		this.nodeId = nodeId;
+	}
 	
 	//-------------------------
 	//----Prompt Management----
@@ -166,7 +196,7 @@ public class SlaveNode {
 				clientSocket.emit("moveProcessCallback>"+id+">"+p.getName()+">"+serFile.getPath()+">"+newNodeId);
 			}
 			else {
-				System.out.println("Failed to move process due to serialization: "+p.getName()+" "+id+" "+serFile.getPath());
+				System.out.println("Failed to move process due to serialization: "+p.getName()+" "+id);
 			}
 		}
 		else {
@@ -233,5 +263,27 @@ public class SlaveNode {
 		return new StringBuilder().append("prefix")
 		        .append(System.currentTimeMillis()/1000000).append(UUID.randomUUID())
 		        .append(".").append("ser").toString();
-	}	
+	}
+	
+	public void cleanProcesses() {
+		while(this.runProcessCleaning) {
+			synchronized(processes) {
+				for(int i = 0; i < processes.size(); i++) {
+					if(!processes.get(i).isAlive()) {
+						ThreadProcess p = processes.remove(i);
+						clientSocket.emit("removeDeadProcess>"+p.getId()+">"+nodeId);
+					}
+				}
+			}
+			try {
+				Thread.sleep(cleanProcessInterval);
+			} catch (InterruptedException e) {
+				System.out.println("SlaveNode.cleanProcesses: sleep failed");
+				e.printStackTrace();
+			}
+		}
+		
+		runProcessCleaning = true;
+	}
+	
 }
