@@ -56,6 +56,22 @@ public class NodeProxyManager {
 		}
 	}
 	
+	public ProcessProxy removeProcessById(int processId){
+		synchronized(proxies){
+			Iterator<NodeProxy> iterator = proxies.iterator();
+			while(iterator.hasNext()){
+				NodeProxy node = iterator.next();
+				ProcessProxy process = node.getProcessById(processId);
+				if(process != null){
+					//process found, remove it
+					node.removeProcessById(processId);
+					return process;
+				}
+			}
+			return null;
+		}
+	}
+	
 	/**
 	 * NodeProxy removeNodeById(int):
 	 * Removes and returns a NodeProxy with a particular id.
