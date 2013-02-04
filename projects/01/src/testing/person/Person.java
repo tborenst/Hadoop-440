@@ -1,4 +1,4 @@
-package person;
+package testing.person;
 
 import java.awt.List;
 import java.io.*;
@@ -60,11 +60,38 @@ public class Person implements Runnable, java.io.Serializable{
 		suspended = true;
 		while(suspended);
 	}
+	
+	
+	private String stringifyArray(String[] args) {
+		if(args.length < 1) {return "[]";}
+		else {
+			String result = "["+args[0];
+			for(int a = 1; a < args.length; a++) {
+				result += ","+args[a];
+			}
+			result += "]";
+			return result;			
+		}		
+	}
+	
+	private String[] destringifyArray(String args) {
+		return args.substring(1, args.length()-1).split(",");
+	}
 
 	/*
 	 * main routine for testing
 	 */
 	public static void main(String[] args){
+		Person p = new Person("p", 21);
+		String[] s = {"one", "two", "three", "4"};
+		System.out.println(s);
+		String sString = p.stringifyArray(s);
+		System.out.println(sString);
+		String[] s2 = p.destringifyArray(sString);
+		System.out.println(p.stringifyArray(s2));
+		
+		
+		/*
 		Person p = new Person("p", 21);
 		Thread pt = new Thread(p);
 		tFile serFile = new tFile("person.ser");
@@ -99,7 +126,7 @@ public class Person implements Runnable, java.io.Serializable{
 			e.printStackTrace();
 		}
 		*/
-		
+		/*
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e1) {

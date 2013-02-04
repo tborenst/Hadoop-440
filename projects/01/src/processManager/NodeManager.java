@@ -10,11 +10,11 @@ import networking.SIOCommand;
 import networking.SIOServer;
 
 public class NodeManager {
-	private static NodeProxyManager nodeProxyManager;
-	private static boolean runLoadBalancing;
-	private static SIOServer serverSocket;
-	private static int loadBalanceThreshold;
-	private static int loadBalanceInterval;
+	private NodeProxyManager nodeProxyManager;
+	private boolean runLoadBalancing;
+	private SIOServer serverSocket;
+	private int loadBalanceThreshold;
+	private int loadBalanceInterval;
 	private int processCounter;
 	private Thread loadBalanceThread;
 	//private static CommandPrompt prompt;
@@ -133,17 +133,16 @@ public class NodeManager {
 	 * if emit is successfully sent, edit the NodeProxy if not try again.
 	 * @param processName
 	 */
-	public void addNewProcess(String processName, String argumentsString) {
+	public void addNewProcess(String processName, String[] args) {
 		NodeProxy free = nodeProxyManager.getLeastBusyNode();
-		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processCounter+">"+argumentsString);
+		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processCounter+">"+stringifyArray(args));
 		if(emitSent) {
 			free.addNewProcess(processCounter, processName);
 			processCounter++;
 		}
 		else {
-			addNewProcess(processName); //dangerous chance of endless recursive cycle
+			addNewProcess(processName, args); //dangerous chance of endless recursive cycle
 		}
-		
 	}
 	
 	/**
@@ -244,6 +243,38 @@ public class NodeManager {
 	public void suspendLoadBalancing() {
 		runLoadBalancing = false;
 		while(!runLoadBalancing);
+	}
+	
+	
+	//----------------------
+	//----Util Functions----
+	//----------------------
+	/**
+	 * String stringifyArray(String[] args):
+	 * Converts a String[] to its string representation (for socket transport).
+	 * @param args
+	 * @return
+	 */
+	private String stringifyArray(String[] args) {
+		if(args.length < 1) {return "[]";}
+		else {
+			String result = "["+args[0];
+			for(int a = 1; a < args.length; a++) {
+				result += ","+args[a];
+			}
+			result += "]";
+			return result;			
+		}		
+	}
+	
+	/**
+	 * String[] destrinifyArray(String args):
+	 * Converts a String assumed to be an array in string representation (from socket transport).
+	 * @param args
+	 * @return
+	 */
+	private String[] destringifyArray(String args) {
+		return args.substring(1, args.length()-1).split(",");
 	}
 }
 
