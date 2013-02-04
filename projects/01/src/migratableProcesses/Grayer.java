@@ -2,12 +2,11 @@
  * The Grayer class takes in a String path and String format of an existing image to grayscale the image pixel by pixel.
  */
 
-package testing;
+package migratableProcesses;
 
 import java.awt.image.BufferedImage;
 
 import processManager.ThreadProcess;
-import migratableProcesses.MigratableProcess;
 import transactionaFileIO.tFile;
 
 public class Grayer implements MigratableProcess{
@@ -113,8 +112,8 @@ public class Grayer implements MigratableProcess{
 	
 	//testing
 	public static void main(String[] args) throws InterruptedException {
-		String[] foo = {"src/testing/test.jpg", "jpeg"};
-		ThreadProcess gt = new ThreadProcess("testing.Grayer", 98, foo);
+		String[] foo = {"testing/test.jpg", "jpeg"};
+		ThreadProcess gt = new ThreadProcess("migratableProcesses.Grayer", 98, foo);
 		
 		gt.start();
 		System.out.println("running...");
@@ -128,7 +127,7 @@ public class Grayer implements MigratableProcess{
 		Thread.sleep(5000);
 		
 		System.out.println("reviving...");
-		ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "Grayer", true);
+		ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "testing.Grayer", true);
 		
 		System.out.println("rerunning...");
 		gtRevival.start();

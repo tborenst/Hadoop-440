@@ -21,10 +21,10 @@ public class NodeManager {
 	private Thread loadBalanceThread;
 	private CommandPrompt prompt;
 	
-	public NodeManager(int loadBalanceThreshold, int loadBalanceInterval) {
+	public NodeManager(int loadBalanceThreshold, int loadBalanceInterval, int port) {
 		this.nodeProxyManager = new NodeProxyManager();
 		this.runLoadBalancing = true;
-		this.serverSocket = new SIOServer(4313);
+		this.serverSocket = new SIOServer(port);
 		this.loadBalanceThreshold = loadBalanceThreshold;
 		this.loadBalanceInterval = loadBalanceInterval;
 		this.processCounter = 0;
@@ -142,16 +142,21 @@ public class NodeManager {
 	 */
 	public void addNewProcess(String processName, String args) {
 		NodeProxy free = nodeProxyManager.getLeastBusyNode();
-		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processName+">"+args);
-		if(emitSent) {
-			free.addNewProcess(processCounter, processName);
-			processCounter++;
-			//prompt.emit("launched process: "+processName+"on node: "+free.getId());
+		if(free != null){
+			Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processName+">"+args);
+			if(emitSent) {
+				free.addNewProcess(processCounter, processName);
+				processCounter++;
+				prompt.emit("launched process: "+processName+"on node: "+free.getId());
+			}
+			else {
+				//addNewProcess(processName, args); //dangerous chance of endless recursive cycle
+				prompt.emit("failed to launch process: "+processName);
+			}
+		} else {
+			prompt.emit("No nodes are currently available to run proces: " + processName + ".");
 		}
-		else {
-			//addNewProcess(processName, args); //dangerous chance of endless recursive cycle
-			//prompt.emit("failed to launch process: "+processName);
-		}
+		
 	}
 	
 	public void moveProcessFrom(int processId, String processName, String serPath, int nodeId) {

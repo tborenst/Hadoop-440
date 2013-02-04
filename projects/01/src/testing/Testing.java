@@ -3,7 +3,9 @@ package testing;
 import java.util.Scanner;
 
 import processManager.CommandPrompt;
+import processManager.NodeManager;
 import processManager.NodeProxy;
+import processManager.SlaveNode;
 //import processManager.NodeManager;
 import networking.*;
 
@@ -33,7 +35,7 @@ public class Testing {
 //		});
 //		Thread.sleep(1000);
 //		manager.quit();
-		
+//		
 //		final CommandPrompt prompt = new CommandPrompt();
 //		new Thread(new Runnable(){
 //			public void run(){
@@ -57,14 +59,26 @@ public class Testing {
 //				System.exit(0);
 //			}
 //		});
+//		prompt.on("addNewProcess", new SIOCommand(){
+//			public void run(){
+//				System.out.println(args[0]);
+//				System.out.println(args[1]);
+//			}
+//		});
 		
-		NodeProxy n = new NodeProxy(237);
-		n.addNewProcess(23, "Grayer");
-		n.addNewProcess(12, "WebCrawl");
-		n.addNewProcess(49, "Saxpy.java");
-		n.addNewProcess(97, "arbit.ser");
-		n.addNewProcess(104, "tertarin");
-		System.out.println(n.getProcessesAsString());
-		System.out.println(n.getProcessesAsString());
+//		NodeProxy n = new NodeProxy(237);
+//		n.addNewProcess(23, "Grayer");
+//		n.addNewProcess(12, "WebCrawl");
+//		n.addNewProcess(49, "Saxpy.java");
+//		n.addNewProcess(97, "arbit.ser");
+//		n.addNewProcess(104, "tertarin");
+//		System.out.println(n.getProcessesAsString());
+//		System.out.println(n.getProcessesAsString());
+		
+		NodeManager master = new NodeManager(5, 5000, 4013);
+		Thread.sleep(1000);
+		//master.addNewProcess("migratableProcesses.Grayer", "[./images/flower.jpg,jpeg]");
+		//master.ps();
+		
 	}
 }
