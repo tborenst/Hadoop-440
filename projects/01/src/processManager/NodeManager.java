@@ -142,7 +142,7 @@ public class NodeManager {
 	 */
 	public void addNewProcess(String processName, String args) {
 		NodeProxy free = nodeProxyManager.getLeastBusyNode();
-		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processCounter+">"+args);
+		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processName+">"+args);
 		if(emitSent) {
 			free.addNewProcess(processCounter, processName);
 			processCounter++;
@@ -239,7 +239,7 @@ public class NodeManager {
 			ProcessProxy p = busy.getRandomProcess();
 			if(p != null) {
 				//once process is serialized, slave node emits to master to assign process to a free node
-				Boolean emitSent = serverSocket.emit(busy.getId(), "moveProcess>"+p.getId());
+				Boolean emitSent = serverSocket.emit(busy.getId(), "moveProcess>"+p.getId()+">"+free.getId());
 				if(emitSent) {
 					busy.removeProcessById(p.getId());
 					free.addExistingProcess(p);

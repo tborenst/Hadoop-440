@@ -10,28 +10,115 @@ import transactionaFileIO.tFile;
 import util.Util;
 
 import networking.SIOClient;
+import networking.SIOCommand;
 
 public class SlaveNode {
 	private ArrayList<ThreadProcess> processes;
 	private SIOClient clientSocket;
-	//private CommandPrompt prompt;
+	private CommandPrompt prompt;
 	private String serDirectoryPath;
 	
 	public SlaveNode(String serverHostname, int serverPort, String serDirectoryPath) {
 		this.processes = new ArrayList<ThreadProcess>();
 		this.clientSocket = new SIOClient(serverHostname, serverPort);
-		//prompt = new CommandPrompt();
+		prompt = new CommandPrompt();
 		File serDir = new File(serDirectoryPath);
 		if(serDir.exists() && serDir.isDirectory()) {
 			this.serDirectoryPath = serDirectoryPath;
 		}
 		else {this.serDirectoryPath = "";}
+		
+		//Prompt Events
+		prompt.on("ps", new SIOCommand() {
+			public void run() {
+				ps();
+			}
+		});
+		
+		prompt.on("quit", new SIOCommand() {
+			public void run() {
+				quit();
+			}
+		});
+		
+		prompt.on("addNewProcess", new SIOCommand() {
+			public void run() {
+				createNewProcess(args[0], args[1]);
+			}
+		});
+		
+		//ClientSocketIO Events
+		clientSocket.on("addNewProcess", new SIOCommand() {
+			public void run() {
+				//+processCounter+">"+processCounter+">"+args"
+				addNewProcess(Integer.parseInt(args[0]), args[1], Util.destringifyArray(args[0]));
+			}
+		});
+		
+		clientSocket.on("addExistingProcess", new SIOCommand() {
+			public void run() {
+				//+processId+">"+processName+">"+serPath"
+				addExistingProcess(Integer.parseInt(args[0]), args[1], args[2]);
+			}
+		});
+		
+		clientSocket.on("killProcess", new SIOCommand() {
+			public void run() {
+				killProcessById(Integer.parseInt(args[0]));
+			}
+		});
+		
+		clientSocket.on("moveProcess", new SIOCommand() {
+			public void run() {
+				moveProcessTo(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+			}
+		});
 	}
 	
-	//ps
-	//quit
-	//createNewProcess
 	
+	//-------------------------
+	//----Prompt Management----
+	//-------------------------
+	
+	/**
+	 * void ps(void):
+	 * Emits the locally running processes in a readable format.
+	 */
+	public void ps() {
+		prompt.emit("slave ps");
+	}
+	
+	/**
+	 * void quit(void):
+	 * Closes the node.
+	 */
+	public void quit() {
+		prompt.emit("Closing this slave node, all processes will be lost.");
+		System.exit(1);
+	}
+	
+	/**
+	 * void createNewProcess(String processName, String args):
+	 * For when a user creates a new process on a slave node.
+	 * Asks the master to create a new process with processName using args.
+	 * @param processName
+	 * @param args
+	 */
+	public void createNewProcess(String processName, String args) {
+		clientSocket.emit("addNewProcess>"+processName+">"+args);
+	}
+	
+	
+	//--------------------------
+	//----Process Management----
+	//--------------------------
+	/**
+	 * void addNewProcess(int id, String name, String[] args):
+	 * Creates, adds and runs a new process with name and id with args.
+	 * @param id
+	 * @param name
+	 * @param args
+	 */
 	public void addNewProcess(int id, String name, String[] args) {
 		ThreadProcess p = new ThreadProcess(name, id, args);
 		if(p != null) {
@@ -40,7 +127,13 @@ public class SlaveNode {
 		}
 	}
 	
-	
+	/**
+	 * void addExistingProcess(int id, String name, String serPath):
+	 * Recovers, adds and runs the process with name and id, serialized at serPath.
+	 * @param id
+	 * @param name
+	 * @param serPath
+	 */
 	public void addExistingProcess(int id, String name, String serPath) {
 		ThreadProcess p = new ThreadProcess(name, id, serPath, true);
 		if(p != null) {
@@ -49,17 +142,34 @@ public class SlaveNode {
 		}	
 	}
 	
+	/**
+	 * void moveProcessTo(int id, int newNodeId):
+	 * Serializes the process with id and removes it from processes then asks the master node to send it to the node with newNodeId.
+	 * @param id
+	 * @param newNodeId
+	 */
 	public void moveProcessTo(int id, int newNodeId) {
 		ThreadProcess p = removeProcessById(id);
-		tFile serFile = p.serialize(newSerFile());
-		if(serFile != null) {
-			clientSocket.emit("moveProcessCallback>"+id+">"+p.getName()+">"+serFile.getPath()+">"+newNodeId);
+		if(p != null) {
+			tFile serFile = p.serialize(newSerFile());
+			if(serFile != null) {
+				clientSocket.emit("moveProcessCallback>"+id+">"+p.getName()+">"+serFile.getPath()+">"+newNodeId);
+			}
+			else {
+				System.out.println("Failed to move process due to serialization: "+p.getName()+" "+id+" "+serFile.getPath());
+			}
 		}
 		else {
-			System.out.println("Failed to move process due to serialization: "+p.getName()+" "+p.getId()+" "+serFile.getPath());
+			System.out.println("Failed to find process: "+id);
 		}
 	}
 	
+	/**
+	 * ThreadProcess killProcessById(int id):
+	 * Kills the process with id and removes it from processes.
+	 * @param id
+	 * @return ThreadProcess
+	 */
 	public ThreadProcess killProcessById(int id) {
 		ThreadProcess p = removeProcessById(id);
 		if(p != null) {
@@ -68,6 +178,12 @@ public class SlaveNode {
 		return p;
 	}
 	
+	/**
+	 * ThreadProcess removeProcessById(int id):
+	 * Finds and removes the process with id from processes.
+	 * @param id
+	 * @return ThreadProcess
+	 */
 	private ThreadProcess removeProcessById(int id) {
 		Iterator<ThreadProcess> iterator = processes.iterator();
 		ArrayList<ThreadProcess> tmpProcesses = new ArrayList<ThreadProcess>();
@@ -83,6 +199,12 @@ public class SlaveNode {
 		return foundProcess;
 	}
 	
+	/**
+	 * tFile newSerFile(void):
+	 * Creates a new file for serialization.
+	 * Cycles until we can create a new file.
+	 * @return
+	 */
 	private tFile newSerFile() {
 		File serFileAttempt = new File(serDirectoryPath+makeSerFileName());
 		while(serFileAttempt.exists()) {
@@ -92,11 +214,14 @@ public class SlaveNode {
 		return new tFile(serFileAttempt, true);
 	}
 	
+	/**
+	 * String makeSerFileName(void):
+	 * Creates a random file name for serialization with extension ".ser".
+	 * @return String
+	 */
 	private String makeSerFileName() {
 		return new StringBuilder().append("prefix")
 		        .append(System.currentTimeMillis()/1000000).append(UUID.randomUUID())
 		        .append(".").append("ser").toString();
-	}
-	
-	
+	}	
 }
