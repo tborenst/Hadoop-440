@@ -16,7 +16,8 @@ public class NodeManager {
 	private static int loadBalanceThreshold;
 	private static int loadBalanceInterval;
 	private int processCounter;
-	//private static Prompt prompt;
+	private Thread loadBalanceThread;
+	//private static CommandPrompt prompt;
 	
 	public NodeManager(int loadBalanceThreshold, int loadBalanceInterval) {
 		this.nodeProxyManager = new NodeProxyManager();
@@ -25,7 +26,26 @@ public class NodeManager {
 		this.loadBalanceThreshold = loadBalanceThreshold;
 		this.loadBalanceInterval = loadBalanceInterval;
 		this.processCounter = 0;
-		//this.prompt = new Prompt(); //check if process exists in prompt Class.forName
+		//this.prompt = new CommandPrompt(); //check if process exists in prompt Class.forName
+		
+		//CommandPrompt Events
+		/*prompt.on("ps", new SIOCommand() {
+			public void run() {
+				ps();
+			}
+		});
+		
+		prompt.on("quit", new SIOCommand() {
+			public void run() {
+				ps();
+			}
+		});
+		
+		prompt.on("addNewProcess", new SIOCommand() {
+			public void run() {
+				addNewProcess(args[0], args[1]);
+			}
+		});*/
 
 		//ServerSocketIO Events
 		serverSocket.on("connection",  new SIOCommand(){
@@ -42,7 +62,7 @@ public class NodeManager {
 		
 		serverSocket.on("addNewProcess", new SIOCommand(){
 			public void run() {
-				addNewProcess(args[0]);
+				addNewProcess(args[0], args[1]);
 			}
 		});
 		
@@ -59,7 +79,11 @@ public class NodeManager {
 			}
 		});
 		
-		//runLoadBalancing();
+		this.loadBalanceThread = new Thread(new Runnable() {
+			public void run() {
+				runLoadBalancing();
+			}
+		});
 	}
 	
 //	//ps
@@ -109,9 +133,9 @@ public class NodeManager {
 	 * if emit is successfully sent, edit the NodeProxy if not try again.
 	 * @param processName
 	 */
-	public void addNewProcess(String processName) {
+	public void addNewProcess(String processName, String argumentsString) {
 		NodeProxy free = nodeProxyManager.getLeastBusyNode();
-		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processName+">"+processCounter);
+		Boolean emitSent = serverSocket.emit(free.getId(), "addNewProcess>"+processCounter+">"+processCounter+">"+argumentsString);
 		if(emitSent) {
 			free.addNewProcess(processCounter, processName);
 			processCounter++;

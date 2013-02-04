@@ -8,7 +8,7 @@ public class Testing {
 	public static void main(String[] args) throws InterruptedException{
 		NodeManager manager = new NodeManager(5, 5000);
 		Thread.sleep(1000);
-		final SIOClient client1 = new SIOClient("192.168.1.16", 4313);
+		final SIOClient client1 = new SIOClient("localhost", 4313);
 		client1.on("quit", new SIOCommand(){
 			public void run(){
 				System.out.println("OOOH NOOO!");
