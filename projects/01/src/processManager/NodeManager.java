@@ -5,8 +5,6 @@
 
 package processManager;
 
-import java.util.Arrays;
-
 import processManager.NodeProxy.ProcessProxy;
 import networking.SIOCommand;
 import networking.SIOServer;
@@ -18,6 +16,7 @@ public class NodeManager {
 	private int loadBalanceThreshold;
 	private int loadBalanceInterval;
 	private int processCounter;
+	@SuppressWarnings("unused")
 	private Thread loadBalanceThread;
 	private CommandPrompt prompt;
 	
@@ -67,13 +66,7 @@ public class NodeManager {
 				addNewProcess(args[0], args[1]);
 			}
 		});
-		
-		serverSocket.on("moveProcess", new SIOCommand() {
-			public void run() {
-				moveProcessFrom(Integer.parseInt(args[0]), args[1], args[2], Integer.parseInt(args[3]));
-			}
-		});
-		
+				
 		serverSocket.on("moveProcessCallback", new SIOCommand() {
 			public void run() {
 				//int processId, String processName, String serPath, int nodeId
@@ -101,11 +94,10 @@ public class NodeManager {
 	//quit
 	public void quit() {
 		ps();
-		prompt.emit("closing nodes...");
+		prompt.emit("closing slave nodes...");
 		serverSocket.broadcast("quit");
 		prompt.emit("bye, bye... *I'll be back*");
 		System.exit(1);
-		
 	}
 	
 	
@@ -119,6 +111,7 @@ public class NodeManager {
 	 */
 	public void addNode(int nodeId) {
 		NodeProxy free = nodeProxyManager.addNode(nodeId);
+		serverSocket.emit(nodeId, "nodeId>"+nodeId);
 		loadBalanceWithNode(free);
 	}
 	
@@ -155,22 +148,6 @@ public class NodeManager {
 			}
 		} else {
 			prompt.emit("No nodes are currently available to run proces: " + processName + ".");
-		}
-		
-	}
-	
-	public void moveProcessFrom(int processId, String processName, String serPath, int nodeId) {
-		NodeProxy free = nodeProxyManager.getLeastBusyNode();
-		if(moveProcessTo(processId, processName, serPath, free.getId())) {
-			NodeProxy oldNode = nodeProxyManager.getNodeById(nodeId);
-			if(oldNode != null) {
-				ProcessProxy p = oldNode.removeProcessById(processId);
-				if(p != null) {
-					free.addExistingProcess(p);
-					return;
-				}
-			}
-			free.addNewProcess(processId, processName);
 		}
 		
 	}
