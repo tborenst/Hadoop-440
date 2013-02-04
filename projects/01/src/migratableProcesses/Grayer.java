@@ -5,27 +5,31 @@
 package migratableProcesses;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 import processManager.ThreadProcess;
-import transactionaFileIO.tFile;
+import transactionaFileIO.TransactionalFileInputStream;
+import transactionaFileIO.TransactionalFileOutputStream;
 
 public class Grayer implements MigratableProcess{
-	private String path;
 	private int pixelX; //col
 	private int pixelY; //row
 	private String format;
-	private tFile file;
+	private TransactionalFileOutputStream outStream;
+	private TransactionalFileInputStream inStream;
 	
 	private static final long serialVersionUID = 4L;
 	private boolean suspended;
 	
 	public Grayer(String[] args) {
-		this(args[0], args[1]);
+		this(args[0], args[1], args[2]);
 	}
 	
-	public Grayer(String path, String format) {
-		this.path = path;
-		this.file = new tFile(path, false);
+	public Grayer(String inputPath, String outputPath, String format) {
+		this.outStream = new TransactionalFileOutputStream(inputPath);
+		this.inStream = new TransactionalFileInputStream(outputPath);
 		this.format = format;
 		this.pixelX = 0;
 		this.pixelY = 0;
@@ -61,9 +65,14 @@ public class Grayer implements MigratableProcess{
 	 */
 	private void saveImg(BufferedImage img) {
 		System.out.println("Trying to Save Img");
-		if(file != null) {
-			file.writeImg(img, format);
-			System.out.println("Saved Img");
+		if(outStream != null && img != null ) {
+			try {
+				ImageIO.write(img, format, outStream);
+				System.out.println("Saved Img");
+			} catch (IOException e) {
+				System.out.println("Unable to Save Img");
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -73,10 +82,15 @@ public class Grayer implements MigratableProcess{
 	 */
 	@Override
 	public void run() {
-		if(file == null) {file = new tFile(path, false);}
-		if(file != null) {
-			BufferedImage img = file.readImg();
-			while(!suspended && pixelY < img.getHeight()) {
+		if(inStream != null) {
+			BufferedImage img = null;
+			try {
+				img = ImageIO.read(inStream);
+			} catch (IOException e) {
+				System.out.println("Unable to open original image");
+				e.printStackTrace();
+			}
+			while(!suspended && img != null && pixelY < img.getHeight()) {
 				//iterate through the image first by column and then by row
 				if(pixelX == img.getWidth()-1) {pixelX = 0; pixelY++;}
 				else {pixelX++;}
@@ -86,7 +100,6 @@ public class Grayer implements MigratableProcess{
 			
 			//suspended
 			saveImg(img);
-			file = null;
 		}
 		suspended = false;
 	}
