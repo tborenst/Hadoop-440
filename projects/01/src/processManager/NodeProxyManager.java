@@ -75,7 +75,7 @@ public class NodeProxyManager {
 	 * NodeProxy getBusiestNodeProxy(void):
 	 * Returns the node with the most running processes.
 	 */
-	NodeProxy getBusiestNodeProxy(){
+	NodeProxy getBusiestNode(){
 		synchronized(proxies){
 			Iterator<NodeProxy> iterator = proxies.iterator();
 			int max = 0;
@@ -96,7 +96,7 @@ public class NodeProxyManager {
 	 * NodeProxy getLeastBusyNodeProxy(void):
 	 * Returns the node with the least running processes.
 	 */
-	NodeProxy getLeastBusyNodeProxy(){
+	NodeProxy getLeastBusyNode(){
 		synchronized(proxies){
 			Iterator<NodeProxy> iterator = proxies.iterator();
 			if(!iterator.hasNext()){
