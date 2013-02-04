@@ -3,6 +3,7 @@ package testing;
 import java.util.Scanner;
 
 import processManager.CommandPrompt;
+import processManager.NodeProxy;
 //import processManager.NodeManager;
 import networking.*;
 
@@ -32,16 +33,38 @@ public class Testing {
 //		});
 //		Thread.sleep(1000);
 //		manager.quit();
-		CommandPrompt prompt = new CommandPrompt();
-		prompt.on("ps", new SIOCommand(){
-			public void run(){
-				System.out.println("PS...");
-			}
-		});
-		prompt.on("quit", new SIOCommand(){
-			public void run(){
-				System.exit(0);
-			}
-		});
+		
+//		final CommandPrompt prompt = new CommandPrompt();
+//		new Thread(new Runnable(){
+//			public void run(){
+//				try {
+//					Thread.sleep(5000);
+//					prompt.emit("This message is brought to you by ProcessManager Inc,.");
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				
+//			}
+//		}).start();
+//		prompt.on("ps", new SIOCommand(){
+//			public void run(){
+//				System.out.println("PS...");
+//			}
+//		});
+//		prompt.on("quit", new SIOCommand(){
+//			public void run(){
+//				System.exit(0);
+//			}
+//		});
+		
+		NodeProxy n = new NodeProxy(237);
+		n.addNewProcess(23, "Grayer");
+		n.addNewProcess(12, "WebCrawl");
+		n.addNewProcess(49, "Saxpy.java");
+		n.addNewProcess(97, "arbit.ser");
+		n.addNewProcess(104, "tertarin");
+		System.out.println(n.getProcessesAsString());
+		System.out.println(n.getProcessesAsString());
 	}
 }
