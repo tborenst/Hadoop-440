@@ -194,7 +194,7 @@ public class NodeManager {
 			p = n.removeProcessById(processId);
 		}
 		else {
-			p = nodeProxyManager.getProcessById(processId)
+			p = nodeProxyManager.removeProcessById(processId);
 		}
 		
 		if(p != null) {
