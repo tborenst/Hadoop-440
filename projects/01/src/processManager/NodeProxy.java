@@ -49,6 +49,21 @@ public class NodeProxy {
 		}
 	}
 	
+	public ProcessProxy getProcessById(int processId){
+		synchronized(processes){
+			Iterator<ProcessProxy> iterator = processes.iterator();
+			while(iterator.hasNext()){
+				ProcessProxy process = iterator.next();
+				if(process.getId() == processId){
+					//process found
+					return process;
+				}
+			}
+			//process not found
+			return null;
+		}
+	}
+	
 	public void addNewProcess(int id, String name){
 		synchronized(processes){
 			ProcessProxy process = new ProcessProxy(id, name);

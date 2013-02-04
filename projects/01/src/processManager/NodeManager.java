@@ -182,6 +182,17 @@ public class NodeManager {
 	}
 	
 	/**
+	 * ProcessProxy getProcessById(int):
+	 * Looks through all proxy nodes and returns a process with a particular id.
+	 * If no process with specified id is found, will return null.
+	 * @param processId
+	 * @return
+	 */
+	public ProcessProxy getProcessById(int processId) {
+		return nodeProxyManager.getProcessById(processId);
+	}
+	
+	/**
 	 * void cleanDeadProcessProxy(int nodeId, int processId):
 	 * Removes a dead ProcessProxy (processId) from NodeProxy (nodeId).
 	 * @param nodeId
