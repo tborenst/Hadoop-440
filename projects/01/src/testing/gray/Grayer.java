@@ -24,7 +24,7 @@ public class Grayer implements MigratableProcess{
 	
 	public Grayer(String path, String format) {
 		this.path = path;
-		this.file = new tFile(path);
+		this.file = new tFile(path, false);
 		this.format = format;
 		this.pixelX = 0;
 		this.pixelY = 0;
@@ -93,18 +93,14 @@ public class Grayer implements MigratableProcess{
 		System.out.println("Suspended!");
 		suspended = true;
 		while(suspended){
-			//System.out.println("asdf");
+			//do nothing...
 		}
 	}
 	
 	//testing
 	public static void main(String[] args) throws InterruptedException {
-		
-		
-		
-		//TODO: include id
-		ThreadProcess gt = new ThreadProcess((MigratableProcess) new Grayer("src/gray/test.jpg", "jpeg"), 98);
-		
+		String[] foo = {"src/testing/gray/test.jpg", "jpeg"};
+		ThreadProcess gt = new ThreadProcess("Grayer", 98, foo);
 		gt.start();
 		System.out.println("running...");
 		
@@ -117,8 +113,7 @@ public class Grayer implements MigratableProcess{
 		Thread.sleep(10000);
 		
 		System.out.println("deserializing...");
-		tFile serFile = new tFile("img.ser");
-		ThreadProcess gtRevival = new ThreadProcess((MigratableProcess) serFile.readObj(), 98);
+		ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "Grayer", true);
 		gtRevival.start();
 	}
 
