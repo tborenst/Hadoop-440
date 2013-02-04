@@ -34,37 +34,43 @@ public class Testing {
 //		Thread.sleep(1000);
 //		manager.quit();
 		
-//		final CommandPrompt prompt = new CommandPrompt();
-//		new Thread(new Runnable(){
-//			public void run(){
-//				try {
-//					Thread.sleep(5000);
-//					prompt.emit("This message is brought to you by ProcessManager Inc,.");
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				
-//			}
-//		}).start();
-//		prompt.on("ps", new SIOCommand(){
-//			public void run(){
-//				System.out.println("PS...");
-//			}
-//		});
-//		prompt.on("quit", new SIOCommand(){
-//			public void run(){
-//				System.exit(0);
-//			}
-//		});
+		final CommandPrompt prompt = new CommandPrompt();
+		new Thread(new Runnable(){
+			public void run(){
+				try {
+					Thread.sleep(5000);
+					prompt.emit("This message is brought to you by ProcessManager Inc,.");
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		}).start();
+		prompt.on("ps", new SIOCommand(){
+			public void run(){
+				System.out.println("PS...");
+			}
+		});
+		prompt.on("quit", new SIOCommand(){
+			public void run(){
+				System.exit(0);
+			}
+		});
+		prompt.on("addNewProcess", new SIOCommand(){
+			public void run(){
+				System.out.println(args[0]);
+				System.out.println(args[1]);
+			}
+		});
 		
-		NodeProxy n = new NodeProxy(237);
-		n.addNewProcess(23, "Grayer");
-		n.addNewProcess(12, "WebCrawl");
-		n.addNewProcess(49, "Saxpy.java");
-		n.addNewProcess(97, "arbit.ser");
-		n.addNewProcess(104, "tertarin");
-		System.out.println(n.getProcessesAsString());
-		System.out.println(n.getProcessesAsString());
+//		NodeProxy n = new NodeProxy(237);
+//		n.addNewProcess(23, "Grayer");
+//		n.addNewProcess(12, "WebCrawl");
+//		n.addNewProcess(49, "Saxpy.java");
+//		n.addNewProcess(97, "arbit.ser");
+//		n.addNewProcess(104, "tertarin");
+//		System.out.println(n.getProcessesAsString());
+//		System.out.println(n.getProcessesAsString());
 	}
 }

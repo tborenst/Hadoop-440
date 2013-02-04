@@ -94,7 +94,7 @@ public class CommandPrompt {
 			return;
 		}
 		String className = "migratableProcesses." + inputArray[0]; //get process name
-		String[] argsArray = Arrays.copyOfRange(inputArray, 0, inputArray.length);
+		String[] argsArray = Arrays.copyOfRange(inputArray, 1, inputArray.length);
 		//check if the class exist
 		try {
 			Class.forName(className); //see if you can find a class of name className
