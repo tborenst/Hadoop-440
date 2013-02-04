@@ -94,8 +94,8 @@ public class NodeManager {
 		});
 	}
 	
-	public String ps() {
-		prompt.emit(nodeProxyManager.getAllProcesses());
+	public void ps() {
+		prompt.emit(nodeProxyManager.getProcessesAsString());
 	}
 	
 	//quit

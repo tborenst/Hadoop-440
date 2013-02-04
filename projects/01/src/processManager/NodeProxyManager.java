@@ -27,6 +27,17 @@ public class NodeProxyManager {
 		}
 	}
 	
+	public String getProcessesAsString(){
+		String string = "";
+		synchronized(proxies){
+			Iterator<NodeProxy> iterator = proxies.iterator();
+			while(iterator.hasNext()){
+				string += iterator.next().getProcessesAsString();
+			}
+		}
+		return string;
+	}
+	
 	/**
 	 * NodeProxy removeNodeById(int):
 	 * Removes and returns a NodeProxy with a particular id.

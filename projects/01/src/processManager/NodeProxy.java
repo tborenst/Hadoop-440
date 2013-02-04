@@ -18,6 +18,27 @@ public class NodeProxy {
 	}
 	
 	/**
+	 * String getProcessesAsString(void):
+	 * Returns a String that describes all the processes running on this node.
+	 * @return String
+	 */
+	public String getProcessesAsString(){
+		String string = "----------------------------------------------------\n"
+				      + "Node ID: " + id + "\n"
+				      + "----------------------------------------------------\n";
+		synchronized(processes){
+			Iterator<ProcessProxy> iterator = processes.iterator();
+			while(iterator.hasNext()){
+				ProcessProxy process = iterator.next();
+				String temp = "Prcess: " + process.getId() + " | " + process.getName() + "\n";
+				string += temp;
+			}
+			string += "----------------------------------------------------\n";
+		}
+		return string;
+	}
+	
+	/**
 	 * int getNumberOfProcesses(void):
 	 * Returns the number of processes running on this node.
 	 * @return

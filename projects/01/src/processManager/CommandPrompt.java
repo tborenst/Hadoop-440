@@ -9,9 +9,9 @@ import util.Util;
 import networking.SIOCommand;
 
 public class CommandPrompt {
-	HashMap<String, SIOCommand> bindings;
-	Object printLock;
-	Boolean promptGiven;
+	private HashMap<String, SIOCommand> bindings;
+	private Object printLock;
+	private Boolean promptGiven;
 	
 	public CommandPrompt(){
 		this.bindings = new HashMap<String, SIOCommand>();
@@ -39,7 +39,9 @@ public class CommandPrompt {
 	 */
 	public void emit(String message){
 		synchronized(printLock){
+			System.out.println("");
 			System.out.println(message);
+			System.out.print("> ");
 			givePrompt();
 		}
 	}
