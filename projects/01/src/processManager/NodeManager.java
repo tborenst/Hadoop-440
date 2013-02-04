@@ -68,6 +68,12 @@ public class NodeManager {
 			}
 		});
 		
+		serverSocket.on("moveProcess", new SIOCommand() {
+			public void run() {
+				moveProcessFrom(Integer.parseInt(args[0]), args[1], args[2], Integer.parseInt(args[3]));
+			}
+		});
+		
 		serverSocket.on("moveProcessCallback", new SIOCommand() {
 			public void run() {
 				//int processId, String processName, String serPath, int nodeId
@@ -149,6 +155,22 @@ public class NodeManager {
 		}
 	}
 	
+	public void moveProcessFrom(int processId, String processName, String serPath, int nodeId) {
+		NodeProxy free = nodeProxyManager.getLeastBusyNode();
+		if(moveProcessTo(processId, processName, serPath, free.getId())) {
+			NodeProxy oldNode = nodeProxyManager.getNodeById(nodeId);
+			if(oldNode != null) {
+				ProcessProxy p = oldNode.removeProcessById(processId);
+				if(p != null) {
+					free.addExistingProcess(p);
+					return;
+				}
+			}
+			free.addNewProcess(processId, processName);
+		}
+		
+	}
+	
 	/**
 	 * void moveProcessTo(int processId, String processName, String serPath, int nodeId):
 	 * Move a process (processId) with processName (processName) serialized at serPath to the node with NodeId.
@@ -159,8 +181,8 @@ public class NodeManager {
 	 * @param serPath
 	 * @param nodeId
 	 */
-	public void moveProcessTo(int processId, String processName, String serPath, int nodeId) {
-		serverSocket.emit(nodeId, "addExistingProcess>"+processId+">"+processName+">"+serPath);
+	public Boolean moveProcessTo(int processId, String processName, String serPath, int nodeId) {
+		return serverSocket.emit(nodeId, "addExistingProcess>"+processId+">"+processName+">"+serPath);
 		
 		//this should only be called for moving processes, so the proxy already has the existingProcess
 		//ie no need to update the NodeProxy with nodeId
@@ -185,8 +207,13 @@ public class NodeManager {
 	 * @param processId
 	 */
 	public void cleanDeadProcessProxy(int nodeId, int processId) {
-		NodeProxy p = nodeProxyManager.getNodeById(nodeId);
-		if(p != null) {p.removeProcessById(processId);}
+		NodeProxy n = nodeProxyManager.getNodeById(nodeId);
+		if(n != null) {
+			ProcessProxy p = n.removeProcessById(processId);
+			if(p != null) {
+				prompt.emit("Terminated Process: "+p.getName()+" id: "+p.getId());
+			}
+		}
 	}
 	
 	/**

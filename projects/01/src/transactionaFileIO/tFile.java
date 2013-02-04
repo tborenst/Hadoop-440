@@ -15,16 +15,20 @@ public class tFile implements Serializable{
 	private File file;
 	private static final long serialVersionUID = 3L;
 	
-	public tFile(String path) {
-		this.file = new File(path);
-		if(!file.exists()) {
+	public tFile(File file, Boolean createIfDoesntExist) {
+		this.file = file;
+		if(!file.exists() && createIfDoesntExist) {
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
-				System.out.println("tFile.tFile(): failed to create file: "+path);
+				System.out.println("tFile.tFile(): failed to create file: "+file.getPath());
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public tFile(String path, Boolean createIfDoesntExist) {
+		this(new File(path), createIfDoesntExist);
 	}
 
 	/**

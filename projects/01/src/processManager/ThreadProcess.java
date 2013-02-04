@@ -6,28 +6,80 @@
 package processManager;
 
 import migratableProcesses.MigratableProcess;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.IOException;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import transactionaFileIO.tFile;
+import util.Util;
 
 public class ThreadProcess {
 	private MigratableProcess process;
 	private Thread thread;
 	private int id;
+	private String name;
 	
-	public ThreadProcess(MigratableProcess process, int id){
+	public ThreadProcess(String name, int id, String[] args) {
+		Class<?> myClass = null;
+		try {
+			myClass = Class.forName("processName");
+		} catch (ClassNotFoundException e) {
+			System.out.println("ThreadProcess.ThreadProcess: process does not exist: "+name);
+			e.printStackTrace();
+		}
+		
+		Constructor<?> myConstructor = null;
+		
+		try {
+			myConstructor = myClass.getDeclaredConstructor(String[].class);
+		} catch (NoSuchMethodException e) {
+			System.out.println("ThreadProcess.ThreadProcess: constructor for process does not exist: "+name);
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			System.out.println("ThreadProcess.ThreadProcess: cannot get constructor of process due to security issue: "+name);
+			e.printStackTrace();
+		} 
+		
+		
+		Object[] arguments = {args};
+		try {
+			//like .apply in javascript - takes in an array of arguments
+			this.process = (MigratableProcess) myConstructor.newInstance(arguments);
+		} catch (InstantiationException e) {
+			System.out.println("ThreadProcess.ThreadProcess: unable to initialize process: "+name);
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			System.out.println("ThreadProcess.ThreadProcess: unable to initialize process (illegal access): "+name);
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			System.out.println("ThreadProcess.ThreadProcess: process does not exist (bad arguments): "+name+" args: "+Util.stringifyArray(args));
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			System.out.println("ThreadProcess.ThreadProcess: unable to initialize process: "+name);
+			e.printStackTrace();
+		}
+		
+		this.id = id;
+		this.name = name;
+		this.thread = new Thread(this.process);
+	}
+	
+	public ThreadProcess(MigratableProcess process, int id, String name){
 		this.process = process;
 		this.id = id;
+		this.name = name;
 		this.thread = new Thread(process);
+	}
+	
+	public ThreadProcess(String serPath, int id, String name, Boolean deleteAfterLoad) {
+		this(ThreadProcess.deserialize(serPath, deleteAfterLoad), id, name);
 	}
 	
 	/**
 	 * void suspend(void):
 	 * Calls the suspend() method on the process so that it enters a safe state.
 	 */
-	private void suspend(){
+	public void suspend(){
 		process.suspend();
 	}
 	
@@ -48,25 +100,55 @@ public class ThreadProcess {
 	}
 	
 	/**
-	 * void serialize(String path):
+	 * String getName(void):
+	 * Return the process' name.
+	 * @return String
+	 */
+	public String getName() {
+		return name;
+	}
+	
+	/**
+	 * tFile serialize(String path):
 	 * Forces the process into a safe state and then serializes it into a file saved to "path".
 	 */
-	//TODO: change this to use TransactionalFileIO
-	public void serialize(String path){
+	public tFile serialize(String path){
+		return serialize(new tFile(path, true));
+	}
+	
+	/**
+	 * tFile serialize(tFile serFile):
+	 * Forces the process into a safe state and then serializes it into a the file.
+	 * @param serFile
+	 * @return tFile
+	 */
+	public tFile serialize(tFile serFile){
 		process.suspend();
-		
-		tFile serFile = new tFile(path);
-		serFile.writeObj((Object) process);
-		
-		/*try{
-			FileOutputStream fileOut = new FileOutputStream(path);
-			ObjectOutputStream objOut = new ObjectOutputStream(fileOut);
-			objOut.writeObject(process);
-			objOut.close();
-		} catch (IOException e){
-			System.out.println("Could not serialize the following process:");
-			System.out.println(process.toString());
-		}*/
+		if(serFile.exists()) {
+			serFile.writeObj((Object) process);
+			return serFile;
+		}
+		return null;
+	}
+	
+	/**
+	 * MigratableProcess deserialize(String path, Boolean deleteAfterLoad):
+	 * Opens the file at path then recovers and returns the serialized process.
+	 * Deletes the file if deleteAfterLoad is true.
+	 * @param path
+	 * @param deleteAfterLoad
+	 * @return MigratableProcess
+	 */
+	public static MigratableProcess deserialize(String path, Boolean deleteAfterLoad) {
+		tFile serFile = new tFile(path, false);
+		MigratableProcess p = null;
+		if(serFile.exists()) {
+			p = (MigratableProcess) serFile.readObj();
+			if(deleteAfterLoad) {
+				serFile.delete();
+			}
+		}
+		return p;
 	}
 	
 }
