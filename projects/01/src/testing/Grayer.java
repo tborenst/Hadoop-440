@@ -27,9 +27,6 @@ public class Grayer implements MigratableProcess{
 	public Grayer(String path, String format) {
 		this.path = path;
 		this.file = new tFile(path, false);
-		if(this.file == null) {
-			
-		}
 		this.format = format;
 		this.pixelX = 0;
 		this.pixelY = 0;
@@ -88,7 +85,9 @@ public class Grayer implements MigratableProcess{
 				grayPixel(img, pixelX, pixelY);
 			}
 			
+			//suspended
 			saveImg(img);
+			file = null;
 		}
 		suspended = false;
 		
@@ -102,9 +101,13 @@ public class Grayer implements MigratableProcess{
 	public void suspend() {
 		System.out.println("Suspended!");
 		suspended = true;
-		file = null;
 		while(suspended){
-			//System.out.println("asdf");
+			try {
+				Thread.sleep(0);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -122,7 +125,7 @@ public class Grayer implements MigratableProcess{
 		gt.serialize("img.ser");
 		
 		System.out.println("check image!!");
-		Thread.sleep(10000);
+		Thread.sleep(5000);
 		
 		System.out.println("reviving...");
 		ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "Grayer", true);
