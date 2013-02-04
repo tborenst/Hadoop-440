@@ -22,7 +22,7 @@ public class ThreadProcess {
 	public ThreadProcess(String name, int id, String[] args) {
 		Class<?> myClass = null;
 		try {
-			myClass = Class.forName("processName");
+			myClass = Class.forName(name);
 		} catch (ClassNotFoundException e) {
 			System.out.println("ThreadProcess.ThreadProcess: process does not exist: "+name);
 			e.printStackTrace();

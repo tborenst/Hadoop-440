@@ -272,8 +272,8 @@ public class tFile implements Serializable{
 	
 	//testing
 	public static void main(String[] args) {
-		tFile test = new tFile("./obj.txt");
-		tFile test2 = new tFile("./obj.txt");
+		tFile test = new tFile("./obj.txt", true);
+		tFile test2 = new tFile("./obj.txt", true);
 		test.writeObj((Object) "candyman wrote this 2");
 		System.out.println(test2.read());
 		test2.writeObj((Object) "candyman wrote this 1");
