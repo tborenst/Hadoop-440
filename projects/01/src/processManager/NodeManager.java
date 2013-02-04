@@ -76,7 +76,7 @@ public class NodeManager {
 		
 		serverSocket.on("removeDeadProcess", new SIOCommand() {
 			public void run() {
-				cleanDeadProcessProxy(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+				cleanDeadProcess(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 			}
 		});
 		
@@ -178,7 +178,7 @@ public class NodeManager {
 	 */
 	public void killProcess(int nodeId, int processId) {
 		Boolean emitSent = serverSocket.emit(nodeId, "killProcess>"+processId);
-		if(emitSent) {cleanDeadProcessProxy(nodeId, processId);}
+		if(emitSent) {cleanDeadProcess(nodeId, processId);}
 	}
 	
 	/**
@@ -187,13 +187,18 @@ public class NodeManager {
 	 * @param nodeId
 	 * @param processId
 	 */
-	public void cleanDeadProcessProxy(int processId, int nodeId) {
+	public void cleanDeadProcess(int processId, int nodeId) {
 		NodeProxy n = nodeProxyManager.getNodeById(nodeId);
+		ProcessProxy p = null;
 		if(n != null) {
-			ProcessProxy p = n.removeProcessById(processId);
-			if(p != null) {
-				prompt.emit("Terminated Process: "+p.getName()+" id: "+p.getId());
-			}
+			p = n.removeProcessById(processId);
+		}
+		else {
+			p = nodeProxyManager.getProcessById(processId)
+		}
+		
+		if(p != null) {
+			prompt.emit("Terminated Process: "+p.getName()+" id: "+p.getId());
 		}
 	}
 	
