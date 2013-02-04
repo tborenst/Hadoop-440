@@ -16,7 +16,7 @@ public class NodeManager {
 	private static int loadBalanceThreshold;
 	private static int loadBalanceInterval;
 	private int processCounter;
-	//private static Prompt prompt;
+	private CommandPrompt prompt;
 	
 	public NodeManager(int loadBalanceThreshold, int loadBalanceInterval) {
 		this.nodeProxyManager = new NodeProxyManager();
@@ -25,7 +25,7 @@ public class NodeManager {
 		this.loadBalanceThreshold = loadBalanceThreshold;
 		this.loadBalanceInterval = loadBalanceInterval;
 		this.processCounter = 0;
-		//this.prompt = new Prompt(); //check if process exists in prompt Class.forName
+		this.prompt = new CommandPrompt(); //check if process exists in prompt Class.forName
 
 		//ServerSocketIO Events
 		serverSocket.on("connection",  new SIOCommand(){
@@ -62,17 +62,16 @@ public class NodeManager {
 		//runLoadBalancing();
 	}
 	
-//	//ps
-//	public String ps() {
-//		prompt.emit(nodeManager.getAllProcesses);
-//	}
+	public String ps() {
+		prompt.emit(nodeManager.getAllProcesses);
+	}
 	
 	//quit
 	public void quit() {
-		//ps();
-		//prompt.emit("closing nodes...");
+		ps();
+		prompt.emit("closing nodes...");
 		serverSocket.broadcast("quit");
-		//prompt.emit("bye, bye... *I'll be back*");
+		prompt.emit("bye, bye... *I'll be back*");
 		System.exit(1);
 		
 	}

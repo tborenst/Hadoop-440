@@ -34,7 +34,7 @@ public class SIOClient {
 			System.out.print("Socket attempted to connect to unknown host: " + hostname + ".");
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("Sokcet failed to connect to host: " + hostname +" at port: " + port + ".");
+			System.out.println("Socket failed to connect to host: " + hostname +" at port: " + port + ".");
 			e.printStackTrace();
 		}
 		listen();
