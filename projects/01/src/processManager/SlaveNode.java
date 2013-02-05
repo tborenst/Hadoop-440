@@ -82,6 +82,7 @@ public class SlaveNode {
 		
 		clientSocket.on("addExistingProcess", new SIOCommand() {
 			public void run() {
+				
 				//+processId+">"+processName+">"+serPath"
 				addExistingProcess(Integer.parseInt(args[0]), args[1], args[2]);
 			}
@@ -286,7 +287,7 @@ public class SlaveNode {
 	 * @return String
 	 */
 	private String makeSerFileName() {
-		return new StringBuilder().append("prefix")
+		return new StringBuilder().append("node"+nodeId)
 		        .append(System.currentTimeMillis()/1000000).append(UUID.randomUUID())
 		        .append(".").append("ser").toString();
 	}
