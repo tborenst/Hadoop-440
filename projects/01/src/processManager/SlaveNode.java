@@ -162,19 +162,36 @@ public class SlaveNode {
 	 */
 	public void addNewProcess(int id, String name, String[] args) {
 		ThreadProcess p;
+		
 		try {
 			p = new ThreadProcess(name, id, args);
 			if(p != null) {
 				processes.add(p);
 				p.start();
 			}
-		} catch (InstantiationException | IllegalAccessException
-				| IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException
-				| ClassNotFoundException e) {
+		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
-			// e.printStackTrace();
+			//e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
 		}
+		
 	}
 	
 	/**

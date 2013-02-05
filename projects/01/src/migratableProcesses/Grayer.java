@@ -6,6 +6,7 @@ package migratableProcesses;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.imageio.ImageIO;
 
@@ -17,6 +18,7 @@ public class Grayer implements MigratableProcess{
 	private int pixelX; //col
 	private int pixelY; //row
 	private String format;
+	private String[] args;
 	private TransactionalFileOutputStream outStream;
 	private TransactionalFileInputStream inStream;
 	
@@ -28,6 +30,8 @@ public class Grayer implements MigratableProcess{
 	}
 	
 	public Grayer(String path, String format) {
+		String[] args = {path, format};
+		this.args = args;
 		this.outStream = new TransactionalFileOutputStream(path);
 		this.inStream = new TransactionalFileInputStream(path);
 		this.format = format;
@@ -122,7 +126,7 @@ public class Grayer implements MigratableProcess{
 	}
 	
 	//testing
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws InterruptedException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
 		String[] foo = {"testing/test.jpg", "jpeg"};
 		ThreadProcess gt = new ThreadProcess("migratableProcesses.Grayer", 98, foo);
 		

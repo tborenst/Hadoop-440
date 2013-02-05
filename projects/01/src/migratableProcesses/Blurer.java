@@ -6,6 +6,7 @@ package migratableProcesses;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.imageio.ImageIO;
 
@@ -149,9 +150,9 @@ public class Blurer implements MigratableProcess{
 	}
 	
 	//testing
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws InterruptedException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
 		String[] foo = {"testing/test.jpg", "jpeg"};
-		ThreadProcess gt = new ThreadProcess("migratableProcesses.Grayer", 98, foo);
+		ThreadProcess gt = new ThreadProcess("migratableProcesses.Blurer", 98, foo);
 		
 		gt.start();
 		System.out.println("running...");
@@ -165,7 +166,7 @@ public class Blurer implements MigratableProcess{
 		Thread.sleep(5000);
 		
 		System.out.println("reviving...");
-		ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "testing.Grayer", true);
+		ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "testing.Blurer", true);
 		
 		System.out.println("rerunning...");
 		gtRevival.start();
