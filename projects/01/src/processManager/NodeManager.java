@@ -91,6 +91,7 @@ public class NodeManager {
 				runLoadBalancing();
 			}
 		});
+		loadBalanceThread.start();
 	}
 	
 	public void ps() {
@@ -216,6 +217,7 @@ public class NodeManager {
 	 * Load balances with the least busy node
 	 */
 	public void loadBalance() {
+		//System.out.println("running loadBalance()");
 		NodeProxy free = nodeProxyManager.getLeastBusyNode(); //may not be the node to which this process gets added to
 		loadBalanceWithNode(free);
 	}
@@ -253,6 +255,7 @@ public class NodeManager {
 	public void runLoadBalancing() {
 		while(runLoadBalancing) {
 			loadBalance();
+			//System.out.println("calling loadBalance()");
 			try {
 				Thread.sleep(loadBalanceInterval);
 			} catch (InterruptedException e) {
