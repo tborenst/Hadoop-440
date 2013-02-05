@@ -135,6 +135,7 @@ public class SlaveNode {
 	 * Closes the node.
 	 */
 	public void quit() {
+		clientSocket.emit("disconnectMe>"+nodeId);
 		prompt.emit("Closing this slave node, all processes will be lost.");
 		System.exit(1);
 	}

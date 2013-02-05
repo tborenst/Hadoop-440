@@ -95,8 +95,8 @@ public class SIOClient {
 						try {
 							String[] message = in.readUTF().split(">");
 							String commandName = message[0]; //get command name
-//							System.out.println("CLIENT RECIEVED : " + commandName + " : EVENT");
-//							System.out.println("ARGS: " + Util.stringifyArray(message));
+							System.out.println("CLIENT RECIEVED : " + commandName + " : EVENT");
+							System.out.println("ARGS: " + Util.stringifyArray(message));
 							synchronized(bindings){
 								SIOCommand command = bindings.get(commandName);
 								if(command != null){

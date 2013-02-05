@@ -57,7 +57,13 @@ public class NodeManager {
 		
 		serverSocket.on("disconnect", new SIOCommand() {
 			public void run() {
-				removeDeadNode(Integer.parseInt(args[0]));
+				removeNodeById(Integer.parseInt(args[0]));
+			}
+		});
+		
+		serverSocket.on("disconnectMe", new SIOCommand() {
+			public void run() {
+				removeNodeById(Integer.parseInt(args[0]));
 			}
 		});
 		
@@ -85,6 +91,7 @@ public class NodeManager {
 				runLoadBalancing();
 			}
 		});
+		loadBalanceThread.start();
 	}
 	
 	public void ps() {
@@ -120,8 +127,9 @@ public class NodeManager {
 	 * Removes the NodeProxy with nodeId
 	 * @param nodeId
 	 */
-	public void removeDeadNode(int nodeId) {
+	public void removeNodeById(int nodeId) {
 		nodeProxyManager.removeNodeById(nodeId);
+		serverSocket.emit(nodeId, "quit");
 	}
 	
 	//--------------------------
@@ -209,6 +217,7 @@ public class NodeManager {
 	 * Load balances with the least busy node
 	 */
 	public void loadBalance() {
+		//System.out.println("running loadBalance()");
 		NodeProxy free = nodeProxyManager.getLeastBusyNode(); //may not be the node to which this process gets added to
 		loadBalanceWithNode(free);
 	}
@@ -246,6 +255,7 @@ public class NodeManager {
 	public void runLoadBalancing() {
 		while(runLoadBalancing) {
 			loadBalance();
+			//System.out.println("calling loadBalance()");
 			try {
 				Thread.sleep(loadBalanceInterval);
 			} catch (InterruptedException e) {
