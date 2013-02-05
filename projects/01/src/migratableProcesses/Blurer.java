@@ -156,28 +156,5 @@ public class Blurer implements MigratableProcess{
 			}
 		}
 	}
-	
-	//testing
-	public static void main(String[] args) throws InterruptedException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
-		String[] foo = {"testing/test.jpg", "jpeg"};
-		ThreadProcess gt = new ThreadProcess("migratableProcesses.Blurer", 98, foo);
-		
-		gt.start();
-		System.out.println("running...");
-		
-		Thread.sleep(1000);		
-		
-		System.out.println("suspending...");
-		gt.serialize("img.ser");
-		
-		System.out.println("check image!!");
-		Thread.sleep(5000);
-		
-		System.out.println("reviving...");
-		ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "testing.Blurer", true);
-		
-		System.out.println("rerunning...");
-		gtRevival.start();
-	}
 
 }
