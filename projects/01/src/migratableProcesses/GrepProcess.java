@@ -29,7 +29,7 @@ public class GrepProcess implements MigratableProcess
 		
 		query = args[0];
 		inFile = new TransactionalFileInputStream(args[1]);
-		outFile = new TransactionalFileOutputStream(args[2]);
+		outFile = new TransactionalFileOutputStream(args[2], true);
 	}
 
 	public void run()
