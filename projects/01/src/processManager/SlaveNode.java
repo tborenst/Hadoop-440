@@ -1,6 +1,7 @@
 package processManager;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
@@ -160,10 +161,19 @@ public class SlaveNode {
 	 * @param args
 	 */
 	public void addNewProcess(int id, String name, String[] args) {
-		ThreadProcess p = new ThreadProcess(name, id, args);
-		if(p != null) {
-			processes.add(p);
-			p.start();
+		ThreadProcess p;
+		try {
+			p = new ThreadProcess(name, id, args);
+			if(p != null) {
+				processes.add(p);
+				p.start();
+			}
+		} catch (InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException
+				| ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
 		}
 	}
 	

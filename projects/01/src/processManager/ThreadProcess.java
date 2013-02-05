@@ -19,17 +19,21 @@ public class ThreadProcess {
 	private int id;
 	private String name;
 	
-	public ThreadProcess(String name, int id, String[] args) {
-		Class<?> myClass = null;
-		try {
+	public ThreadProcess(String name, int id, String[] args) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+		Class<?> myClass = Class.forName(name);
+		Constructor<?> myConstructor = myClass.getDeclaredConstructor(String[].class);
+		Object[] arguments = {args};
+		this.process = (MigratableProcess) myConstructor.newInstance(arguments);
+		
+		/*try {
 			myClass = Class.forName(name);
 		} catch (ClassNotFoundException e) {
 			System.out.println("ThreadProcess.ThreadProcess: process does not exist: "+name);
 			e.printStackTrace();
 		}
 		
-		Constructor<?> myConstructor = null;
 		
+		Constructor<?> myConstructor = null;
 		try {
 			myConstructor = myClass.getDeclaredConstructor(String[].class);
 		} catch (NoSuchMethodException e) {
@@ -57,7 +61,7 @@ public class ThreadProcess {
 		} catch (InvocationTargetException e) {
 			System.out.println("ThreadProcess.ThreadProcess: unable to initialize process: "+name);
 			e.printStackTrace();
-		}
+		}*/
 		
 		this.id = id;
 		this.name = name;
@@ -115,7 +119,7 @@ public class ThreadProcess {
 	 */
 	public Boolean isAlive() {
 		Thread.State tState = thread.getState();
-		System.out.print(tState.equals(Thread.State.TERMINATED));
+		//System.out.print(tState.equals(Thread.State.TERMINATED));
 		return !tState.equals(Thread.State.TERMINATED);
 	}
 	
