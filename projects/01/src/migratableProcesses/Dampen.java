@@ -11,28 +11,27 @@ import java.lang.reflect.InvocationTargetException;
 import javax.imageio.ImageIO;
 
 import processManager.ThreadProcess;
-import transactionaFileIO.TransactionalFileInputStream;
-import transactionaFileIO.TransactionalFileOutputStream;
 import transactionaFileIO.tFile;
 import util.Util;
 
-public class Grayer implements MigratableProcess{
+public class Dampen implements MigratableProcess{
 	private int pixelX; //col
 	private int pixelY; //row
 	private String format;
 	private String[] args;
+	
 	private static final long serialVersionUID = 4L;
 	private volatile boolean suspended;
 	private tFile file;
 	
-	public Grayer(String[] args) {
+	public Dampen(String[] args) {
 		this(args[0], args[1]);
 	}
 	
-	public Grayer(String path, String format) {
+	public Dampen(String path, String format) {
 		String[] args = {path, format};
-		this.args = args;
 		this.file = new tFile(path, true);
+		this.args = args;
 		this.format = format;
 		this.pixelX = 0;
 		this.pixelY = 0;
@@ -41,7 +40,7 @@ public class Grayer implements MigratableProcess{
 	}
 	
 	public String toString() {
-		return "Grayer "+Util.stringifyArray(args);
+		return "Blurer "+Util.stringifyArray(args);
 	}
 	
 	/**
@@ -51,15 +50,21 @@ public class Grayer implements MigratableProcess{
 	 * @param x
 	 * @param y
 	 */
-	private void grayPixel(BufferedImage img, int x, int y) {
+	private void dampenPixel(BufferedImage img, int x, int y) {
 		if(0 <= x && x < img.getWidth() && 0 <= y && y < img.getHeight()) {
 			int rgb = img.getRGB(x,y);
+			
 			int colorMask = 255;
 			int r = (rgb >> 16) & colorMask;
+			int newRed = r/5;
+			
 			int g = (rgb >> 8) & colorMask;
+			int newGreen = g/5;
+			
 			int b = rgb & colorMask;
-			int newColor = (r+g+b)/3;
-			int newrgb = (newColor<<16)|(newColor<<8)|(newColor);
+			int newBlue = b/5;
+			
+			int newrgb = (newRed<<16)|(newGreen<<8)|(newBlue);
 			img.setRGB(x, y, newrgb);
 		}
 		
@@ -71,7 +76,6 @@ public class Grayer implements MigratableProcess{
 	 * @param img
 	 */
 	private void saveImg(BufferedImage img) {
-		//System.out.println("Trying to Save Img: "+(file != null)+" "+(img!=null));
 		file.writeImg(img, format);
 	}
 	
@@ -82,14 +86,12 @@ public class Grayer implements MigratableProcess{
 	@Override
 	public void run() {
 		BufferedImage img = file.readImg();
-		
-
 		while(!suspended && img != null && pixelY < img.getHeight()) {
 			//iterate through the image first by column and then by row
 			if(pixelX == img.getWidth()-1) {pixelX = 0; pixelY++;}
 			else {pixelX++;}
 			
-			grayPixel(img, pixelX, pixelY);
+			dampenPixel(img, pixelX, pixelY);
 		}
 		
 		//suspended
@@ -110,11 +112,8 @@ public class Grayer implements MigratableProcess{
 	
 	//testing
 	public static void main(String[] args) throws InterruptedException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
-		Grayer g = new Grayer("_cayman.jpg", "jpeg");
-		g.run();
-		
-		/*String[] foo = {"testing/kesden_1.jpg", "testing/k.jpg", "jpeg"};
-		ThreadProcess gt = new ThreadProcess("migratableProcesses.Grayer", 98, foo);
+		String[] foo = {"_cayman.jpg", "jpeg"};
+		ThreadProcess gt = new ThreadProcess("migratableProcesses.Dampen", 98, foo);
 		
 		gt.start();
 		System.out.println("running...");
@@ -122,16 +121,16 @@ public class Grayer implements MigratableProcess{
 		Thread.sleep(1000);		
 		
 		System.out.println("suspending...");
-		gt.serialize("img.ser");
+		//gt.suspend();("img.ser");
 		
 		System.out.println("check image!!");
 		Thread.sleep(5000);
 		
 		System.out.println("reviving...");
-		ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "testing.Grayer", true);
+		//ThreadProcess gtRevival = new ThreadProcess("img.ser", 98, "testing.Blurer", true);
 		
 		System.out.println("rerunning...");
-		gtRevival.start();*/
+		//gtRevival.start();
 	}
 
 }

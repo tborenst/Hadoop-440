@@ -1,5 +1,6 @@
 package transactionaFileIO;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -10,14 +11,17 @@ public class TransactionalFileInputStream extends InputStream implements Seriali
 	private String path;
 	private long offset;
 
-	public TransactionalFileInputStream(String path) {
+	public TransactionalFileInputStream(String path) throws IOException {
 		this.path = path;
-		this.offset = 0;
+		File f = new File(path);
+		if(!f.exists()) {f.createNewFile();}
+		this.offset = (long) 0;
 	}
 	
 	@Override
 	public int read() throws IOException {
-		RandomAccessFile raf = new RandomAccessFile(path, "r");
+		File f = new File(path);
+		RandomAccessFile raf = new RandomAccessFile(f, "r");
 		raf.seek(offset);
 		int readVal = raf.read();
 		offset = raf.getFilePointer();
