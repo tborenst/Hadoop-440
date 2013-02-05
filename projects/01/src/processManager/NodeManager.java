@@ -61,6 +61,12 @@ public class NodeManager {
 			}
 		});
 		
+		serverSocket.on("disconnectMe", new SIOCommand() {
+			public void run() {
+				removeNodeById(Integer.parseInt(args[0]));
+			}
+		});
+		
 		serverSocket.on("addNewProcess", new SIOCommand(){
 			public void run() {
 				addNewProcess(args[0], args[1]);
