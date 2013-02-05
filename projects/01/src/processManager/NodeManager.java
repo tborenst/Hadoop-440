@@ -163,6 +163,7 @@ public class NodeManager {
 	 * @param nodeId
 	 */
 	public Boolean moveProcessTo(int processId, String processName, String serPath, int nodeId) {
+		System.out.println("MOVE PROCESS: " + processId + "TO " + nodeId);
 		return serverSocket.emit(nodeId, "addExistingProcess>"+processId+">"+processName+">"+serPath);
 		
 		//this should only be called for moving processes, so the proxy already has the existingProcess
@@ -228,6 +229,7 @@ public class NodeManager {
 				//once process is serialized, slave node emits to master to assign process to a free node
 				Boolean emitSent = serverSocket.emit(busy.getId(), "moveProcess>"+p.getId()+">"+free.getId());
 				if(emitSent) {
+					System.out.println("EMIT SUCCESSFULL");
 					busy.removeProcessById(p.getId());
 					free.addExistingProcess(p);
 				}

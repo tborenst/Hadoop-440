@@ -75,7 +75,7 @@ public class Testing {
 //		System.out.println(n.getProcessesAsString());
 //		System.out.println(n.getProcessesAsString());
 		
-		NodeManager master = new NodeManager(5, 5000, 4013);
+		NodeManager master = new NodeManager(1, 5000, 4013);
 		Thread.sleep(1000);
 		//master.addNewProcess("migratableProcesses.Grayer", "[./images/flower.jpg,jpeg]");
 		//master.ps();

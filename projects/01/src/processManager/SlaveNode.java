@@ -82,7 +82,7 @@ public class SlaveNode {
 		
 		clientSocket.on("addExistingProcess", new SIOCommand() {
 			public void run() {
-				
+				System.out.println("addingExistingProcess "+Util.stringifyArray(args));
 				//+processId+">"+processName+">"+serPath"
 				addExistingProcess(Integer.parseInt(args[0]), args[1], args[2]);
 			}
@@ -202,10 +202,14 @@ public class SlaveNode {
 	 * @param serPath
 	 */
 	public void addExistingProcess(int id, String name, String serPath) {
+		System.out.println("ADDEXISTINGPROCESS: TOP");
 		ThreadProcess p = new ThreadProcess(serPath, id, name, true);
+		System.out.println("P IS NULL? - " + (p == null));
 		if(p != null) {
+			System.out.println("ABOUT TO ADD PROCESS");
 			processes.add(p);
 			p.start();
+			System.out.println("ADDED PROCESS");
 		}	
 	}
 	
