@@ -163,8 +163,9 @@ public class NodeManager {
 	 * @param nodeId
 	 */
 	public Boolean moveProcessTo(int processId, String processName, String serPath, int nodeId) {
-		System.out.println("MOVE PROCESS: " + processId + "TO " + nodeId);
-		return serverSocket.emit(nodeId, "addExistingProcess>"+processId+">"+processName+">"+serPath);
+		Boolean emitSuccess = serverSocket.emit(nodeId, "addExistingProcess>"+processId+">"+processName+">"+serPath);
+
+		System.out.println("MOVE PROCESS: " + processId + " TO " + nodeId+" Success "+emitSuccess);
 		
 		//this should only be called for moving processes, so the proxy already has the existingProcess
 		//ie no need to update the NodeProxy with nodeId
