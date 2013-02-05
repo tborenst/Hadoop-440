@@ -93,6 +93,7 @@ public class NodeProxyManager {
 					toReturn = proxy;
 				}
 			}
+			proxies = cleanList;
 			return toReturn;
 		}
 	}
