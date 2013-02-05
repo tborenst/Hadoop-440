@@ -84,13 +84,20 @@ public class SIOServer {
 								command.parameters(parameters);
 								try{
 									command.run();
-								} catch(Exception e){
+								} catch(Exception e1){
 									System.out.println("Failed to run command: connection.");
+									command = bindings.get("disconnect");
+									command.parameters(parameters);
+									try{
+										command.run();
+									} catch(Exception e2){
+										System.out.println("Failed to run command: disconnect.");
+									}
 								}
 							}
 						}
 					} catch (IOException e) {
-						System.out.println("Coud not accept connection on port: " + port + ".");
+						System.out.println("Could not accept connection on port: " + port + ".");
 						e.printStackTrace();
 					}
 				}
