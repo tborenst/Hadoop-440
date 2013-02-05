@@ -162,10 +162,8 @@ public class SlaveNode {
 	 * @param args
 	 */
 	public void addNewProcess(int id, String name, String[] args) {
-		ThreadProcess p;
-		
 		try {
-			p = new ThreadProcess(name, id, args);
+			ThreadProcess p = new ThreadProcess(name, id, args);
 			if(p != null) {
 				processes.add(p);
 				p.start();
@@ -203,7 +201,7 @@ public class SlaveNode {
 	 * @param serPath
 	 */
 	public void addExistingProcess(int id, String name, String serPath) {
-		ThreadProcess p = new ThreadProcess(name, id, serPath, true);
+		ThreadProcess p = new ThreadProcess(serPath, id, name, true);
 		if(p != null) {
 			processes.add(p);
 			p.start();
