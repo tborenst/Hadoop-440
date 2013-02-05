@@ -57,7 +57,13 @@ public class NodeManager {
 		
 		serverSocket.on("disconnect", new SIOCommand() {
 			public void run() {
-				removeDeadNode(Integer.parseInt(args[0]));
+				removeNodeById(Integer.parseInt(args[0]));
+			}
+		});
+		
+		serverSocket.on("disconnectMe", new SIOCommand() {
+			public void run() {
+				removeNodeById(Integer.parseInt(args[0]));
 			}
 		});
 		
@@ -120,8 +126,9 @@ public class NodeManager {
 	 * Removes the NodeProxy with nodeId
 	 * @param nodeId
 	 */
-	public void removeDeadNode(int nodeId) {
+	public void removeNodeById(int nodeId) {
 		nodeProxyManager.removeNodeById(nodeId);
+		serverSocket.emit(nodeId, "quit");
 	}
 	
 	//--------------------------
