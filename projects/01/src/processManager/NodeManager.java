@@ -101,9 +101,7 @@ public class NodeManager {
 	//quit
 	public void quit() {
 		ps();
-		prompt.emit("closing slave nodes...");
 		serverSocket.broadcast("quit");
-		prompt.emit("bye, bye... *I'll be back*");
 		System.exit(1);
 	}
 	
@@ -148,14 +146,14 @@ public class NodeManager {
 			if(emitSent) {
 				free.addNewProcess(processCounter, processName);
 				processCounter++;
-				prompt.emit("launched process: "+processName+"on node: "+free.getId());
+				prompt.emit("Launched process: "+processName+" on node: "+free.getId() + ".");
 			}
 			else {
 				//addNewProcess(processName, args); //dangerous chance of endless recursive cycle
-				prompt.emit("failed to launch process: "+processName);
+				prompt.emit("Failed to launch process: "+processName + ".");
 			}
 		} else {
-			prompt.emit("No nodes are currently available to run proces: " + processName + ".");
+			prompt.emit("No nodes are currently available to run process: " + processName + ".");
 		}
 		
 	}
@@ -173,7 +171,7 @@ public class NodeManager {
 	public Boolean moveProcessTo(int processId, String processName, String serPath, int nodeId) {
 		Boolean emitSuccess = serverSocket.emit(nodeId, "addExistingProcess>"+processId+">"+processName+">"+serPath);
 
-		System.out.println("MOVE PROCESS: " + processId + " TO " + nodeId+" Success "+emitSuccess);
+		//System.out.println("MOVE PROCESS: " + processId + " TO " + nodeId+" Success "+emitSuccess);
 		return emitSuccess;
 		//this should only be called for moving processes, so the proxy already has the existingProcess
 		//ie no need to update the NodeProxy with nodeId
@@ -239,7 +237,7 @@ public class NodeManager {
 				//once process is serialized, slave node emits to master to assign process to a free node
 				Boolean emitSent = serverSocket.emit(busy.getId(), "moveProcess>"+p.getId()+">"+free.getId());
 				if(emitSent) {
-					System.out.println("EMIT SUCCESSFULL");
+					//System.out.println("EMIT SUCCESSFULL");
 					busy.removeProcessById(p.getId());
 					free.addExistingProcess(p);
 				}

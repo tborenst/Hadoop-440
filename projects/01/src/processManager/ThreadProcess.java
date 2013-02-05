@@ -24,45 +24,6 @@ public class ThreadProcess {
 		Constructor<?> myConstructor = myClass.getDeclaredConstructor(String[].class);
 		Object[] arguments = {args};
 		this.process = (MigratableProcess) myConstructor.newInstance(arguments);
-		
-		/*try {
-			myClass = Class.forName(name);
-		} catch (ClassNotFoundException e) {
-			System.out.println("ThreadProcess.ThreadProcess: process does not exist: "+name);
-			e.printStackTrace();
-		}
-		
-		
-		Constructor<?> myConstructor = null;
-		try {
-			myConstructor = myClass.getDeclaredConstructor(String[].class);
-		} catch (NoSuchMethodException e) {
-			System.out.println("ThreadProcess.ThreadProcess: constructor for process does not exist: "+name);
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			System.out.println("ThreadProcess.ThreadProcess: cannot get constructor of process due to security issue: "+name);
-			e.printStackTrace();
-		} 
-		
-		
-		Object[] arguments = {args};
-		try {
-			//like .apply in javascript - takes in an array of arguments
-			this.process = (MigratableProcess) myConstructor.newInstance(arguments);
-		} catch (InstantiationException e) {
-			System.out.println("ThreadProcess.ThreadProcess: unable to initialize process: "+name);
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			System.out.println("ThreadProcess.ThreadProcess: unable to initialize process (illegal access): "+name);
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			System.out.println("ThreadProcess.ThreadProcess: process does not exist (bad arguments): "+name+" args: "+Util.stringifyArray(args));
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			System.out.println("ThreadProcess.ThreadProcess: unable to initialize process: "+name);
-			e.printStackTrace();
-		}*/
-		
 		this.id = id;
 		this.name = name;
 		this.thread = new Thread(this.process);
@@ -119,7 +80,6 @@ public class ThreadProcess {
 	 */
 	public Boolean isAlive() {
 		Thread.State tState = thread.getState();
-		//System.out.print(tState.equals(Thread.State.TERMINATED));
 		return !tState.equals(Thread.State.TERMINATED);
 	}
 	
@@ -157,7 +117,6 @@ public class ThreadProcess {
 	public static MigratableProcess deserialize(String path, Boolean deleteAfterLoad) {
 		tFile serFile = new tFile(path, false);
 		MigratableProcess p = null;
-		System.out.println("SERFILENULL? - " + (serFile == null));
 		if(serFile != null && serFile.exists()) {
 			p = (MigratableProcess) serFile.readObj();
 			if(deleteAfterLoad) {

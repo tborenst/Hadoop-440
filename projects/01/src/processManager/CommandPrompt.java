@@ -18,6 +18,7 @@ public class CommandPrompt {
 		this.printLock = new Object();
 		this.promptGiven = false;
 		givePrompt();
+		System.out.print("> ");
 	}
 	
 	/**
@@ -39,9 +40,10 @@ public class CommandPrompt {
 	 */
 	public void emit(String message){
 		synchronized(printLock){
-			System.out.println("\n");
+			System.out.print("\n");
 			System.out.println(message);
 			givePrompt();
+			System.out.print("> ");
 		}
 	}
 	
@@ -62,7 +64,6 @@ public class CommandPrompt {
 			Runnable prompt = new Runnable(){
 				public void run(){
 					Scanner scanner = new Scanner(System.in);
-					System.out.print("> ");
 					String input = scanner.nextLine();
 					promptGiven = false;
 					analayzeInput(input);
@@ -96,12 +97,11 @@ public class CommandPrompt {
 		//check if the class exist
 		try {
 			Class.forName(className); //see if you can find a class of name className
-			System.out.println("Executing '" + className + "'...");
+			emit("Executing '" + className + "'...");
 			synchronized(bindings){
 				SIOCommand addNewProcess = bindings.get("addNewProcess");
 				if(addNewProcess == null){
-					System.out.println("Failed to execute process '" + className + "'.");
-					givePrompt();
+					emit("Failed to execute process '" + className + "'.");
 				} else {
 					//set up parameters
 					String[] parameters = {className, Util.stringifyArray(argsArray)};
@@ -109,14 +109,12 @@ public class CommandPrompt {
 					try{
 						addNewProcess.run();
 					} catch (Exception e){
-						System.out.println("Failed to execute process '" + className + "'.");
-						givePrompt();
+						emit("Failed to execute process '" + className + "'.");
 					}
 				}
 			}
 		} catch (ClassNotFoundException e) {
-			System.out.println("Process '" + className + "' not found.");
-			givePrompt();
+			emit("Process '" + className + "' not found.");
 		}
 	}
 	
@@ -130,8 +128,7 @@ public class CommandPrompt {
 			try{
 				ps.run();
 			} catch(Exception e) {
-				System.out.println("Could not retrieve list of processes.");
-				givePrompt();
+				emit("Could not retrieve list of processes.");
 			}
 		}
 	}
@@ -146,8 +143,7 @@ public class CommandPrompt {
 			try{
 				quit.run();
 			} catch (Exception e){
-				System.out.println("Could not quit ProcessManagaer.");
-				givePrompt();
+				emit("Could not quit ProcessManager.");
 			}
 		}
 	}

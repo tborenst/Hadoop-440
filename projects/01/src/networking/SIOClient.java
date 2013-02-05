@@ -36,7 +36,7 @@ public class SIOClient {
 			System.out.print("Socket attempted to connect to unknown host: " + hostname + ".");
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("Socket failed to connect to host: " + hostname +" at port: " + port + ".");
+			//System.out.println("Socket failed to connect to host: " + hostname +" at port: " + port + ".");
 			e.printStackTrace();
 		}
 		listen();
@@ -66,7 +66,7 @@ public class SIOClient {
 			try {
 				out.writeUTF(message);
 			} catch (IOException e) {
-				System.out.println("Could not emit message: " + message + ".");
+				//System.out.println("Could not emit message: " + message + ".");
 				e.printStackTrace();
 			}
 		}
@@ -85,7 +85,7 @@ public class SIOClient {
 						if(!socket.isConnected()){
 							synchronized(alive){
 								alive = false;
-								System.out.println("Socket disconnected.");
+								//System.out.println("Socket disconnected.");
 								break; //exit the loop if the socket isn't alive
 							}
 						} 
@@ -95,8 +95,8 @@ public class SIOClient {
 						try {
 							String[] message = in.readUTF().split(">");
 							String commandName = message[0]; //get command name
-							System.out.println("CLIENT RECIEVED : " + commandName + " : EVENT");
-							System.out.println("ARGS: " + Util.stringifyArray(message));
+//							//System.out.println("CLIENT RECIEVED : " + commandName + " : EVENT");
+//							//System.out.println("ARGS: " + Util.stringifyArray(message));
 							synchronized(bindings){
 								SIOCommand command = bindings.get(commandName);
 								if(command != null){
@@ -105,12 +105,12 @@ public class SIOClient {
 									try{
 										command.run(); //run command
 									} catch(Exception e){
-										System.out.println("Failed to run command: " + commandName + ".");
+										//System.out.println("Failed to run command: " + commandName + ".");
 									}
 								}
 							}
 						} catch (IOException e) {
-							System.out.println("CLIENT: could not connect to server. Killing self.");
+							//System.out.println("CLIENT: could not connect to server. Killing self.");
 							synchronized(alive){
 								alive = false;
 							}
@@ -136,7 +136,7 @@ public class SIOClient {
 				socket.close();
 			}
 		} catch (IOException e) {
-			System.out.println("Could not close socket.");
+			//System.out.println("Could not close socket.");
 			e.printStackTrace();
 		}
 	}

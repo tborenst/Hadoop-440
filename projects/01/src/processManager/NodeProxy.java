@@ -103,8 +103,12 @@ public class NodeProxy {
 	public ProcessProxy getRandomProcess(){
 		synchronized(processes){
 			cleanUp();
-			int index = (int)(Math.random() * ((processes.size() - 0) + 1));
-			return processes.get(index);
+			int index = (int)(Math.random() * ((processes.size() - 1) + 1));
+			if(processes.size() == 0){
+				return null;
+			} else {
+				return processes.get(index);
+			}
 		}
 	}
 	

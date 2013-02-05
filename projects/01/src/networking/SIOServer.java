@@ -32,7 +32,7 @@ public class SIOServer {
 			this.serverSocket = new ServerSocket(port);
 			this.alive = true;
 		} catch (IOException e) {
-			System.out.println("Could not initiate a server socket on port: " + port + ".");
+			//System.out.println("Could not initiate a server socket on port: " + port + ".");
 			e.printStackTrace();
 		}
 		listen();
@@ -85,19 +85,19 @@ public class SIOServer {
 								try{
 									command.run();
 								} catch(Exception e1){
-									System.out.println("Failed to run command: connection.");
+									//System.out.println("Failed to run command: connection.");
 									command = bindings.get("disconnect");
 									command.parameters(parameters);
 									try{
 										command.run();
 									} catch(Exception e2){
-										System.out.println("Failed to run command: disconnect.");
+										//System.out.println("Failed to run command: disconnect.");
 									}
 								}
 							}
 						}
 					} catch (IOException e) {
-						System.out.println("Could not accept connection on port: " + port + ".");
+						//System.out.println("Could not accept connection on port: " + port + ".");
 						e.printStackTrace();
 					}
 				}
@@ -136,7 +136,7 @@ public class SIOServer {
 				try {
 					serverSocket.close();
 				} catch (IOException e) {
-					System.out.println("Could not close server on port: " + port + ".");
+					//System.out.println("Could not close server on port: " + port + ".");
 					e.printStackTrace();
 				}
 			}
@@ -231,7 +231,7 @@ public class SIOServer {
 				this.in = new DataInputStream(this.socket.getInputStream());
 				this.out = new DataOutputStream(this.socket.getOutputStream());
 			} catch (IOException e) {
-				System.out.println("Could not get socket input/output stream.");
+				//System.out.println("Could not get socket input/output stream.");
 				e.printStackTrace();
 			}
 			listen();
@@ -252,7 +252,7 @@ public class SIOServer {
 							//socket disconnected
 								synchronized(alive){
 									alive = false;
-									System.out.println("Socket disconnected.");
+									//System.out.println("Socket disconnected.");
 									break; //exit the loop if the socket isn't alive
 								}
 							} 
@@ -270,13 +270,13 @@ public class SIOServer {
 										try{
 											command.run(); //run command
 										} catch(Exception e){
-											System.out.println("Failed to run command: " + commandName + ".");
+											//System.out.println("Failed to run command: " + commandName + ".");
 										}
 									}
 								}
 							}
 						} catch (IOException e1) {
-							System.out.println("SERVER: could not reach socket. Killing socket.");
+							//System.out.println("SERVER: could not reach socket. Killing socket.");
 							synchronized(alive){
 								alive = false;
 							}
@@ -289,7 +289,7 @@ public class SIOServer {
 									try{
 										command.run(); //run command
 									} catch(Exception e2){
-										System.out.println("Failed to run command: disconnect.");
+										//System.out.println("Failed to run command: disconnect.");
 									}
 								}
 								
@@ -315,7 +315,7 @@ public class SIOServer {
 						try {
 							out.writeUTF(message);
 						} catch (IOException e) {
-							System.out.println("Could not send message ['" + message + "'] to socket.");
+							//System.out.println("Could not send message ['" + message + "'] to socket.");
 							e.printStackTrace();
 						}
 					}
