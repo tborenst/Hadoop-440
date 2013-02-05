@@ -13,7 +13,7 @@ import processManager.ThreadProcess;
 import transactionaFileIO.TransactionalFileInputStream;
 import transactionaFileIO.TransactionalFileOutputStream;
 
-public class Grayer implements MigratableProcess{
+public class Blurer implements MigratableProcess{
 	private int pixelX; //col
 	private int pixelY; //row
 	private String format;
@@ -23,11 +23,11 @@ public class Grayer implements MigratableProcess{
 	private static final long serialVersionUID = 4L;
 	private volatile boolean suspended;
 	
-	public Grayer(String[] args) {
+	public Blurer(String[] args) {
 		this(args[0], args[1]);
 	}
 	
-	public Grayer(String path, String format) {
+	public Blurer(String path, String format) {
 		this.outStream = new TransactionalFileOutputStream(path);
 		this.inStream = new TransactionalFileInputStream(path);
 		this.format = format;
@@ -44,15 +44,42 @@ public class Grayer implements MigratableProcess{
 	 * @param x
 	 * @param y
 	 */
-	private void grayPixel(BufferedImage img, int x, int y) {
+	private void blurPixel(BufferedImage img, int x, int y) {
 		if(0 <= x && x < img.getWidth() && 0 <= y && y < img.getHeight()) {
 			int rgb = img.getRGB(x,y);
+			int rgbLeft = rgb;
+			int rgbRight = rgb;
+			int rgbTop = rgb;
+			int rgbBottom = rgb;
+			
+			if(0 <= x-1) {rgbLeft = img.getRGB(x-1, y);}
+			if(x+1 < img.getWidth()) {rgbRight = img.getRGB(x+1, y);}
+			if(0 <= y-1) {rgbTop = img.getRGB(x, y-1);}
+			if(y+1 < img.getHeight()) {rgbBottom = img.getRGB(x, y+1);}
+			
 			int colorMask = 255;
 			int r = (rgb >> 16) & colorMask;
+			int rL = (rgbLeft >> 16) & colorMask;
+			int rR = (rgbRight >> 16) & colorMask;
+			int rT = (rgbTop >> 16) & colorMask;
+			int rB = (rgbBottom >> 16) & colorMask;
+			int newRed = (rL+rR+rT+rB+r)/5;
+			
 			int g = (rgb >> 8) & colorMask;
+			int gL = (rgbLeft >> 8) & colorMask;
+			int gR = (rgbRight >> 8) & colorMask;
+			int gT = (rgbTop >> 8) & colorMask;
+			int gB = (rgbBottom >> 8) & colorMask;
+			int newGreen = (gL+gR+gT+gB+g)/5;
+			
 			int b = rgb & colorMask;
-			int newColor = (r+g+b)/3;
-			int newrgb = (newColor<<16)|(newColor<<8)|(newColor);
+			int bL = rgbLeft & colorMask;
+			int bR = rgbRight & colorMask;
+			int bT = rgbTop & colorMask;
+			int bB = rgbBottom & colorMask;
+			int newBlue = (bL+bR+bT+bB+b)/5;
+			
+			int newrgb = (newRed<<16)|(newGreen<<8)|(newBlue);
 			img.setRGB(x, y, newrgb);
 		}
 		
@@ -95,7 +122,7 @@ public class Grayer implements MigratableProcess{
 				if(pixelX == img.getWidth()-1) {pixelX = 0; pixelY++;}
 				else {pixelX++;}
 				
-				grayPixel(img, pixelX, pixelY);
+				blurPixel(img, pixelX, pixelY);
 			}
 			
 			//suspended
