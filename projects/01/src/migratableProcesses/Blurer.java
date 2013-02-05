@@ -13,11 +13,13 @@ import javax.imageio.ImageIO;
 import processManager.ThreadProcess;
 import transactionaFileIO.TransactionalFileInputStream;
 import transactionaFileIO.TransactionalFileOutputStream;
+import util.Util;
 
 public class Blurer implements MigratableProcess{
 	private int pixelX; //col
 	private int pixelY; //row
 	private String format;
+	private String[] args;
 	private TransactionalFileOutputStream outStream;
 	private TransactionalFileInputStream inStream;
 	
@@ -29,6 +31,8 @@ public class Blurer implements MigratableProcess{
 	}
 	
 	public Blurer(String path, String format) {
+		String[] args = {path, format};
+		this.args = args;
 		this.outStream = new TransactionalFileOutputStream(path);
 		this.inStream = new TransactionalFileInputStream(path);
 		this.format = format;
@@ -36,6 +40,10 @@ public class Blurer implements MigratableProcess{
 		this.pixelY = 0;
 		
 		this.suspended = false;
+	}
+	
+	public String toString() {
+		return "Blurer "+Util.stringifyArray(args);
 	}
 	
 	/**

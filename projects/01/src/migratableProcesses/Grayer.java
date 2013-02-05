@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import processManager.ThreadProcess;
 import transactionaFileIO.TransactionalFileInputStream;
 import transactionaFileIO.TransactionalFileOutputStream;
+import util.Util;
 
 public class Grayer implements MigratableProcess{
 	private int pixelX; //col
@@ -39,6 +40,10 @@ public class Grayer implements MigratableProcess{
 		this.pixelY = 0;
 		
 		this.suspended = false;
+	}
+	
+	public String toString() {
+		return "Grayer "+Util.stringifyArray(args);
 	}
 	
 	/**

@@ -291,7 +291,7 @@ public class SlaveNode {
 	 * @return String
 	 */
 	private String makeSerFileName() {
-		return new StringBuilder().append("prefix")
+		return new StringBuilder().append("node"+nodeId)
 		        .append(System.currentTimeMillis()/1000000).append(UUID.randomUUID())
 		        .append(".").append("ser").toString();
 	}

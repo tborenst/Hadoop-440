@@ -1,7 +1,6 @@
 package transactionaFileIO;
 
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -21,7 +20,6 @@ public class TransactionalFileOutputStream extends OutputStream implements Seria
 
 	@Override
 	public void write(int b) throws IOException {
-		//File f = new File(path);
 		RandomAccessFile raf = new RandomAccessFile(path, "rw");
 		raf.seek(offset);
 		raf.write(b);
@@ -29,7 +27,7 @@ public class TransactionalFileOutputStream extends OutputStream implements Seria
 		raf.close();
 	}
 	
-
+	//testing function
 	public static void main(String[] args) {
 		TransactionalFileOutputStream tOut = new TransactionalFileOutputStream("asdf.txt");
 		PrintStream out = new PrintStream(tOut);
@@ -37,12 +35,11 @@ public class TransactionalFileOutputStream extends OutputStream implements Seria
 		
 		TransactionalFileInputStream tIn = new TransactionalFileInputStream("asdf.txt");
 		DataInputStream in = new DataInputStream(tIn);
-		try {
+		/*try {
 			System.out.println(in.readLine());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 }
