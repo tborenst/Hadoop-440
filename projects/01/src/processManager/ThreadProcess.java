@@ -157,7 +157,8 @@ public class ThreadProcess {
 	public static MigratableProcess deserialize(String path, Boolean deleteAfterLoad) {
 		tFile serFile = new tFile(path, false);
 		MigratableProcess p = null;
-		if(serFile.exists()) {
+		System.out.println("SERFILENULL? - " + (serFile == null));
+		if(serFile != null && serFile.exists()) {
 			p = (MigratableProcess) serFile.readObj();
 			if(deleteAfterLoad) {
 				serFile.delete();

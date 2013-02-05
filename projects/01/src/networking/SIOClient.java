@@ -12,6 +12,8 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import util.Util;
+
 public class SIOClient {
 	private String hostname;                      //the hostname to connect to
 	private int port;                             //the port to connect to
@@ -93,6 +95,8 @@ public class SIOClient {
 						try {
 							String[] message = in.readUTF().split(">");
 							String commandName = message[0]; //get command name
+//							System.out.println("CLIENT RECIEVED : " + commandName + " : EVENT");
+//							System.out.println("ARGS: " + Util.stringifyArray(message));
 							synchronized(bindings){
 								SIOCommand command = bindings.get(commandName);
 								if(command != null){
