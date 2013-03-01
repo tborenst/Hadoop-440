@@ -1,6 +1,19 @@
 15-440 project #1
 Tomer Borenstein (tborenst) and Vansi Vallabhaneini (vvallabh)
 
+NOTE: we have been having some last minute problem with our makefile. For now,
+the makefile can only recompile the project but not produce a new jar file
+(for some reason, the jar files it created were corrupted). You can stil run
+the project by using our jar file (java -jar processManager.jar), but if you'd
+like to add code to our project, you'd have to remake the jar file. You could
+also run the program by the following commands:
+---
+cd src
+java -cp . processManager.Main
+---
+Sorry for the inconvinience.
+
+
 Hello graders!
 We added this README so that it will be easier for you to operate our process manager.
 We really enjoyed this project, we hope you'll enjoy grading it (and like... 50 more of them?)
