@@ -1,7 +1,9 @@
-package testing;
+package rmi;
 
 import java.lang.reflect.*;
 import java.util.HashMap;
+
+import vansitest.Person;
 
 public class ClientHandler implements InvocationHandler {
 

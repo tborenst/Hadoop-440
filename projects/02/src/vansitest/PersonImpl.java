@@ -1,4 +1,4 @@
-package testing;
+package vansitest;
 
 public class PersonImpl implements Person{
 	private int age;

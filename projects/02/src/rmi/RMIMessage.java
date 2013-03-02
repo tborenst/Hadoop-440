@@ -1,4 +1,4 @@
-package testing;
+package rmi;
 
 import java.io.Serializable;
 

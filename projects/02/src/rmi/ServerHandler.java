@@ -1,8 +1,10 @@
-package testing;
+package rmi;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import vansitest.PersonImpl;
 
 public class ServerHandler {
 	public ArrayList<Object> RMIIndex;

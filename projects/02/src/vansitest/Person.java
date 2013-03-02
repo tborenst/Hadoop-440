@@ -1,4 +1,4 @@
-package testing;
+package vansitest;
 
 public interface Person {
 	public String toString();

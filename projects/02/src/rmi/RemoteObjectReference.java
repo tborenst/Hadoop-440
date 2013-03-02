@@ -1,4 +1,4 @@
-package testing;
+package rmi;
 
 public class RemoteObjectReference {
 	public String hostname;
