@@ -7,14 +7,24 @@
  */
 package networking;
 
-public class SIOPacket {
+import java.io.Serializable;
+public class SIOPacket implements Serializable{
+	private static final long serialVersionUID = 4619069636246433999L;
 	private String message;
 	private Object object;
 	private Boolean blocking;
+	private int requestId;
 	
 	public SIOPacket(String message, Object object){
 		this.message = message;
-		this.object = object;
+		if(!(object instanceof java.io.Serializable) && object != null){
+			Warning.Warn("object in SIOPacket must be serializable");
+			this.object = null;
+		} else {
+			this.object = object;
+		}
+		this.blocking = false; //packets are non-blocking by default
+		this.requestId = -1;
 	}
 	
 	public String getMessage(){
@@ -23,5 +33,21 @@ public class SIOPacket {
 	
 	public Object getObject(){
 		return object;
+	}
+	
+	public void setBlocking(Boolean bool){
+		blocking = bool;
+	}
+	
+	public Boolean isBlocking(){
+		return blocking;
+	}
+	
+	public void setRequestId(int id){
+		requestId = id;
+	}
+	
+	public int getRequestId(){
+		return requestId;
 	}
 }

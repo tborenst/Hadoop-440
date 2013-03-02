@@ -48,6 +48,7 @@ public class SIOServer extends SIOSocket{
 							SIOCommand command = bindings.get("connection");
 							if(command != null){
 								command.passObject(id); //call "connection" with new socket's id
+								command.passSocket(inSocket);
 								try{
 									command.run();
 								} catch (Exception e){
@@ -132,8 +133,8 @@ public class SIOServer extends SIOSocket{
 			this.id = id;
 			this.alive = true;
 			try{
-				this.objIn = new ObjectInputStream(socket.getInputStream());
 				this.objOut = new ObjectOutputStream(socket.getOutputStream());
+				this.objIn = new ObjectInputStream(socket.getInputStream());
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
@@ -144,23 +145,31 @@ public class SIOServer extends SIOSocket{
 		 * Listen for packets from the client that corresponds to this IncomingSocket.
 		 */
 		private void listen(){
+			final IncomingSocket self = this;
 			new Thread(new Runnable(){
 				@Override
 				public void run() {
 					while(true){
 						try {
-							//recieve SIOPacket and unpack it
+							//receive SIOPacket and unpack it
 							SIOPacket packet = (SIOPacket)objIn.readObject();
 							String message = packet.getMessage();
 							Object object = packet.getObject();
 							//find and run corresponding SIOCommand
 							synchronized(bindings){
 								SIOCommand command = bindings.get(message);
-								command.passObject(object);
-								try{
-									command.run();
-								} catch (Exception e){
-									e.printStackTrace();
+								if(command != null){
+									command.passObject(object);
+									command.passSocket(self);
+									if(packet.isBlocking()){
+										//this is a blocking request from the client
+										command.passRequestId(packet.getRequestId());
+									}
+									try{
+										command.run();
+									} catch (Exception e){
+										e.printStackTrace();
+									}
 								}
 							}
 						} catch (IOException e) {
@@ -195,6 +204,26 @@ public class SIOServer extends SIOSocket{
 		}
 		
 		/**
+		 * Send a String 'message' with the Object 'object' to this socket.
+		 */
+		public void emit(String message, Object object){
+			SIOPacket packet = new SIOPacket(message, object);
+			sendPacket(packet);
+		}
+		
+		/**
+		 * Respond to a blocking request with id 'requestId', with a String 'message' and
+		 * an Object 'object'.
+		 */
+		public void respond(int requestId, Object object){
+			SIOPacket packet = new SIOPacket("", object);
+			packet.setBlocking(true); //this is a response to a blocking request
+			packet.setRequestId(requestId); //blocking request with id requestId
+			sendPacket(packet);
+		}
+		
+		
+		/**
 		 * Send an SIOPacket to this socket.
 		 */
 		public void sendPacket(SIOPacket packet){
@@ -202,6 +231,7 @@ public class SIOServer extends SIOSocket{
 				try {
 					objOut.writeObject(packet);
 				} catch (IOException e) {
+					//socket disconnected
 					disconnect();
 				}
 			}

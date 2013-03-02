@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.HashMap;
 
 public class SIOClient extends SIOSocket{
@@ -15,15 +16,19 @@ public class SIOClient extends SIOSocket{
 	private ObjectInputStream objIn;
 	private ObjectOutputStream objOut;
 	private HashMap<String, SIOCommand> bindings;
+	private HashMap<Integer, SIOResponse> requests;
+	private int requestCount;
 	
 	public SIOClient(String hostname, int port){
 		this.hostname = hostname;
 		this.port = port;
 		this.bindings = new HashMap<String, SIOCommand>();
+		this.requests = new HashMap<Integer, SIOResponse>();
+		this.requestCount = 0;
 		try {
 			this.socket = new Socket(hostname, port);
-			this.objIn = new ObjectInputStream(socket.getInputStream());
 			this.objOut = new ObjectOutputStream(socket.getOutputStream());
+			this.objIn = new ObjectInputStream(socket.getInputStream());
 			this.alive = true;
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -47,15 +52,25 @@ public class SIOClient extends SIOSocket{
 							SIOPacket packet = (SIOPacket)objIn.readObject();
 							String message = packet.getMessage();
 							Object object = packet.getObject();
-							synchronized(bindings){
-								//attempt to run corresponding SIOCommand
-								SIOCommand command = bindings.get(message);
-								if(command != null){
-									command.passObject(object);
-									try{
-										command.run();
-									} catch (Exception e){
-										e.printStackTrace();
+							
+							if(packet.isBlocking()){
+								//this is a response to a blocking request
+								int requestId = packet.getRequestId();
+								synchronized(requests){
+									requests.put(requestId, new SIOResponse(true, object));
+								}
+							} else {	
+								//this is a normal non-blocking message from the server
+								synchronized(bindings){
+									//attempt to run corresponding SIOCommand
+									SIOCommand command = bindings.get(message);
+									if(command != null){
+										command.passObject(object);
+										try{
+											command.run();
+										} catch (Exception e){
+											e.printStackTrace();
+										}
 									}
 								}
 							}
@@ -72,16 +87,76 @@ public class SIOClient extends SIOSocket{
 	}
 	
 	/**
+	 * Bind a particular String 'message' with an SIOCommand 'command'.
+	 */
+	public void on(String message, SIOCommand command){
+		synchronized(bindings){
+			bindings.put(message, command);
+		}
+	}
+	
+	/**
+	 * Send a String 'message' with an Object 'object' as a non-blocking call to the server.
+	 */
+	public void emit(String message, Object object){
+		SIOPacket packet = new SIOPacket(message, object);
+		sendPacket(packet);
+	}
+	
+	/**
 	 * Send a String 'message' with Object 'object' to server, and wait for a response from
 	 * the server. This function is blocking, and returns the object that comes with the
-	 * corresponding response from the server.
+	 * corresponding response from the server. If a request times out, this function returns null.
 	 * @param message - message to the server
 	 * @param object - object to the server
 	 * @return the object that comes with the corresponding 
 	 */
 	public Object request(String message, Object object){
+		long timeout = 10000; //timeout for request
+		long requestTime;
 		SIOPacket packet = new SIOPacket(message, object);
-		return null;
+		packet.setBlocking(true); //this is a blocking server call
+		int requestId;
+		synchronized(requests){
+			//add new request
+			requestId = requestCount++;
+			requests.put(requestId, new SIOResponse(false, null));
+			//send packet
+			packet.setRequestId(requestId);
+			sendPacket(packet);
+			requestTime = (new Date()).getTime();
+		}
+		//block while waiting for response
+		while(true){
+			synchronized(requests){
+				SIOResponse response = requests.get(requestId);
+				if(response.getStatus() == true){
+					return response.getObject();
+				} else {
+					long currentTime = (new Date()).getTime();
+					long duration = currentTime - requestTime;
+					if(timeout < duration){
+						//request timed out
+						requests.remove(requestId);
+						return null;
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Send SIOPacket to server.
+	 */
+	private void sendPacket(SIOPacket packet){
+		synchronized(objOut){
+			try {
+				objOut.writeObject(packet);
+			} catch (IOException e) {
+				//socket disconnected
+				disconnect();
+			}
+		}
 	}
 	
 	/**
