@@ -4,7 +4,7 @@
 
 package vansitest;
 
-import rmi.ClientHandler;
+import rmi.Stub;
 import rmi.ServerHandler;
 
 public class VansiTest {
@@ -13,7 +13,7 @@ public class VansiTest {
 		ServerHandler s = new ServerHandler(8080);
 		s.RMIIndex.add(new PersonImpl(1, "tomer"));
 		
-		ClientHandler c = new ClientHandler();
+		Stub c = new Stub();
 		//c.
 	}
 }
