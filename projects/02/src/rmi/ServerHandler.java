@@ -4,6 +4,7 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import networking.SIOCommand;
 import networking.SIOServer;
 
 import vansitest.PersonImpl;
@@ -27,10 +28,56 @@ public class ServerHandler {
 		primToObj.put(float.class, Float.class);
 		primToObj.put(double.class, Double.class);
 		primToObj.put(void.class, Void.class);
+		
+		serverSocket.on("invokeMethod", new SIOCommand() {
+			public void run() {
+				RMIResponse response = handle((RMIRequest) object); //arg0 = RMIRequest
+				socket.respond(requestId, response);
+			}
+		});
+		
+		/*serverSocket.on("lookupObject", new SIOCommand() {
+			public void run() {
+				RMIResponse response = lookup((RMIObjRequest) object);
+				socket.respond(requestId, response);
+			}
+		});*/
+	}
+	
+	/*public RMIResponse lookup(RMIObjRequest request) {
+		Object result;
+		boolean isThrowable;
+		RemoteObjectReference ror = request.ror;
+		try {
+			result = RMIIndex.getROR(request.name);
+			isThrowable = false;
+		} catch(Exception e) {
+			result = e;
+			isThrowable = true;
+		}
+		
+		return new RMIResponse(ror, result, isThrowable);
+		
+	}*/
+	
+	public RMIResponse handle(RMIRequest request) {
+		Object result;
+		boolean isThrowable;
+		RemoteObjectReference ror = request.ror;
+		try {
+			result = runMethodOn(ror.objectUID, request.methodName, request.args);
+			isThrowable = false;
+		} catch(Exception e) {
+			result = e;
+			isThrowable = true;
+		}
+		
+		return new RMIResponse(ror, result, isThrowable);
+		
 	}
 	
 	
-	public Object handle(String objectUID, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+	public Object runMethodOn(String objectUID, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		//Object o = RMIIndex.getObject(objectUID);
 		Object o = RMIIndex.get(Integer.parseInt(objectUID));
 		Class<?> c = o.getClass();
@@ -106,16 +153,11 @@ public class ServerHandler {
 	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		ServerHandler v = new ServerHandler(8080);
 		v.RMIIndex.add(new PersonImpl(1, "tomer"));
-		v.handle("0", "toString", new Object[]{});
-		v.handle("0", "setName", new Object[]{"doom"});
-		v.handle("0", "setAge", new Object[]{10});
+		v.runMethodOn("0", "toString", new Object[]{});
+		v.runMethodOn("0", "setName", new Object[]{"doom"});
+		v.runMethodOn("0", "setAge", new Object[]{10});
 		
-		/*server.on("invokeMethod", new SIOCommand() {
-			public void run() {
-				RMIResponse response = handle((RMIRequest) object); //arg0 = RMIRequest
-				socket.respond(requestId, response);
-			}
-		});*/
+		
 		
 		/*
 		System.out.println("----------");

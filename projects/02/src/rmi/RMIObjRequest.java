@@ -1,11 +1,12 @@
 package rmi;
 
 
-public class RMIObjRequest implements RMIMessage {
+public class RMIObjRequest extends RMIMessage {
 	private static final long serialVersionUID = -6830740318499414720L;
-	public String objectUID;
+	public String name;
 	
-	public RMIObjRequest(String objectUID) {
-		this.objectUID = objectUID;
+	public RMIObjRequest(RemoteObjectReference ror, String name) {
+		super(ror);
+		this.name = name;
 	}
 }
