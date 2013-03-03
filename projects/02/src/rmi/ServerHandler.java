@@ -1,6 +1,7 @@
 /**
  * ServerHandler is the interface through which the requests are marshaled and 
  * methods invoked after which results are sent back to the requesters.
+ * Author: Vansi Vallabhaneni
  */
 
 package rmi;
@@ -15,12 +16,12 @@ import networking.SIOServer;
 import vansitest.PersonImpl;
 
 public class ServerHandler {
-	public ArrayList<Object> RMIIndex;
+	public RMIIndex RMIIndex;
 	private HashMap<Class<?>, Class<?>> primToObj;
 	private SIOServer serverSocket;
 	
 	public ServerHandler(int port) {
-		this.RMIIndex = new ArrayList<Object>();
+		this.RMIIndex = new RMIIndex();
 		this.serverSocket = new SIOServer(port);
 		
 		this.primToObj = new HashMap<Class<?>, Class<?>>();
@@ -33,8 +34,7 @@ public class ServerHandler {
 		primToObj.put(float.class, Float.class);
 		primToObj.put(double.class, Double.class);
 		primToObj.put(void.class, Void.class);
-		
-		//Fires when a client asks to invoke a method.
+
 		serverSocket.on("invokeMethod", new SIOCommand() {
 			public void run() {
 				RMIResponse response = handle((RMIRequest) object); //arg0 = RMIRequest
@@ -42,29 +42,38 @@ public class ServerHandler {
 			}
 		});
 		
-		/*serverSocket.on("lookupObject", new SIOCommand() {
+		serverSocket.on("lookupObject", new SIOCommand() {
 			public void run() {
-				RMIResponse response = lookup((RMIObjRequest) object);
+				RMIObjResponse response = lookup((RMIObjRequest) object);
 				socket.respond(requestId, response);
 			}
-		});*/
+		});
 	}
 	
-	/*public RMIResponse lookup(RMIObjRequest request) {
+	//for testing purposes
+	public RemoteObjectReference addObject(Object o, String interfaceName, String name) {
+		return RMIIndex.addObject(o, serverSocket.hostname, serverSocket.port, interfaceName, name);
+	}
+	
+	/**
+	 * Marshals the lookup request to the RMIIndex and and returns the results as a RMIObjResponse.
+	 * @param request
+	 * @return
+	 */
+	public RMIObjResponse lookup(RMIObjRequest request) {
 		Object result;
 		boolean isThrowable;
-		RemoteObjectReference ror = request.ror;
 		try {
-			result = RMIIndex.getROR(request.name);
+			result = RMIIndex.getRorByName(request.name);
 			isThrowable = false;
 		} catch(Exception e) {
 			result = e;
 			isThrowable = true;
 		}
 		
-		return new RMIResponse(ror, result, isThrowable);
+		return new RMIObjResponse(result, isThrowable);
 		
-	}*/
+	}
 	
 	/**
 	 * Handle unpacks the messages and tries to run the method. And packages and returns the results as a RMIResponse.
@@ -77,7 +86,7 @@ public class ServerHandler {
 		boolean isThrowable;
 		RemoteObjectReference ror = request.ror;
 		try {
-			result = runMethodOn(ror.objectUID, request.methodName, request.args);
+			result = runMethodOn(ror, request.methodName, request.args);
 			isThrowable = false;
 		} catch(Exception e) {
 			result = e;
@@ -90,7 +99,7 @@ public class ServerHandler {
 	
 	/**
 	 * Tries to run method (methodName) on the remote object (objectUID) with arguments (args).
-	 * @param objectUID
+	 * @param ror
 	 * @param methodName
 	 * @param args
 	 * @return
@@ -100,9 +109,9 @@ public class ServerHandler {
 	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 */
-	public Object runMethodOn(String objectUID, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+	public Object runMethodOn(RemoteObjectReference ror, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		//Object o = RMIIndex.getObject(objectUID);
-		Object o = RMIIndex.get(Integer.parseInt(objectUID));
+		Object o = RMIIndex.getObjectByRor(ror);
 		Class<?> c = o.getClass();
 		
 		//System.out.println(args.length);
@@ -200,12 +209,12 @@ public class ServerHandler {
 	
 	//testing
 	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		ServerHandler v = new ServerHandler(8080);
+/*		ServerHandler v = new ServerHandler(8080);
 		v.RMIIndex.add(new PersonImpl(1, "tomer"));
 		v.runMethodOn("0", "toString", new Object[]{});
 		v.runMethodOn("0", "setName", new Object[]{"doom"});
 		v.runMethodOn("0", "setAge", new Object[]{10});
-		
+		*/
 		
 		
 		/*

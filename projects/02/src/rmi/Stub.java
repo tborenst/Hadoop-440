@@ -1,6 +1,7 @@
 /**
  * Stub marshals requests between the Proxy and the 
  * RMI server which contains the correlating remote object.
+ * Author: Vansi Vallabhaneni
  */
 
 package rmi;
@@ -34,6 +35,7 @@ public class Stub implements InvocationHandler {
 		RMIRequest requestData = new RMIRequest(ror, method, args);
 		
 		//send request
+		//TODO: throw accessException if socket is not alive
 		RMIResponse responseData = (RMIResponse) socket.request("invokeMethod", requestData);
 		
 		//check response for errors (isThrowable)
@@ -42,7 +44,7 @@ public class Stub implements InvocationHandler {
 		}
 		
 		return responseData.response;
-}
+	}
 
 	
 	
