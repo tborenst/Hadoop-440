@@ -4,14 +4,18 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import networking.SIOServer;
+
 import vansitest.PersonImpl;
 
 public class ServerHandler {
 	public ArrayList<Object> RMIIndex;
 	private HashMap<Class<?>, Class<?>> primToObj;
+	private SIOServer serverSocket;
 	
-	public ServerHandler() {
+	public ServerHandler(int port) {
 		this.RMIIndex = new ArrayList<Object>();
+		this.serverSocket = new SIOServer(port);
 		
 		this.primToObj = new HashMap<Class<?>, Class<?>>();
 		primToObj.put(boolean.class, Boolean.class);
@@ -38,7 +42,6 @@ public class ServerHandler {
 			System.out.println("Found type: "+argTypes[i].toString());
 		}
 		
-		//TODO: if unable to find method, iterate through methods with name and check if the primitives are actually objects
 		Method m;
 		try {
 			m = c.getMethod(methodName, argTypes);
@@ -101,13 +104,13 @@ public class ServerHandler {
 	
 	
 	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		ServerHandler v = new ServerHandler();
+		ServerHandler v = new ServerHandler(8080);
 		v.RMIIndex.add(new PersonImpl(1, "tomer"));
 		v.handle("0", "toString", new Object[]{});
 		v.handle("0", "setName", new Object[]{"doom"});
 		v.handle("0", "setAge", new Object[]{10});
 		
-		/*server.on("request", new SIOCommand() {
+		/*server.on("invokeMethod", new SIOCommand() {
 			public void run() {
 				RMIResponse response = handle((RMIRequest) object); //arg0 = RMIRequest
 				socket.respond(requestId, response);
