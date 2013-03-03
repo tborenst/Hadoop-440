@@ -9,6 +9,8 @@ package rmi;
 import java.lang.reflect.*;
 import java.util.HashMap;
 
+import vansitest.Util;
+
 import networking.SIOCommand;
 import networking.SIOServer;
 
@@ -154,10 +156,12 @@ public class ServerHandler {
 	 * @throws NoSuchMethodException
 	 */
 	private Method findMethod(Class<?> c, String methodName, Class<?>[] argTypes) throws NoSuchMethodException {
-		System.out.println("lets try my own method");
+		//System.out.println("Server.findMethod: lets try my own method.");
 		Method[] methods = c.getMethods();
+		//System.out.println("Server.findMethod: found " + methods.length + " methods.");
 		for(int m = 0; m < methods.length; m++) {
-			if(methodName == methods[m].getName()) {
+			//System.out.println("Server.findMethod: checking method " + methods[m].getName() +" for a match with "+methodName);
+			if(methodName.equals(methods[m].getName())) {
 				Class<?>[] otherArgTypes = methods[m].getParameterTypes();
 				//System.out.println(Util.stringifyArray(otherArgTypes));
 				if(typesArrayEqual(argTypes, otherArgTypes)) {return methods[m];}
@@ -176,7 +180,8 @@ public class ServerHandler {
 		if(t1Arr.length != t2Arr.length) {return false;}
 		
 		for(int i = 0; i < t1Arr.length; i++) {
-			//System.out.println("comparing: "+t1Arr[i].toString()+" & "+t2Arr[i].toString()+" -> "+t1Arr[i].equals(t2Arr[i]));
+			System.out.println("comparing: " + t1Arr[i].toString() +" & " + t2Arr[i].toString() 
+									+ " -> " + typeEqual(t1Arr[i], t2Arr[i]));
 			if(!typeEqual(t1Arr[i], t2Arr[i])) {return false;}
 		}
 		return true;
@@ -190,7 +195,7 @@ public class ServerHandler {
 	 * @param t2
 	 * @return
 	 */
-	private boolean typeEqual(Class<?> t1, Class<?> t2) {
+	public boolean typeEqual(Class<?> t1, Class<?> t2) {
 		if(t1.equals(t2)) {
 			return true;
 		}
@@ -225,33 +230,7 @@ public class ServerHandler {
 	
 	//testing
 	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-/*		ServerHandler v = new ServerHandler(8080);
-		v.RMIIndex.add(new PersonImpl(1, "tomer"));
-		v.runMethodOn("0", "toString", new Object[]{});
-		v.runMethodOn("0", "setName", new Object[]{"doom"});
-		v.runMethodOn("0", "setAge", new Object[]{10});
-		*/
-		
-		
-		/*
-		System.out.println("----------");
-		
-		Object[] methodArgs = new Object[]{10};
-		Class<?>[] argTypes = new Class<?>[methodArgs.length];
-		for(int i = 0; i < methodArgs.length; i++) {
-			argTypes[i] = methodArgs[i].getClass();
-			System.out.println("2: Found type: "+argTypes[i].toString());
-		}
-		
-		Object obj = v.RMIIndex.get(0);
-		Class<?> c = obj.getClass();
-		Method method = c.getMethod("setAge", argTypes);
-		Class<?>[] otherArgTypes = method.getParameterTypes();
-		for(int o = 0; o < otherArgTypes.length; o++) {
-			System.out.println(otherArgTypes[o].toString()+" "+otherArgTypes[o].equals(argTypes[o]));
-		}
-		
-		System.out.println(Arrays.equals(argTypes, otherArgTypes));
-		*/	
+		ServerHandler s = new ServerHandler(8080);
+		System.out.println(s.typeEqual(Integer.class, int.class));
 	}
 }
