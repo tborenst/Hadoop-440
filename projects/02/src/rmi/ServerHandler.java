@@ -100,7 +100,10 @@ public class ServerHandler {
 	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 */
-	public Object runMethodOn(String objectUID, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+	public Object runMethodOn(String objectUID, String methodName, Object[] args) 
+			throws SecurityException, IllegalAccessException, 
+			IllegalArgumentException, InvocationTargetException, 
+			NoSuchMethodException {
 		//Object o = RMIIndex.getObject(objectUID);
 		Object o = RMIIndex.get(Integer.parseInt(objectUID));
 		Class<?> c = o.getClass();

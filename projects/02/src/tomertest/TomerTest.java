@@ -14,6 +14,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentHashMap;
 
+import rmi.RemoteObjectReference;
+
 import networking.SIOClient;
 import networking.SIOCommand;
 import networking.SIOServer;
@@ -49,6 +51,7 @@ public class TomerTest {
 				server.on("add", new SIOCommand(){
 					public void run(){
 						int[] array = (int[])object;
+						RemoteObjectReference ror = new RemoteObjectReference(null, requestId, null, null);
 						socket.respond(requestId, array[0]+array[1]);
 						socket.respond(requestId, 0);
 					}

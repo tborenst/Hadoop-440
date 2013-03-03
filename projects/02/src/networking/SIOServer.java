@@ -20,9 +20,10 @@ public class SIOServer extends SIOSocket{
 	
 	public SIOServer(int port){
 		try {
+			//find my IP address
 			this.hostname = java.net.InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e1) {
-			//can't get hostname
+			//can't find IP address
 			this.hostname = "Unknown";
 		}
 		this.port = port;
