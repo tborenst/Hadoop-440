@@ -1,26 +1,27 @@
 /**
  * ServerHandler is the interface through which the requests are marshaled and 
  * methods invoked after which results are sent back to the requesters.
+ * Author: Vansi Vallabhaneni
  */
 
 package rmi;
 
 import java.lang.reflect.*;
-import java.util.ArrayList;
 import java.util.HashMap;
+
+import vansitest.Util;
 
 import networking.SIOCommand;
 import networking.SIOServer;
 
-import vansitest.PersonImpl;
 
 public class ServerHandler {
-	public ArrayList<Object> RMIIndex;
+	public RMIIndex RMIIndex;
 	private HashMap<Class<?>, Class<?>> primToObj;
 	private SIOServer serverSocket;
 	
 	public ServerHandler(int port) {
-		this.RMIIndex = new ArrayList<Object>();
+		this.RMIIndex = new RMIIndex();
 		this.serverSocket = new SIOServer(port);
 		
 		this.primToObj = new HashMap<Class<?>, Class<?>>();
@@ -33,38 +34,51 @@ public class ServerHandler {
 		primToObj.put(float.class, Float.class);
 		primToObj.put(double.class, Double.class);
 		primToObj.put(void.class, Void.class);
-		
-		//Fires when a client asks to invoke a method.
+
 		serverSocket.on("invokeMethod", new SIOCommand() {
 			public void run() {
-				RMIResponse response = handle((RMIRequest) object); //arg0 = RMIRequest
+				RMIRequest requestData = (RMIRequest) object;
+				System.out.println("Server: ror: "+requestData.ror.objectUID);
+				RMIResponse response = handle(requestData); //arg0 = RMIRequest
 				socket.respond(requestId, response);
 			}
 		});
 		
-		/*serverSocket.on("lookupObject", new SIOCommand() {
+		serverSocket.on("lookupObject", new SIOCommand() {
 			public void run() {
-				RMIResponse response = lookup((RMIObjRequest) object);
+				System.out.println("Server: recieved a lookupObject requerst.");
+				RMIObjResponse response = lookup((RMIObjRequest) object);
+				System.out.println("Responding: error=" + response.isThrowable);
 				socket.respond(requestId, response);
 			}
-		});*/
+		});
 	}
 	
-	/*public RMIResponse lookup(RMIObjRequest request) {
+	//for testing purposes
+	public RemoteObjectReference addObject(Object o, String interfaceName, String name) {
+		return RMIIndex.addObject(o, serverSocket.getHostname(), serverSocket.getPort(), interfaceName, name);
+	}
+	
+	/**
+	 * Marshals the lookup request to the RMIIndex and and returns the results as a RMIObjResponse.
+	 * @param request
+	 * @return
+	 */
+	public RMIObjResponse lookup(RMIObjRequest request) {
 		Object result;
 		boolean isThrowable;
-		RemoteObjectReference ror = request.ror;
 		try {
-			result = RMIIndex.getROR(request.name);
+			result = RMIIndex.getRorByName(request.name);
+			System.out.println("Found ROR: "+ ((RemoteObjectReference) result).objectUID);
 			isThrowable = false;
 		} catch(Exception e) {
 			result = e;
 			isThrowable = true;
 		}
 		
-		return new RMIResponse(ror, result, isThrowable);
+		return new RMIObjResponse(result, isThrowable);
 		
-	}*/
+	}
 	
 	/**
 	 * Handle unpacks the messages and tries to run the method. And packages and returns the results as a RMIResponse.
@@ -76,8 +90,9 @@ public class ServerHandler {
 		Object result;
 		boolean isThrowable;
 		RemoteObjectReference ror = request.ror;
+		System.out.println("Server.handle: ror: " + ror.objectUID);
 		try {
-			result = runMethodOn(ror.objectUID, request.methodName, request.args);
+			result = runMethodOn(ror, request.methodName, request.args);
 			isThrowable = false;
 		} catch(Exception e) {
 			result = e;
@@ -90,7 +105,7 @@ public class ServerHandler {
 	
 	/**
 	 * Tries to run method (methodName) on the remote object (objectUID) with arguments (args).
-	 * @param objectUID
+	 * @param ror
 	 * @param methodName
 	 * @param args
 	 * @return
@@ -100,19 +115,19 @@ public class ServerHandler {
 	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 */
-	public Object runMethodOn(String objectUID, String methodName, Object[] args) 
-			throws SecurityException, IllegalAccessException, 
-			IllegalArgumentException, InvocationTargetException, 
-			NoSuchMethodException {
-		//Object o = RMIIndex.getObject(objectUID);
-		Object o = RMIIndex.get(Integer.parseInt(objectUID));
+
+	public Object runMethodOn(RemoteObjectReference ror, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+		Object o = RMIIndex.getObjectByRor(ror);
 		Class<?> c = o.getClass();
 		
 		//System.out.println(args.length);
-		Class<?>[] argTypes = new Class<?>[args.length];
-		for(int i = 0; i < args.length; i++) {
-			argTypes[i] = args[i].getClass();
-			System.out.println("Found type: "+argTypes[i].toString());
+		Class<?>[] argTypes = null;
+		if(args != null) {
+			argTypes = new Class<?>[args.length];
+			for(int i = 0; i < args.length; i++) {
+				argTypes[i] = args[i].getClass();
+				System.out.println("Found type: "+argTypes[i].toString());
+			}
 		}
 		
 		Method m;
@@ -142,10 +157,12 @@ public class ServerHandler {
 	 * @throws NoSuchMethodException
 	 */
 	private Method findMethod(Class<?> c, String methodName, Class<?>[] argTypes) throws NoSuchMethodException {
-		System.out.println("lets try my own method");
+		//System.out.println("Server.findMethod: lets try my own method.");
 		Method[] methods = c.getMethods();
+		//System.out.println("Server.findMethod: found " + methods.length + " methods.");
 		for(int m = 0; m < methods.length; m++) {
-			if(methodName == methods[m].getName()) {
+			//System.out.println("Server.findMethod: checking method " + methods[m].getName() +" for a match with "+methodName);
+			if(methodName.equals(methods[m].getName())) {
 				Class<?>[] otherArgTypes = methods[m].getParameterTypes();
 				//System.out.println(Util.stringifyArray(otherArgTypes));
 				if(typesArrayEqual(argTypes, otherArgTypes)) {return methods[m];}
@@ -164,7 +181,8 @@ public class ServerHandler {
 		if(t1Arr.length != t2Arr.length) {return false;}
 		
 		for(int i = 0; i < t1Arr.length; i++) {
-			//System.out.println("comparing: "+t1Arr[i].toString()+" & "+t2Arr[i].toString()+" -> "+t1Arr[i].equals(t2Arr[i]));
+			System.out.println("comparing: " + t1Arr[i].toString() +" & " + t2Arr[i].toString() 
+									+ " -> " + typeEqual(t1Arr[i], t2Arr[i]));
 			if(!typeEqual(t1Arr[i], t2Arr[i])) {return false;}
 		}
 		return true;
@@ -178,7 +196,7 @@ public class ServerHandler {
 	 * @param t2
 	 * @return
 	 */
-	private boolean typeEqual(Class<?> t1, Class<?> t2) {
+	public boolean typeEqual(Class<?> t1, Class<?> t2) {
 		if(t1.equals(t2)) {
 			return true;
 		}
@@ -201,35 +219,19 @@ public class ServerHandler {
 		}
 	}
 	
+
+
+	public String getHostname() {
+		return serverSocket.getHostname();
+	}
+	
+	public int getPort() {
+		return serverSocket.getPort();
+	}
+	
 	//testing
 	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		ServerHandler v = new ServerHandler(8080);
-		v.RMIIndex.add(new PersonImpl(1, "tomer"));
-		v.runMethodOn("0", "toString", new Object[]{});
-		v.runMethodOn("0", "setName", new Object[]{"doom"});
-		v.runMethodOn("0", "setAge", new Object[]{10});
-		
-		
-		
-		/*
-		System.out.println("----------");
-		
-		Object[] methodArgs = new Object[]{10};
-		Class<?>[] argTypes = new Class<?>[methodArgs.length];
-		for(int i = 0; i < methodArgs.length; i++) {
-			argTypes[i] = methodArgs[i].getClass();
-			System.out.println("2: Found type: "+argTypes[i].toString());
-		}
-		
-		Object obj = v.RMIIndex.get(0);
-		Class<?> c = obj.getClass();
-		Method method = c.getMethod("setAge", argTypes);
-		Class<?>[] otherArgTypes = method.getParameterTypes();
-		for(int o = 0; o < otherArgTypes.length; o++) {
-			System.out.println(otherArgTypes[o].toString()+" "+otherArgTypes[o].equals(argTypes[o]));
-		}
-		
-		System.out.println(Arrays.equals(argTypes, otherArgTypes));
-		*/	
+		ServerHandler s = new ServerHandler(8080);
+		System.out.println(s.typeEqual(Integer.class, int.class));
 	}
 }

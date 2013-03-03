@@ -112,7 +112,7 @@ public class SIOClient extends SIOSocket{
 	 * @return the object that comes with the corresponding 
 	 */
 	public Object request(String message, Object object){
-		long timeout = 10000; //timeout for request
+		long timeout = 100000; //timeout for request
 		long requestTime;
 		SIOPacket packet = new SIOPacket(message, object);
 		packet.setBlocking(true); //this is a blocking server call

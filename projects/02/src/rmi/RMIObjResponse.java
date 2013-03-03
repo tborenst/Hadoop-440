@@ -1,6 +1,7 @@
 /**
  * A response message sent from a RMI Server to a client to return the results from a lookup.
  * If isThrowable is true, the lookup resulted in an error.
+ * Author: Vansi Vallabhaneni
  */
 
 package rmi;
@@ -12,6 +13,11 @@ public class RMIObjResponse implements Serializable {
 	public Object response;
 	public boolean isThrowable;
 
+	/**
+	 * Constructor for RMIObjResponse.
+	 * @param response
+	 * @param isThrowable
+	 */
 	public RMIObjResponse(Object response, boolean isThrowable) {
 		this.response = response;
 		this.isThrowable = isThrowable;

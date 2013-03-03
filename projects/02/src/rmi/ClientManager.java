@@ -1,15 +1,13 @@
 /**
  * ClientManager is the interface through which the client can manage its interactions 
  * with RMI servers: connect to new servers or lookup an existing remote object.
+ * Author: Vansi Vallabhaneni
  */
 
 package rmi;
 
 import java.lang.reflect.Proxy;
-import java.net.MalformedURLException;
-import java.rmi.AccessException;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -43,8 +41,10 @@ public class ClientManager {
 	 * @param hostname
 	 * @param port
 	 */
-	public void connectTo(String hostname, int port) {
-		connections.add(new SIOClient(hostname, port));
+	public SIOClient connectTo(String hostname, int port) {
+		SIOClient newConnection = new SIOClient(hostname, port);
+		connections.add(newConnection);
+		return newConnection;
 	}
 	
 	//TODO: handle removing connections, when a socket closes
@@ -55,12 +55,9 @@ public class ClientManager {
 	 * Returns a Proxy of the remote object.
 	 * @param name
 	 * @return
-	 * @throws NotBoundException
-	 * @throws AccessException
-	 * @throws RemoteException
-	 * @throws MalformedURLException
+	 * @throws Exception 
 	 */
-	public Proxy lookup(String name) throws NotBoundException, AccessException, RemoteException, MalformedURLException {
+	public Proxy lookup(String name) throws Exception {
 		for(int c = 0; c < connections.size(); c++) {
 			SIOClient socket = connections.get(c);
 			
@@ -78,26 +75,19 @@ public class ClientManager {
 	 * @param socket
 	 * @param name
 	 * @return
-	 * @throws NotBoundException
-	 * @throws RemoteException
-	 * @throws AccessException
-	 * @throws MalformedURLException
+	 * @throws Exception 
 	 */
-	private Proxy lookupOn(SIOClient socket, String name) throws NotBoundException, RemoteException, AccessException, MalformedURLException {
+	public Proxy lookupOn(SIOClient socket, String name) throws Exception {
 		RMIObjRequest objRequestData = new RMIObjRequest(name);
-		RMIObjResponse objResponseData = (RMIObjResponse) socket.request("lookup", objRequestData);
+		//TODO: throw accessException if socket is not alive
+		RMIObjResponse objResponseData = (RMIObjResponse) socket.request("lookupObject", objRequestData);
 		
 		//TODO: remove weird test code
 		//RMIObjResponse objResponseData = new RMIObjResponse(new RemoteObjectReference("asdf", 8080, "321", "Person"), false);
 		
 		if(objResponseData.isThrowable) {
 			// TODO Figure out something better than the try and catch
-			try {
-				throw (Exception) objResponseData.response;
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			throw (Exception) objResponseData.response;
 		}
 		
 		RemoteObjectReference ror = (RemoteObjectReference) objResponseData.response;
@@ -115,7 +105,7 @@ public class ClientManager {
 	}
 	
 	//testing function
-	public static void main(String[] args) throws AccessException, RemoteException, MalformedURLException, NotBoundException {
+	public static void main(String[] args) throws Exception {
 		ClientManager client = new ClientManager();
 		client.addInterface(Person.class.getSimpleName(), Person.class);
 		Person p = (Person) client.lookupOn(null, null);
