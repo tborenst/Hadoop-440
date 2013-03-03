@@ -1,6 +1,7 @@
 package networking;
 
 import java.net.ServerSocket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class SIOServer extends SIOSocket{
+	private String hostname;
 	private int port;
 	private ServerSocket serverSocket;
 	private ArrayList<IncomingSocket> sockets;
@@ -17,6 +19,12 @@ public class SIOServer extends SIOSocket{
 	private HashMap<String, SIOCommand> bindings;
 	
 	public SIOServer(int port){
+		try {
+			this.hostname = java.net.InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e1) {
+			//can't get hostname
+			this.hostname = "Unknown";
+		}
 		this.port = port;
 		this.sockets = new ArrayList<IncomingSocket>();
 		this.socketCount = 0;
@@ -105,6 +113,20 @@ public class SIOServer extends SIOSocket{
 	}
 	
 	/**
+	 * Returns this server's hostname
+	 */
+	public String getHostname(){
+		return hostname;
+	}
+	
+	/**
+	 * Returns this server's port
+	 */
+	public int getPort(){
+		return port;
+	}
+	
+	/**
 	 * Clean up dead sockets.
 	 */
 	protected void cleanUp(){
@@ -120,6 +142,7 @@ public class SIOServer extends SIOSocket{
 			sockets = liveSockets;
 		}
 	}
+	
 	
 	public class IncomingSocket extends SIOSocket{
 		private int id;
