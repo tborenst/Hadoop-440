@@ -1,3 +1,7 @@
+/**
+ * A request message from a client to a RMI Server to invoke a method (methodName) 
+ * on the remote object (with objectUID) with arguments (args).
+ */
 package rmi;
 
 import java.lang.reflect.Method;

@@ -1,3 +1,8 @@
+/**
+ * A response message sent from a RMI Server to a client to return the results from a lookup.
+ * If isThrowable is true, the lookup resulted in an error.
+ */
+
 package rmi;
 
 import java.io.Serializable;

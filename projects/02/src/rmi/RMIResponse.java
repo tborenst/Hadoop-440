@@ -1,3 +1,8 @@
+/**
+ * A response message from a RMI Server to a client to return the result from a RMIRequest.
+ * If isThrowable is true, the request resulted in an error.
+ */
+
 package rmi;
 
 public class RMIResponse extends RMIMessage {

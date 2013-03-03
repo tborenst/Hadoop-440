@@ -1,3 +1,7 @@
+/**
+ * A transparent object containing all necessary the identifying information for a remote object.
+ */
+
 package rmi;
 
 public class RemoteObjectReference {

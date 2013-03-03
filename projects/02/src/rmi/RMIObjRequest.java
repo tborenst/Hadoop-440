@@ -1,3 +1,7 @@
+/**
+ * A request message sent from a client to a RMI Server to lookup an object with name (name).
+ */
+
 package rmi;
 
 import java.io.Serializable;

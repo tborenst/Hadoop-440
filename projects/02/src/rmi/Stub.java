@@ -1,3 +1,8 @@
+/**
+ * Stub marshals requests between the Proxy and the 
+ * RMI server which contains the correlating remote object.
+ */
+
 package rmi;
 
 import java.lang.reflect.*;
@@ -9,17 +14,15 @@ public class Stub implements InvocationHandler {
 	private SIOClient socket;
 
 
-
+	
 	public Stub(RemoteObjectReference ror, SIOClient socket) {
 		this.ror = ror;
 		this.socket = socket;
 	}
 	
-
+	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
-		//RemoteProxy remProx = (RemoteProxy) proxy;
-		//System.out.println("Obj: "+obj.toString());
 		System.out.println("Method: " + method.toString());
 		
 		if(args != null) {

@@ -13,7 +13,7 @@ public class VansiTest {
 		ServerHandler s = new ServerHandler(8080);
 		s.RMIIndex.add(new PersonImpl(1, "tomer"));
 		
-		Stub c = new Stub();
+		//Stub c = new Stub();
 		//c.
 	}
 }

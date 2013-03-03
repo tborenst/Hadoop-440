@@ -1,3 +1,8 @@
+/**
+ * Abstract class for RMI messages relating to remote objects. 
+ * Therefore every such message needs to include a RemoteObjectReference.
+ */
+
 package rmi;
 
 import java.io.Serializable;
