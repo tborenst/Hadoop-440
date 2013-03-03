@@ -1,9 +1,14 @@
 package rmi;
 
-public class RMIObjResponse extends RMIMessage{
-	private static final long serialVersionUID = 2115010397836118161L;
+import java.io.Serializable;
 
-	public RMIObjResponse(RemoteObjectReference ror) {
-		super(ror);
+public class RMIObjResponse implements Serializable {
+	private static final long serialVersionUID = 2115010397836118161L;
+	public Object response;
+	public boolean isThrowable;
+
+	public RMIObjResponse(Object response, boolean isThrowable) {
+		this.response = response;
+		this.isThrowable = isThrowable;
 	}
 }
