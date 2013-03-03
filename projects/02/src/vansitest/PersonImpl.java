@@ -1,6 +1,7 @@
 package vansitest;
 
 public class PersonImpl implements Person{
+	private static final long serialVersionUID = -4668010808997778749L;
 	private int age;
 	private String name;
 	

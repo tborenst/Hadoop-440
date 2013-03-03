@@ -7,13 +7,11 @@
 package rmi;
 
 import java.lang.reflect.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import networking.SIOCommand;
 import networking.SIOServer;
 
-import vansitest.PersonImpl;
 
 public class ServerHandler {
 	public RMIIndex RMIIndex;
@@ -37,14 +35,18 @@ public class ServerHandler {
 
 		serverSocket.on("invokeMethod", new SIOCommand() {
 			public void run() {
-				RMIResponse response = handle((RMIRequest) object); //arg0 = RMIRequest
+				RMIRequest requestData = (RMIRequest) object;
+				System.out.println("Server: ror: "+requestData.ror.objectUID);
+				RMIResponse response = handle(requestData); //arg0 = RMIRequest
 				socket.respond(requestId, response);
 			}
 		});
 		
 		serverSocket.on("lookupObject", new SIOCommand() {
 			public void run() {
+				System.out.println("Server: recieved a lookupObject requerst.");
 				RMIObjResponse response = lookup((RMIObjRequest) object);
+				System.out.println("Responding: error=" + response.isThrowable);
 				socket.respond(requestId, response);
 			}
 		});
@@ -52,7 +54,7 @@ public class ServerHandler {
 	
 	//for testing purposes
 	public RemoteObjectReference addObject(Object o, String interfaceName, String name) {
-		return RMIIndex.addObject(o, serverSocket.hostname, serverSocket.port, interfaceName, name);
+		return RMIIndex.addObject(o, serverSocket.getHostname(), serverSocket.getPort(), interfaceName, name);
 	}
 	
 	/**
@@ -65,6 +67,7 @@ public class ServerHandler {
 		boolean isThrowable;
 		try {
 			result = RMIIndex.getRorByName(request.name);
+			System.out.println("Found ROR: "+ ((RemoteObjectReference) result).objectUID);
 			isThrowable = false;
 		} catch(Exception e) {
 			result = e;
@@ -85,6 +88,7 @@ public class ServerHandler {
 		Object result;
 		boolean isThrowable;
 		RemoteObjectReference ror = request.ror;
+		System.out.println("Server.handle: ror: " + ror.objectUID);
 		try {
 			result = runMethodOn(ror, request.methodName, request.args);
 			isThrowable = false;
@@ -110,8 +114,9 @@ public class ServerHandler {
 	 * @throws NoSuchMethodException
 	 */
 	public Object runMethodOn(RemoteObjectReference ror, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
-		//Object o = RMIIndex.getObject(objectUID);
-		Object o = RMIIndex.getObjectByRor(ror);
+		return "asdf";
+		
+	/*	Object o = RMIIndex.getObjectByRor(ror);
 		Class<?> c = o.getClass();
 		
 		//System.out.println(args.length);
@@ -133,7 +138,7 @@ public class ServerHandler {
 		}
 		else {
 			return null;
-		}
+		}*/
 		
 	}
 	
@@ -205,6 +210,16 @@ public class ServerHandler {
 			}
 				
 		}
+	}
+	
+
+
+	public String getHostname() {
+		return serverSocket.getHostname();
+	}
+	
+	public int getPort() {
+		return serverSocket.getPort();
 	}
 	
 	//testing

@@ -36,6 +36,7 @@ public class Stub implements InvocationHandler {
 		
 		//send request
 		//TODO: throw accessException if socket is not alive
+		System.out.println("Stub: Sending Ror " + requestData.methodName);
 		RMIResponse responseData = (RMIResponse) socket.request("invokeMethod", requestData);
 		
 		//check response for errors (isThrowable)

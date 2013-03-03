@@ -7,10 +7,7 @@
 package rmi;
 
 import java.lang.reflect.Proxy;
-import java.net.MalformedURLException;
-import java.rmi.AccessException;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -44,8 +41,10 @@ public class ClientManager {
 	 * @param hostname
 	 * @param port
 	 */
-	public void connectTo(String hostname, int port) {
-		connections.add(new SIOClient(hostname, port));
+	public SIOClient connectTo(String hostname, int port) {
+		SIOClient newConnection = new SIOClient(hostname, port);
+		connections.add(newConnection);
+		return newConnection;
 	}
 	
 	//TODO: handle removing connections, when a socket closes
@@ -78,7 +77,7 @@ public class ClientManager {
 	 * @return
 	 * @throws Exception 
 	 */
-	private Proxy lookupOn(SIOClient socket, String name) throws Exception {
+	public Proxy lookupOn(SIOClient socket, String name) throws Exception {
 		RMIObjRequest objRequestData = new RMIObjRequest(name);
 		//TODO: throw accessException if socket is not alive
 		RMIObjResponse objResponseData = (RMIObjResponse) socket.request("lookupObject", objRequestData);

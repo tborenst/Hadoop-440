@@ -8,7 +8,7 @@ package rmi;
 import java.lang.reflect.Method;
 
 
-public class RMIRequest extends RMIMessage {
+public class RMIRequest implements RMIMessage {
 	private static final long serialVersionUID = -6830740318499414720L;
 	public String objectUID;
 	public RemoteObjectReference ror;
@@ -22,7 +22,7 @@ public class RMIRequest extends RMIMessage {
 	 * @param args
 	 */
 	public RMIRequest(RemoteObjectReference ror, Method method, Object[] args) {
-		super(ror);
+		this.ror = ror;
 		this.methodName = method.getName();
 		this.args = args;
 	}

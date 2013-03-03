@@ -6,10 +6,11 @@
 
 package rmi;
 
-public class RMIResponse extends RMIMessage {
+public class RMIResponse implements RMIMessage {
 	private static final long serialVersionUID = 8578409383104557400L;
 	public Object response;
 	public boolean isThrowable;
+	public RemoteObjectReference ror;
 	
 	/**
 	 * Constructor for RMIResponse.
@@ -18,7 +19,7 @@ public class RMIResponse extends RMIMessage {
 	 * @param isThrowable
 	 */
 	public RMIResponse(RemoteObjectReference ror, Object response, boolean isThrowable) {
-		super(ror);
+		this.ror = ror;
 		this.response = response;
 		this.isThrowable = isThrowable;
 	}

@@ -5,7 +5,10 @@
 
 package rmi;
 
-public class RemoteObjectReference {
+import java.io.Serializable;
+
+public class RemoteObjectReference implements Serializable {
+	private static final long serialVersionUID = -1690699296896832656L;
 	public String hostname;
 	public int port;
 	public String objectUID;
