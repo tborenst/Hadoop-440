@@ -1,9 +1,15 @@
+/**
+ * ServerHandler is the interface through which the requests are marshaled and 
+ * methods invoked after which results are sent back to the requesters.
+ */
+
 package rmi;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import networking.SIOCommand;
 import networking.SIOServer;
 
 import vansitest.PersonImpl;
@@ -27,10 +33,74 @@ public class ServerHandler {
 		primToObj.put(float.class, Float.class);
 		primToObj.put(double.class, Double.class);
 		primToObj.put(void.class, Void.class);
+		
+		//Fires when a client asks to invoke a method.
+		serverSocket.on("invokeMethod", new SIOCommand() {
+			public void run() {
+				RMIResponse response = handle((RMIRequest) object); //arg0 = RMIRequest
+				socket.respond(requestId, response);
+			}
+		});
+		
+		/*serverSocket.on("lookupObject", new SIOCommand() {
+			public void run() {
+				RMIResponse response = lookup((RMIObjRequest) object);
+				socket.respond(requestId, response);
+			}
+		});*/
 	}
 	
+	/*public RMIResponse lookup(RMIObjRequest request) {
+		Object result;
+		boolean isThrowable;
+		RemoteObjectReference ror = request.ror;
+		try {
+			result = RMIIndex.getROR(request.name);
+			isThrowable = false;
+		} catch(Exception e) {
+			result = e;
+			isThrowable = true;
+		}
+		
+		return new RMIResponse(ror, result, isThrowable);
+		
+	}*/
 	
-	public Object handle(String objectUID, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+	/**
+	 * Handle unpacks the messages and tries to run the method. And packages and returns the results as a RMIResponse.
+	 * Captures errors into the RMIResponse.
+	 * @param request
+	 * @return
+	 */
+	public RMIResponse handle(RMIRequest request) {
+		Object result;
+		boolean isThrowable;
+		RemoteObjectReference ror = request.ror;
+		try {
+			result = runMethodOn(ror.objectUID, request.methodName, request.args);
+			isThrowable = false;
+		} catch(Exception e) {
+			result = e;
+			isThrowable = true;
+		}
+		
+		return new RMIResponse(ror, result, isThrowable);
+		
+	}
+	
+	/**
+	 * Tries to run method (methodName) on the remote object (objectUID) with arguments (args).
+	 * @param objectUID
+	 * @param methodName
+	 * @param args
+	 * @return
+	 * @throws SecurityException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws NoSuchMethodException
+	 */
+	public Object runMethodOn(String objectUID, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		//Object o = RMIIndex.getObject(objectUID);
 		Object o = RMIIndex.get(Integer.parseInt(objectUID));
 		Class<?> c = o.getClass();
@@ -46,7 +116,7 @@ public class ServerHandler {
 		try {
 			m = c.getMethod(methodName, argTypes);
 		} catch (NoSuchMethodException e) {
-			m = findMethod(c, argTypes);
+			m = findMethod(c, methodName, argTypes);
 		}
 		
 		if(m != null) {
@@ -58,17 +128,35 @@ public class ServerHandler {
 		
 	}
 	
-	private Method findMethod(Class<?> c, Class<?>[] argTypes) throws NoSuchMethodException {
+	/**
+	 * Tries to find a method in the class c with methodName and parameter types of argTypes.
+	 * WARNING: It will treat Primitive Wrappers as either primitives or objects, so there are possibilities
+	 * for incorrectness due to overloading of functions with similar parameter types.
+	 * @param c
+	 * @param methodName
+	 * @param argTypes
+	 * @return
+	 * @throws NoSuchMethodException
+	 */
+	private Method findMethod(Class<?> c, String methodName, Class<?>[] argTypes) throws NoSuchMethodException {
 		System.out.println("lets try my own method");
 		Method[] methods = c.getMethods();
 		for(int m = 0; m < methods.length; m++) {
-			Class<?>[] otherArgTypes = methods[m].getParameterTypes();
-			//System.out.println(Util.stringifyArray(otherArgTypes));
-			if(typesArrayEqual(argTypes, otherArgTypes)) {return methods[m];}
+			if(methodName == methods[m].getName()) {
+				Class<?>[] otherArgTypes = methods[m].getParameterTypes();
+				//System.out.println(Util.stringifyArray(otherArgTypes));
+				if(typesArrayEqual(argTypes, otherArgTypes)) {return methods[m];}
+			}
 		}
 		throw new NoSuchMethodException();
 	}
 	
+	/**
+	 * Checks if every element in the type arrays are equal.
+	 * @param t1Arr
+	 * @param t2Arr
+	 * @return
+	 */
 	private boolean typesArrayEqual(Class<?>[] t1Arr, Class<?>[] t2Arr) {
 		if(t1Arr.length != t2Arr.length) {return false;}
 		
@@ -79,6 +167,14 @@ public class ServerHandler {
 		return true;
 	}
 	
+	/**
+	 * Checks if the types are equal.
+	 * WARNING: treats primitive wrappers as primitives and objects when trying to test for equality
+	 * (e.g typeEqual(int.class, Integer.class) is true).
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
 	private boolean typeEqual(Class<?> t1, Class<?> t2) {
 		if(t1.equals(t2)) {
 			return true;
@@ -102,20 +198,15 @@ public class ServerHandler {
 		}
 	}
 	
-	
+	//testing
 	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		ServerHandler v = new ServerHandler(8080);
 		v.RMIIndex.add(new PersonImpl(1, "tomer"));
-		v.handle("0", "toString", new Object[]{});
-		v.handle("0", "setName", new Object[]{"doom"});
-		v.handle("0", "setAge", new Object[]{10});
+		v.runMethodOn("0", "toString", new Object[]{});
+		v.runMethodOn("0", "setName", new Object[]{"doom"});
+		v.runMethodOn("0", "setAge", new Object[]{10});
 		
-		/*server.on("invokeMethod", new SIOCommand() {
-			public void run() {
-				RMIResponse response = handle((RMIRequest) object); //arg0 = RMIRequest
-				socket.respond(requestId, response);
-			}
-		});*/
+		
 		
 		/*
 		System.out.println("----------");
