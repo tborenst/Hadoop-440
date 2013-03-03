@@ -4,11 +4,11 @@ import java.rmi.AlreadyBoundException;
 import java.util.HashMap;
 
 public class RMIIndex {
-	private HashMap<RemoteObjectReference, Object> rorToObj;
+	private HashMap<Integer, Object> uidToObj; //objectUID -> object
 	private HashMap<String, RemoteObjectReference> nameToRor;
 	
 	public RMIIndex(){
-		this.rorToObj = new HashMap<RemoteObjectReference, Object>();
+		this.uidToObj = new HashMap<Integer, Object>();
 		this.nameToRor = new HashMap<String, RemoteObjectReference>();
 	}
 	
@@ -30,15 +30,15 @@ public class RMIIndex {
 	 * @return
 	 */
 	public RemoteObjectReference addObject(Object o, String hostname, int port, String interfaceName, String name) {
-		RemoteObjectReference ror = new RemoteObjectReference(hostname, port, o.hashCode()+"", interfaceName);
+		RemoteObjectReference ror = new RemoteObjectReference(hostname, port, o.hashCode(), interfaceName);
 		nameToRor.put(name, ror);
-		rorToObj.put(ror, o);
+		uidToObj.put(ror.objectUID, o);
 		return ror;
 	}
 	
 	public Object getObjectByRor(RemoteObjectReference ror){
-		synchronized(rorToObj){
-			Object obj = rorToObj.get(ror);
+		synchronized(uidToObj){
+			Object obj = uidToObj.get(ror.objectUID);
 			return obj;
 		}
 	}

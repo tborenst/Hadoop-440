@@ -114,16 +114,17 @@ public class ServerHandler {
 	 * @throws NoSuchMethodException
 	 */
 	public Object runMethodOn(RemoteObjectReference ror, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
-		return "asdf";
-		
-	/*	Object o = RMIIndex.getObjectByRor(ror);
+		Object o = RMIIndex.getObjectByRor(ror);
 		Class<?> c = o.getClass();
 		
 		//System.out.println(args.length);
-		Class<?>[] argTypes = new Class<?>[args.length];
-		for(int i = 0; i < args.length; i++) {
-			argTypes[i] = args[i].getClass();
-			System.out.println("Found type: "+argTypes[i].toString());
+		Class<?>[] argTypes = null;
+		if(args != null) {
+			argTypes = new Class<?>[args.length];
+			for(int i = 0; i < args.length; i++) {
+				argTypes[i] = args[i].getClass();
+				System.out.println("Found type: "+argTypes[i].toString());
+			}
 		}
 		
 		Method m;
@@ -138,7 +139,7 @@ public class ServerHandler {
 		}
 		else {
 			return null;
-		}*/
+		}
 		
 	}
 	
