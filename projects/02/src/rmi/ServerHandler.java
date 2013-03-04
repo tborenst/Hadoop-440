@@ -10,8 +10,8 @@ import java.lang.reflect.*;
 import java.rmi.AlreadyBoundException;
 import java.util.HashMap;
 
-import rmimessage.RMIObjRequest;
-import rmimessage.RMIObjResponse;
+import rmimessage.RMINamingRequest;
+import rmimessage.RMINamingResponse;
 import rmimessage.RMIRequest;
 import rmimessage.RMIResponse;
 
@@ -53,7 +53,7 @@ public class ServerHandler {
 		serverSocket.on("lookupObject", new SIOCommand() {
 			public void run() {
 				System.out.println("Server: recieved a lookupObject requerst.");
-				RMIObjResponse response = lookup((RMIObjRequest) object);
+				RMINamingResponse response = lookup((RMINamingRequest) object);
 				System.out.println("Responding: error=" + response.isError);
 				socket.respond(requestId, response);
 			}
@@ -76,11 +76,11 @@ public class ServerHandler {
 	}
 	
 	/**
-	 * Marshals the lookup request to the RMIIndex and and returns the results as a RMIObjResponse.
+	 * Marshals the lookup request to the RMIIndex and and returns the results as a RMINamingResponse.
 	 * @param request
 	 * @return
 	 */
-	public RMIObjResponse lookup(RMIObjRequest request) {
+	public RMINamingResponse lookup(RMINamingRequest request) {
 		Object result;
 		boolean isError;
 		try {
@@ -92,7 +92,7 @@ public class ServerHandler {
 			isError = true;
 		}
 		
-		return new RMIObjResponse(result, isError);
+		return new RMINamingResponse(result, isError);
 	}
 	
 	/**

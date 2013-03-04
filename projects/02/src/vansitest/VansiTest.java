@@ -4,12 +4,14 @@
 
 package vansitest;
 
+import java.rmi.AlreadyBoundException;
+
 import networking.SIOClient;
 import rmi.*;
 
 public class VansiTest {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws AlreadyBoundException {
 		
 		//setup
 		int serverPort = 8080;

@@ -6,17 +6,17 @@
 
 package rmimessage;
 
-public class RMIObjResponse implements RMIMessage {
+public class RMINamingResponse implements RMIMessage {
 	private static final long serialVersionUID = 2115010397836118161L;
 	public Object response;
 	public boolean isError;
 
 	/**
-	 * Constructor for RMIObjResponse.
+	 * Constructor for RMINamingResponse.
 	 * @param response
 	 * @param isThrowable
 	 */
-	public RMIObjResponse(Object response, boolean isError) {
+	public RMINamingResponse(Object response, boolean isError) {
 		this.response = response;
 		this.isError = isError;
 	}

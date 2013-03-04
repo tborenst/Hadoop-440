@@ -6,7 +6,7 @@
 package rmimessage;
 
 
-public class RMIObjRequest implements RMIMessage {
+public class RMINamingRequest implements RMIMessage {
 	private static final long serialVersionUID = -6830740318499414720L;
 	public String name;
 	
@@ -14,7 +14,7 @@ public class RMIObjRequest implements RMIMessage {
 	 * Constructor for RMIObjReference.
 	 * @param name
 	 */
-	public RMIObjRequest(String name) {
+	public RMINamingRequest(String name) {
 		this.name = name;
 	}
 }

@@ -12,8 +12,8 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import rmimessage.RMIObjRequest;
-import rmimessage.RMIObjResponse;
+import rmimessage.RMINamingRequest;
+import rmimessage.RMINamingResponse;
 
 import vansitest.Person;
 
@@ -83,9 +83,9 @@ public class ClientHandler {
 	 * @throws Exception 
 	 */
 	public Proxy lookupOn(SIOClient socket, String name) throws Exception {
-		RMIObjRequest objRequestData = new RMIObjRequest(name);
+		RMINamingRequest objRequestData = new RMINamingRequest(name);
 		if(socket.isAlive()) {
-			RMIObjResponse objResponseData = (RMIObjResponse) socket.request("lookupObject", objRequestData);
+			RMINamingResponse objResponseData = (RMINamingResponse) socket.request("lookupObject", objRequestData);
 			
 			if(objResponseData.isError) {
 				// TODO Figure out something better than the try and catch
