@@ -1,5 +1,5 @@
 /**
- * ClientManager is the interface through which the client can manage its interactions 
+ * ClientHandler is the interface through which the client can manage its interactions 
  * with RMI servers: connect to new servers or lookup an existing remote object.
  * Author: Vansi Vallabhaneni
  */
@@ -16,14 +16,14 @@ import vansitest.Person;
 
 import networking.SIOClient;
 
-public class ClientManager {
+public class ClientHandler {
 	private HashMap<String, Class<?>> implInterfaces;
 	private ArrayList<SIOClient> connections;
 
 	/**
-	 * Constructor for ClientManager.
+	 * Constructor for ClientHandler.
 	 */
-	public ClientManager() {
+	public ClientHandler() {
 		this.implInterfaces = new HashMap<String, Class<?>>();
 		this.connections = new ArrayList<SIOClient>();
 	}
@@ -112,7 +112,7 @@ public class ClientManager {
 	
 	//testing function
 	public static void main(String[] args) throws Exception {
-		ClientManager client = new ClientManager();
+		ClientHandler client = new ClientHandler();
 		client.addInterface(Person.class.getSimpleName(), Person.class);
 		Person p = (Person) client.lookupOn(null, null);
 		p.getName();

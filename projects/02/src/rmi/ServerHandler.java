@@ -88,7 +88,6 @@ public class ServerHandler {
 		}
 		
 		return new RMIObjResponse(result, isError);
-		
 	}
 	
 	/**

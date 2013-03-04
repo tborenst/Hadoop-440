@@ -19,7 +19,7 @@ public class VansiTest {
 		s.registerObject(new PersonImpl(1, "doom"), Person.class.getSimpleName(), "tomer");
 		
 		
-		ClientManager c = new ClientManager();
+		ClientHandler c = new ClientHandler();
 		SIOClient sock = c.connectTo(serverHostname, serverPort);
 		c.addInterface(Person.class.getSimpleName(), Person.class);
 		

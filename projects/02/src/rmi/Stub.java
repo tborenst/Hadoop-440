@@ -15,11 +15,11 @@ import networking.SIOClient;
 public class Stub implements InvocationHandler {
 	private RemoteObjectReference ror;
 	private SIOClient socket;
-	private ClientManager client;
+	private ClientHandler client;
 
 
 	
-	public Stub(RemoteObjectReference ror, SIOClient socket, ClientManager client) {
+	public Stub(RemoteObjectReference ror, SIOClient socket, ClientHandler client) {
 		this.ror = ror;
 		this.socket = socket;
 		this.client = client;
