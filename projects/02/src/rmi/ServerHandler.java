@@ -48,7 +48,7 @@ public class ServerHandler {
 			public void run() {
 				System.out.println("Server: recieved a lookupObject requerst.");
 				RMIObjResponse response = lookup((RMIObjRequest) object);
-				System.out.println("Responding: error=" + response.isThrowable);
+				System.out.println("Responding: error=" + response.isError);
 				socket.respond(requestId, response);
 			}
 		});

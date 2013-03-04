@@ -6,20 +6,18 @@
 
 package rmi;
 
-import java.io.Serializable;
-
-public class RMIObjResponse implements Serializable {
+public class RMIObjResponse implements RMIMessage {
 	private static final long serialVersionUID = 2115010397836118161L;
 	public Object response;
-	public boolean isThrowable;
+	public boolean isError;
 
 	/**
 	 * Constructor for RMIObjResponse.
 	 * @param response
 	 * @param isThrowable
 	 */
-	public RMIObjResponse(Object response, boolean isThrowable) {
+	public RMIObjResponse(Object response, boolean isError) {
 		this.response = response;
-		this.isThrowable = isThrowable;
+		this.isError = isError;
 	}
 }

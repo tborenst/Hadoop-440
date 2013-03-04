@@ -85,7 +85,7 @@ public class ClientManager {
 		//TODO: remove weird test code
 		//RMIObjResponse objResponseData = new RMIObjResponse(new RemoteObjectReference("asdf", 8080, "321", "Person"), false);
 		
-		if(objResponseData.isThrowable) {
+		if(objResponseData.isError) {
 			// TODO Figure out something better than the try and catch
 			throw (Exception) objResponseData.response;
 		}

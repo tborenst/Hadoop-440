@@ -20,13 +20,13 @@ public class VansiTest {
 		c.addInterface(Person.class.getSimpleName(), Person.class);
 		Person t = (Person) c.lookupOn(sock, "tomer");
 		System.out.println("-------");
-		System.out.println(">>" + t.getName());
+		System.out.println(">> " + t.getName());
 		t.setName("doom_rectum");
-		System.out.println(">>" + t.getName());
+		System.out.println(">> " + t.getName());
 		
-		System.out.println(">>" + t.getAge());
+		System.out.println(">> " + t.getAge());
 		t.setAge(32142);
-		System.out.println(">>" + t.getAge());
+		System.out.println(">> " + t.getAge());
 		
 		
 	}

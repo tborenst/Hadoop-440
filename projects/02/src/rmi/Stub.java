@@ -40,7 +40,7 @@ public class Stub implements InvocationHandler {
 		RMIResponse responseData = (RMIResponse) socket.request("invokeMethod", requestData);
 		
 		//check response for errors (isThrowable)
-		if(responseData.isThrowable) {
+		if(responseData.isError) {
 			throw (Exception) responseData.response;
 		}
 		
