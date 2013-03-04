@@ -100,20 +100,21 @@ public class ServerHandler {
 		try {
 			result = runMethodOn(ror, request.methodName, request.args);
 			isError = false;
-
-			Class<?>[] interfaces = result.getClass().getInterfaces();
-			for(int i = 0; i < interfaces.length; i++) {
-				if(remoteInterface.equals(interfaces[i])) {
-					String objectInterfaceName = RMIIndex.getInterfaceNameByClass(result.getClass());
-					
-					if(objectInterfaceName != null) {
-						result = RMIIndex.addObjectAsRor(result, getHostname(), getPort(), objectInterfaceName); //returns an ror
-						isROR = true;
-						break;
-					}
-					else {
-						isROR = false;
-						break;
+			if(result != null) {
+				Class<?>[] interfaces = result.getClass().getInterfaces();
+				for(int i = 0; i < interfaces.length; i++) {
+					if(remoteInterface.equals(interfaces[i])) {
+						String objectInterfaceName = RMIIndex.getInterfaceNameByClass(result.getClass());
+						
+						if(objectInterfaceName != null) {
+							result = RMIIndex.addObjectAsRor(result, getHostname(), getPort(), objectInterfaceName); //returns an ror
+							isROR = true;
+							break;
+						}
+						else {
+							isROR = false;
+							break;
+						}
 					}
 				}
 			}

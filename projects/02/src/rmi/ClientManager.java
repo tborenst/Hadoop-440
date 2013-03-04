@@ -91,13 +91,16 @@ public class ClientManager {
 		}
 		
 		RemoteObjectReference ror = (RemoteObjectReference) objResponseData.response;
-		
+		return makeProxy(ror, socket);
+	}
+	
+	public Proxy makeProxy(RemoteObjectReference ror, SIOClient socket) {
 		Class<?> myInterface = implInterfaces.get(ror.interfaceName);
 		
 		//TODO: check if myInterface is null, and throw an unimplementedInterfaceException (looks like we need to create this exception)
 		//if(myInterface == null) {throw new UnimplementedInterfaceException();}
 		
-		Stub handler = new Stub(ror, socket);
+		Stub handler = new Stub(ror, socket, this);
 		
 		Proxy foundObj = (Proxy) Proxy.newProxyInstance(myInterface.getClassLoader(),
 				new Class[] { myInterface }, handler);

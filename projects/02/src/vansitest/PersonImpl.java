@@ -1,13 +1,17 @@
 package vansitest;
 
+import java.util.ArrayList;
+
 public class PersonImpl implements Person{
 	private static final long serialVersionUID = -4668010808997778749L;
 	private int age;
 	private String name;
+	private ArrayList<PersonImpl> children;
 	
 	public PersonImpl(int age, String name) {
 		this.age = age;
 		this.name = name;
+		this.children = new ArrayList<PersonImpl>();
 		System.out.println("New Person has been created: "+age+" "+name);
 	}
 	
@@ -36,6 +40,17 @@ public class PersonImpl implements Person{
 	public String getName() {
 		System.out.println("Got name:"+name);
 		return name;
+	}
+
+	@Override
+	public Person makeChild(String name) {
+		PersonImpl child = new PersonImpl(0, name);
+		children.add(child);
+		return child;
+	}
+	
+	public Person getChild(int idx) {
+		return children.get(idx);
 	}
 	
 }

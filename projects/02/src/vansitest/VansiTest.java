@@ -38,6 +38,18 @@ public class VansiTest {
 		t.setAge(32142);
 		System.out.println(">> " + t.getAge());
 		
+		Person t2 = (Person) t.makeChild("toby");
+		System.out.println(">> " + t2.getName());
+		t2.setName("doom_rectum2");
+		System.out.println(">> " + t2.getName());
 		
+		System.out.println(">> " + t2.getAge());
+		t2.setAge(2);
+		System.out.println(">> " + t2.getAge());
+		
+		Person t2Copy = t.getChild(0);
+		System.out.println(">> " + t2Copy.getName());
+		t2Copy.setName("trollFace");
+		System.out.println(">> "+t2.getName());
 	}
 }
