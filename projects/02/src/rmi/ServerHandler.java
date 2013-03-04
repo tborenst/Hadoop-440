@@ -140,6 +140,7 @@ public class ServerHandler {
 	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 */
+
 	public Object runMethodOn(RemoteObjectReference ror, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		Object o = RMIIndex.getObjectByRor(ror);
 		Class<?> c = o.getClass();
