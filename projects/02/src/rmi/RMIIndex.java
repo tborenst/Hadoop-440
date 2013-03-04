@@ -44,9 +44,9 @@ public class RMIIndex {
 	 * @param name
 	 * @return
 	 * @throws AlreadyBoundException 
-	 * @throws NoSuchRORException 
+	 * @throws NoSuchRemoteObjectReferenceException 
 	 */
-	public RemoteObjectReference registerObject(Object o, String hostname, int port, String interfaceName, String name) throws AlreadyBoundException, NoSuchRORException {
+	public RemoteObjectReference registerObject(Object o, String hostname, int port, String interfaceName, String name) throws AlreadyBoundException, NoSuchRemoteObjectReferenceException {
 		RemoteObjectReference ror = addObjectAsRor(o, hostname, port, interfaceName);
 		bind(name, ror);
 		return ror;
@@ -81,13 +81,13 @@ public class RMIIndex {
 	 * If the ROR does not exist on this registry throws 
 	 * If the name is already taken, this method throws AlreadyBoundException
 	 * @throws AlreadyBoundException 
-	 * @throws NoSuchRORException 
+	 * @throws NoSuchRemoteObjectReferenceException 
 	 */
-	public Boolean bind(String name, RemoteObjectReference ror) throws AlreadyBoundException, NoSuchRORException {
+	public Boolean bind(String name, RemoteObjectReference ror) throws AlreadyBoundException, NoSuchRemoteObjectReferenceException {
 		synchronized(nameToRor){
 			synchronized(uidToObj) {
-				if(uidToObj.get(ror.objectUID) == null) {
-					throw new NoSuchRORException();
+				if(ror == null  || uidToObj.get(ror.objectUID) == null) {
+					throw new NoSuchRemoteObjectReferenceException();
 				}
 				else {
 					if(nameToRor.get(name) == null){
@@ -102,34 +102,35 @@ public class RMIIndex {
 	}
 	
 	/**
+	 * Returns true if successful, false if failed (no such binding).
+	 * @throws NoSuchRemoteObjectReferenceException 
+	 */
+	public Boolean rebind(String name, RemoteObjectReference ror) throws NoSuchRemoteObjectReferenceException{
+		synchronized(nameToRor){
+			synchronized(uidToObj) {
+				if(ror == null || uidToObj.get(ror.objectUID) == null) {
+					throw new NoSuchRemoteObjectReferenceException();
+				}
+				else {
+					nameToRor.put(name, ror);
+					return true;
+				}
+			}
+		}
+	}
+	
+
+	/**
 	 * Return true if successful, false if failed (no such bidning).
 	 * @throws NotBoundException 
 	 */
-	public Boolean unbind(String name, RemoteObjectReference ror) throws NotBoundException{
+	public Boolean unbind(String name) throws NotBoundException{
 		synchronized(nameToRor){
 			if(nameToRor.get(name) != null){
 				nameToRor.remove(name);
 				return true;
 			} else {
 				throw new NotBoundException();
-			}
-		}
-	}
-	
-	/**
-	 * Returns true if successful, false if failed (no such binding).
-	 * @throws NoSuchRORException 
-	 */
-	public Boolean rebind(String name, RemoteObjectReference ror) throws NoSuchRORException{
-		synchronized(nameToRor){
-			synchronized(uidToObj) {
-				if(uidToObj.get(ror.objectUID) == null) {
-					throw new NoSuchRORException();
-				}
-				else {
-					nameToRor.put(name, ror);
-					return true;
-				}
 			}
 		}
 	}

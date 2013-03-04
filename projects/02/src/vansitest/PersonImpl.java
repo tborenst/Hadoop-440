@@ -2,6 +2,8 @@ package vansitest;
 
 import java.util.ArrayList;
 
+import rmi.RemoteObjectReference;
+
 public class PersonImpl implements Person{
 	private static final long serialVersionUID = -4668010808997778749L;
 	private int age;
@@ -51,6 +53,12 @@ public class PersonImpl implements Person{
 	
 	public Person getChild(int idx) {
 		return children.get(idx);
+	}
+
+	@Override
+	public RemoteObjectReference getROR() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

@@ -6,12 +6,11 @@ package vansitest;
 
 import java.rmi.AlreadyBoundException;
 
-import networking.SIOClient;
 import rmi.*;
 
 public class VansiTest {
 
-	public static void main(String[] args) throws AlreadyBoundException {
+	public static void main(String[] args) throws AlreadyBoundException, NoSuchRemoteObjectReferenceException {
 		
 		//setup
 		int serverPort = 8080;
@@ -22,7 +21,7 @@ public class VansiTest {
 		
 		
 		ClientHandler c = new ClientHandler();
-		SIOClient sock = c.connectTo(serverHostname, serverPort);
+		c.connectTo(serverHostname, serverPort);
 		c.addInterface(Person.class.getSimpleName(), Person.class);
 		
 		

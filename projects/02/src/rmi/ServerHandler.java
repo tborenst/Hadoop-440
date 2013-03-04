@@ -52,22 +52,85 @@ public class ServerHandler {
 		
 		serverSocket.on("lookupObject", new SIOCommand() {
 			public void run() {
-				System.out.println("Server: recieved a lookupObject requerst.");
+				System.out.println("Server: recieved a lookupObject request.");
 				RMINamingResponse response = lookup((RMINamingRequest) object);
 				System.out.println("Responding: error=" + response.isError);
 				socket.respond(requestId, response);
 			}
 		});
 		
-		serverSocket.on("bind", new SIOCommand() {
+		serverSocket.on("bindObject", new SIOCommand() {
 			public void run() {
-				
+				System.out.println("Server: recieved a bindObject request.");
+				RMINamingResponse response = bind((RMINamingRequest) object);
+				System.out.println("Responding: error=" + response.isError);
+				socket.respond(requestId, response);
+			}
+		});
+		
+		serverSocket.on("rebindObject", new SIOCommand() {
+			public void run() {
+				System.out.println("Server: recieved a bindObject request.");
+				RMINamingResponse response = rebind((RMINamingRequest) object);
+				System.out.println("Responding: error=" + response.isError);
+				socket.respond(requestId, response);
+			}
+		});
+		
+		serverSocket.on("unbindObject", new SIOCommand() {
+			public void run() {
+				System.out.println("Server: recieved a bindObject request.");
+				RMINamingResponse response = unbind((RMINamingRequest) object);
+				System.out.println("Responding: error=" + response.isError);
+				socket.respond(requestId, response);
 			}
 		});
 	}
 	
+	public RMINamingResponse bind(RMINamingRequest request) {
+		Object result;
+		boolean isError;
+		try {
+			result = RMIIndex.bind(request.name, request.ror);
+			isError = false;
+		} catch(Exception e) {
+			result = e;
+			isError = true;
+		}
+		
+		return new RMINamingResponse(result, isError);
+	}
+	
+	public RMINamingResponse rebind(RMINamingRequest request) {
+		Object result;
+		boolean isError;
+		try {
+			result = RMIIndex.rebind(request.name, request.ror);
+			isError = false;
+		} catch(Exception e) {
+			result = e;
+			isError = true;
+		}
+		
+		return new RMINamingResponse(result, isError);
+	}
+	
+	public RMINamingResponse unbind(RMINamingRequest request) {
+		Object result;
+		boolean isError;
+		try {
+			result = RMIIndex.unbind(request.name);
+			isError = false;
+		} catch(Exception e) {
+			result = e;
+			isError = true;
+		}
+		
+		return new RMINamingResponse(result, isError);
+	}
+	
 	//for testing purposes
-	public RemoteObjectReference registerObject(Object o, String interfaceName, String name) throws AlreadyBoundException, NoSuchRORException {
+	public RemoteObjectReference registerObject(Object o, String interfaceName, String name) throws AlreadyBoundException, NoSuchRemoteObjectReferenceException {
 		return RMIIndex.registerObject(o, serverSocket.getHostname(), serverSocket.getPort(), interfaceName, name);
 	}
 	

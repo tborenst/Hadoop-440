@@ -9,8 +9,8 @@ package rmi;
 import java.lang.reflect.Proxy;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.HashMap;
+
 
 import rmimessage.RMINamingRequest;
 import rmimessage.RMINamingResponse;
@@ -21,14 +21,16 @@ import networking.SIOClient;
 
 public class ClientHandler {
 	private HashMap<String, Class<?>> implInterfaces;
-	private ArrayList<SIOClient> connections;
+	private HashMap<String, SIOClient> connections;
+	private HashMap<String, RemoteObjectReference> nameToROR;
 
 	/**
 	 * Constructor for ClientHandler.
 	 */
 	public ClientHandler() {
 		this.implInterfaces = new HashMap<String, Class<?>>();
-		this.connections = new ArrayList<SIOClient>();
+		this.connections = new HashMap<String, SIOClient>();
+		this.nameToROR = new HashMap<String, RemoteObjectReference>();
 	}
 	
 	/**
@@ -47,11 +49,72 @@ public class ClientHandler {
 	 */
 	public SIOClient connectTo(String hostname, int port) {
 		SIOClient newConnection = new SIOClient(hostname, port);
-		connections.add(newConnection);
+		connections.put(hostname + ":" + port, newConnection);
 		return newConnection;
 	}
 	
 	//TODO: handle removing connections, when a socket closes
+	
+	public void bind(String name, RemoteObjectReference ror) throws Exception {
+		if(ror == null) {throw new NoSuchRemoteObjectReferenceException();}
+		SIOClient socket = connections.get(ror.hostname + ":" + ror.port);
+		if(socket.isAlive()) {
+			RMINamingRequest objRequestData = new RMINamingRequest(name, ror);
+			RMINamingResponse objResponseData = (RMINamingResponse) socket.request("bindObject", objRequestData);
+			
+			if(objResponseData.isError) {
+				throw (Exception) objResponseData.response;
+			} else {
+				nameToROR.put(name, ror);
+			}
+		}
+		else {
+			throw new RemoteException();
+		}
+	}
+	
+	
+	public void rebind(String name, RemoteObjectReference ror) throws Exception {
+		if(ror == null) {throw new NoSuchRemoteObjectReferenceException();}
+		SIOClient socket = connections.get(ror.hostname + ":" + ror.port);
+		if(socket.isAlive()) {
+			try {
+				unbind(name);
+			} catch (NotBoundException e) {}
+			
+			RMINamingRequest objRequestData = new RMINamingRequest(name, ror);
+			RMINamingResponse objResponseData = (RMINamingResponse) socket.request("rebindObject", objRequestData);
+			
+			if(objResponseData.isError) {
+				throw (Exception) objResponseData.response;
+			} else {
+				nameToROR.put(name, ror);
+			}
+		}
+		else {
+			throw new RemoteException();
+		}
+	}
+	
+	public void unbind(String name) throws Exception {
+		RemoteObjectReference ror = nameToROR.get(name);
+		if(ror != null) {
+			SIOClient socket = connections.get(ror.hostname + ":" + ror.port);
+			if(socket.isAlive()) {
+				RMINamingRequest objRequestData = new RMINamingRequest(name, null);
+				RMINamingResponse objResponseData = (RMINamingResponse) socket.request("unbindObject", objRequestData);
+				
+				if(objResponseData.isError) {
+					throw (Exception) objResponseData.response;
+				} else {
+					nameToROR.remove(name);
+				}
+			}
+			else {
+				throw new RemoteException();
+			}
+		}
+	}
 	
 	/**
 	 * Look for a remote object with name on the connected servers. 
@@ -62,9 +125,7 @@ public class ClientHandler {
 	 * @throws Exception 
 	 */
 	public Proxy lookup(String name) throws Exception {
-		for(int c = 0; c < connections.size(); c++) {
-			SIOClient socket = connections.get(c);
-			
+		for(SIOClient socket : connections.values()) {
 			try {
 				return lookupOn(socket, name);
 			} catch (NotBoundException e ) {}
@@ -92,6 +153,7 @@ public class ClientHandler {
 			}
 			
 			RemoteObjectReference ror = (RemoteObjectReference) objResponseData.response;
+			nameToROR.put(name, ror);
 			return makeProxy(ror, socket);
 		}
 		else {
@@ -100,17 +162,16 @@ public class ClientHandler {
 	}
 	
 	
-	public Proxy makeProxy(RemoteObjectReference ror, SIOClient socket) {
+	public Proxy makeProxy(RemoteObjectReference ror, SIOClient socket) throws UnaddedInterfaceException {
 		Class<?> myInterface = implInterfaces.get(ror.interfaceName);
-		
-		//TODO: check if myInterface is null, and throw an unimplementedInterfaceException (looks like we need to create this exception)
-		//if(myInterface == null) {throw new UnimplementedInterfaceException();}
-		
-		Stub handler = new Stub(ror, socket, this);
-		
-		Proxy foundObj = (Proxy) Proxy.newProxyInstance(myInterface.getClassLoader(),
-				new Class[] { myInterface }, handler);
-		return foundObj;
+		if(myInterface == null) {throw new UnaddedInterfaceException();}
+		else {
+			Stub handler = new Stub(ror, socket, this);
+			
+			Proxy foundObj = (Proxy) Proxy.newProxyInstance(myInterface.getClassLoader(),
+					new Class[] { myInterface }, handler);
+			return foundObj;
+		}
 	}
 	
 	//testing function

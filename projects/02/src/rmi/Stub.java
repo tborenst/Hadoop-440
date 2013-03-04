@@ -31,6 +31,10 @@ public class Stub implements InvocationHandler {
 	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
+		if(method.getName().equals("getROR")) {
+			return ror;
+		}
+		
 		System.out.println("Method: " + method.toString());
 		
 		if(args != null) {
