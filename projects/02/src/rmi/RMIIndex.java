@@ -1,6 +1,7 @@
 package rmi;
 
 import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
 import java.util.HashMap;
 
 public class RMIIndex {
@@ -42,8 +43,9 @@ public class RMIIndex {
 	 * @param interfaceName
 	 * @param name
 	 * @return
+	 * @throws AlreadyBoundException 
 	 */
-	public RemoteObjectReference registerObject(Object o, String hostname, int port, String interfaceName, String name) {
+	public RemoteObjectReference registerObject(Object o, String hostname, int port, String interfaceName, String name) throws AlreadyBoundException {
 		RemoteObjectReference ror = addObjectAsRor(o, hostname, port, interfaceName);
 		bind(name, ror);
 		return ror;
@@ -65,17 +67,40 @@ public class RMIIndex {
 		}
 	}
 	
+	public Object lookup(String name) throws NotBoundException {
+		Object o = getRorByName(name);
+		if(o == null) {
+			throw new NotBoundException();
+		}
+		return o;
+	}
+	
 	/**
 	 * Returns true if successful, false if failed (already bound).
+	 * @throws AlreadyBoundException 
 	 */
-	public Boolean bind(String name, RemoteObjectReference ror){
-		//TODO: need to throw exception (already bound) if name and ror already exist in hashmap
+	public Boolean bind(String name, RemoteObjectReference ror) throws AlreadyBoundException{
 		synchronized(nameToRor){
 			if(nameToRor.get(name) == null){
 				nameToRor.put(name, ror);
 				return true;
 			} else {
-				return false;
+				throw new AlreadyBoundException();
+			}
+		}
+	}
+	
+	/**
+	 * Return true if successful, false if failed (no such bidning).
+	 * @throws NotBoundException 
+	 */
+	public Boolean unbind(String name, RemoteObjectReference ror) throws NotBoundException{
+		synchronized(nameToRor){
+			if(nameToRor.get(name) != null){
+				nameToRor.remove(name);
+				return true;
+			} else {
+				throw new NotBoundException();
 			}
 		}
 	}
@@ -87,20 +112,6 @@ public class RMIIndex {
 		synchronized(nameToRor){
 			if(nameToRor.get(name) != null){
 				nameToRor.put(name, ror);
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
-	
-	/**
-	 * Return true if successful, false if failed (no such bidning).
-	 */
-	public Boolean unbind(String name, RemoteObjectReference ror){
-		synchronized(nameToRor){
-			if(nameToRor.get(name) != null){
-				nameToRor.remove(name);
 				return true;
 			} else {
 				return false;

@@ -7,6 +7,7 @@
 package rmi;
 
 import java.lang.reflect.*;
+import java.rmi.RemoteException;
 
 import networking.SIOClient;
 
@@ -34,23 +35,26 @@ public class Stub implements InvocationHandler {
 		}
 		
 		
-		//compile request message
 		RMIRequest requestData = new RMIRequest(ror, method, args);
-		//send request
-		//TODO: throw accessException if socket is not alive
-		System.out.println("Stub: Sending Ror " + requestData.methodName);
+		//System.out.println("Stub: Sending Ror " + requestData.methodName);
 		RMIResponse responseData = (RMIResponse) socket.request("invokeMethod", requestData);
-		Object result = responseData.response;
 		
-		//check response for errors (isThrowable)
-		if(responseData.isError) {
-			throw (Exception) responseData.response;
-		} else if(responseData.isROR) {
-			RemoteObjectReference resultROR = (RemoteObjectReference) responseData.response;
-			result = client.makeProxy(resultROR, socket);
+		if(socket.isAlive()) {
+			Object result = responseData.response;
+			
+			//check response for errors (isThrowable)
+			if(responseData.isError) {
+				throw (Exception) responseData.response;
+			} else if(responseData.isROR) {
+				RemoteObjectReference resultROR = (RemoteObjectReference) responseData.response;
+				result = client.makeProxy(resultROR, socket);
+			}
+			
+			return result;
 		}
-		
-		return result;
+		else {
+			throw new RemoteException();
+		}
 	}
 
 	

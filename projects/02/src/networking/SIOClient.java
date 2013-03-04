@@ -187,5 +187,11 @@ public class SIOClient extends SIOSocket{
 			}
 		}
 	}
+	
+	public Boolean isAlive(){
+		synchronized(alive){
+			return alive;
+		}
+	}
 
 }

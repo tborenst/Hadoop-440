@@ -8,6 +8,7 @@ package rmi;
 
 import java.lang.reflect.Proxy;
 import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -63,7 +64,8 @@ public class ClientManager {
 			
 			try {
 				return lookupOn(socket, name);
-			} catch (NotBoundException e) {}
+			} catch (NotBoundException e ) {}
+			catch(RemoteException e) {}
 		}
 		throw new NotBoundException();
 	}
@@ -79,19 +81,20 @@ public class ClientManager {
 	 */
 	public Proxy lookupOn(SIOClient socket, String name) throws Exception {
 		RMIObjRequest objRequestData = new RMIObjRequest(name);
-		//TODO: throw accessException if socket is not alive
-		RMIObjResponse objResponseData = (RMIObjResponse) socket.request("lookupObject", objRequestData);
-		
-		//TODO: remove weird test code
-		//RMIObjResponse objResponseData = new RMIObjResponse(new RemoteObjectReference("asdf", 8080, "321", "Person"), false);
-		
-		if(objResponseData.isError) {
-			// TODO Figure out something better than the try and catch
-			throw (Exception) objResponseData.response;
+		if(socket.isAlive()) {
+			RMIObjResponse objResponseData = (RMIObjResponse) socket.request("lookupObject", objRequestData);
+			
+			if(objResponseData.isError) {
+				// TODO Figure out something better than the try and catch
+				throw (Exception) objResponseData.response;
+			}
+			
+			RemoteObjectReference ror = (RemoteObjectReference) objResponseData.response;
+			return makeProxy(ror, socket);
 		}
-		
-		RemoteObjectReference ror = (RemoteObjectReference) objResponseData.response;
-		return makeProxy(ror, socket);
+		else {
+			throw new RemoteException();
+		}
 	}
 	
 	public Proxy makeProxy(RemoteObjectReference ror, SIOClient socket) {

@@ -7,6 +7,7 @@
 package rmi;
 
 import java.lang.reflect.*;
+import java.rmi.AlreadyBoundException;
 import java.util.HashMap;
 
 import networking.SIOCommand;
@@ -52,10 +53,16 @@ public class ServerHandler {
 				socket.respond(requestId, response);
 			}
 		});
+		
+		/*serverSocket.on("bind", new SIOCommand() {
+			public void run() {
+				
+			}
+		});*/
 	}
 	
 	//for testing purposes
-	public RemoteObjectReference registerObject(Object o, String interfaceName, String name) {
+	public RemoteObjectReference registerObject(Object o, String interfaceName, String name) throws AlreadyBoundException {
 		return RMIIndex.registerObject(o, serverSocket.getHostname(), serverSocket.getPort(), interfaceName, name);
 	}
 	
@@ -70,17 +77,17 @@ public class ServerHandler {
 	 */
 	public RMIObjResponse lookup(RMIObjRequest request) {
 		Object result;
-		boolean isThrowable;
+		boolean isError;
 		try {
-			result = RMIIndex.getRorByName(request.name);
+			result = RMIIndex.lookup(request.name);
 			System.out.println("Found ROR: "+ ((RemoteObjectReference) result).objectUID);
-			isThrowable = false;
+			isError = false;
 		} catch(Exception e) {
 			result = e;
-			isThrowable = true;
+			isError = true;
 		}
 		
-		return new RMIObjResponse(result, isThrowable);
+		return new RMIObjResponse(result, isError);
 		
 	}
 	
@@ -126,7 +133,6 @@ public class ServerHandler {
 		
 		
 		return new RMIResponse(ror, result, isError, isROR);
-		
 	}
 	
 	/**
