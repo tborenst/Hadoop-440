@@ -11,6 +11,7 @@ public class RMIResponse implements RMIMessage {
 	public Object response;
 	public boolean isError;
 	public RemoteObjectReference ror;
+	public boolean isROR;
 	
 	/**
 	 * Constructor for RMIResponse.
@@ -18,9 +19,10 @@ public class RMIResponse implements RMIMessage {
 	 * @param response
 	 * @param isThrowable
 	 */
-	public RMIResponse(RemoteObjectReference ror, Object response, boolean isError) {
+	public RMIResponse(RemoteObjectReference ror, Object response, boolean isError, boolean isROR) {
 		this.ror = ror;
 		this.response = response;
 		this.isError = isError;
+		this.isROR = isROR;
 	}
 }

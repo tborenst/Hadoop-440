@@ -9,8 +9,6 @@ package rmi;
 import java.lang.reflect.*;
 import java.util.HashMap;
 
-import vansitest.Util;
-
 import networking.SIOCommand;
 import networking.SIOServer;
 
@@ -19,10 +17,12 @@ public class ServerHandler {
 	public RMIIndex RMIIndex;
 	private HashMap<Class<?>, Class<?>> primToObj;
 	private SIOServer serverSocket;
+	private Class<?> remoteInterface;
 	
-	public ServerHandler(int port) {
+	public ServerHandler(int port, Class<?> remoteInterface) {
 		this.RMIIndex = new RMIIndex();
 		this.serverSocket = new SIOServer(port);
+		this.remoteInterface = remoteInterface;
 		
 		this.primToObj = new HashMap<Class<?>, Class<?>>();
 		primToObj.put(boolean.class, Boolean.class);
@@ -55,8 +55,12 @@ public class ServerHandler {
 	}
 	
 	//for testing purposes
-	public RemoteObjectReference addObject(Object o, String interfaceName, String name) {
-		return RMIIndex.addObject(o, serverSocket.getHostname(), serverSocket.getPort(), interfaceName, name);
+	public RemoteObjectReference registerObject(Object o, String interfaceName, String name) {
+		return RMIIndex.registerObject(o, serverSocket.getHostname(), serverSocket.getPort(), interfaceName, name);
+	}
+	
+	public void registerClass(Class<?> c, String interfaceName) {
+		RMIIndex.registerClass(c, interfaceName);
 	}
 	
 	/**
@@ -88,18 +92,39 @@ public class ServerHandler {
 	 */
 	public RMIResponse handle(RMIRequest request) {
 		Object result;
-		boolean isThrowable;
+		boolean isError = true;
+		boolean isROR = false;
 		RemoteObjectReference ror = request.ror;
 		System.out.println("Server.handle: ror: " + ror.objectUID);
+		
 		try {
 			result = runMethodOn(ror, request.methodName, request.args);
-			isThrowable = false;
+			isError = false;
+
+			Class<?>[] interfaces = result.getClass().getInterfaces();
+			for(int i = 0; i < interfaces.length; i++) {
+				if(remoteInterface.equals(interfaces[i])) {
+					String objectInterfaceName = RMIIndex.getInterfaceNameByClass(result.getClass());
+					
+					if(objectInterfaceName != null) {
+						result = RMIIndex.addObjectAsRor(result, getHostname(), getPort(), objectInterfaceName); //returns an ror
+						isROR = true;
+						break;
+					}
+					else {
+						isROR = false;
+						break;
+					}
+				}
+			}
+			
 		} catch(Exception e) {
 			result = e;
-			isThrowable = true;
+			isError = true;
 		}
 		
-		return new RMIResponse(ror, result, isThrowable);
+		
+		return new RMIResponse(ror, result, isError, isROR);
 		
 	}
 	
@@ -230,7 +255,7 @@ public class ServerHandler {
 	
 	//testing
 	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		ServerHandler s = new ServerHandler(8080);
+		ServerHandler s = new ServerHandler(8080, MyRemote.class);
 		System.out.println(s.typeEqual(Integer.class, int.class));
 	}
 }

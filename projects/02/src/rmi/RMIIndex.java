@@ -6,16 +6,30 @@ import java.util.HashMap;
 public class RMIIndex {
 	private HashMap<Integer, Object> uidToObj; //objectUID -> object
 	private HashMap<String, RemoteObjectReference> nameToRor;
+	private HashMap<Class<?>, String> classToInterfaceName;
 	
 	public RMIIndex(){
 		this.uidToObj = new HashMap<Integer, Object>();
 		this.nameToRor = new HashMap<String, RemoteObjectReference>();
+		this.classToInterfaceName = new HashMap<Class<?>, String>();
 	}
 	
 	public RemoteObjectReference getRorByName(String name){
 		synchronized(nameToRor){
 			RemoteObjectReference ror = nameToRor.get(name);
 			return ror;
+		}
+	}
+	
+	public void registerClass(Class<?> c, String interfaceName) {
+		synchronized(classToInterfaceName) {
+			classToInterfaceName.put(c, interfaceName);
+		}
+	}
+	
+	public String getInterfaceNameByClass(Class<?> c) {
+		synchronized(classToInterfaceName) {
+			return classToInterfaceName.get(c);
 		}
 	}
 	
@@ -29,12 +43,20 @@ public class RMIIndex {
 	 * @param name
 	 * @return
 	 */
-	public RemoteObjectReference addObject(Object o, String hostname, int port, String interfaceName, String name) {
-		RemoteObjectReference ror = new RemoteObjectReference(hostname, port, o.hashCode(), interfaceName);
-		nameToRor.put(name, ror);
-		uidToObj.put(ror.objectUID, o);
+	public RemoteObjectReference registerObject(Object o, String hostname, int port, String interfaceName, String name) {
+		RemoteObjectReference ror = addObjectAsRor(o, hostname, port, interfaceName);
+		bind(name, ror);
 		return ror;
 	}
+	
+	public RemoteObjectReference addObjectAsRor(Object o, String hostname, int port, String interfaceName) {
+		RemoteObjectReference ror = new RemoteObjectReference(hostname, port, o.hashCode(), interfaceName);
+		synchronized(uidToObj){
+			uidToObj.put(ror.objectUID, o);
+			return ror;
+		}
+	}
+	
 	
 	public Object getObjectByRor(RemoteObjectReference ror){
 		synchronized(uidToObj){

@@ -10,15 +10,25 @@ import rmi.*;
 public class VansiTest {
 
 	public static void main(String[] args) throws Exception {
+		
+		//setup
 		int serverPort = 8080;
-		ServerHandler s = new ServerHandler(serverPort);
+		ServerHandler s = new ServerHandler(serverPort, MyRemote.class);
 		String serverHostname = s.getHostname();
-		s.addObject(new PersonImpl(1, "doom"), "Person", "tomer");
+		s.registerClass(PersonImpl.class, Person.class.getSimpleName());
+		s.registerObject(new PersonImpl(1, "doom"), Person.class.getSimpleName(), "tomer");
+		
 		
 		ClientManager c = new ClientManager();
 		SIOClient sock = c.connectTo(serverHostname, serverPort);
 		c.addInterface(Person.class.getSimpleName(), Person.class);
+		
+		
+		
+		//actually start doing shit
 		Person t = (Person) c.lookupOn(sock, "tomer");
+		
+		
 		System.out.println("-------");
 		System.out.println(">> " + t.getName());
 		t.setName("doom_rectum");
