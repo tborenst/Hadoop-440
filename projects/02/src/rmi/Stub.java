@@ -9,6 +9,9 @@ package rmi;
 import java.lang.reflect.*;
 import java.rmi.RemoteException;
 
+import rmimessage.RMIRequest;
+import rmimessage.RMIResponse;
+
 import networking.SIOClient;
 
 

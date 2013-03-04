@@ -10,6 +10,11 @@ import java.lang.reflect.*;
 import java.rmi.AlreadyBoundException;
 import java.util.HashMap;
 
+import rmimessage.RMIObjRequest;
+import rmimessage.RMIObjResponse;
+import rmimessage.RMIRequest;
+import rmimessage.RMIResponse;
+
 import networking.SIOCommand;
 import networking.SIOServer;
 
@@ -54,11 +59,11 @@ public class ServerHandler {
 			}
 		});
 		
-		/*serverSocket.on("bind", new SIOCommand() {
+		serverSocket.on("bind", new SIOCommand() {
 			public void run() {
 				
 			}
-		});*/
+		});
 	}
 	
 	//for testing purposes

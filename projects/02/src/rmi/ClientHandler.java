@@ -12,6 +12,9 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import rmimessage.RMIObjRequest;
+import rmimessage.RMIObjResponse;
+
 import vansitest.Person;
 
 import networking.SIOClient;

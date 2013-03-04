@@ -4,7 +4,7 @@
  * Author: Vansi Vallabhaneni
  */
 
-package rmi;
+package rmimessage;
 
 public class RMIObjResponse implements RMIMessage {
 	private static final long serialVersionUID = 2115010397836118161L;

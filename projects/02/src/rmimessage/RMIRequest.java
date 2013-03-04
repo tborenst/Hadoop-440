@@ -3,9 +3,11 @@
  * on the remote object (with objectUID) with arguments (args).
  * Author: Vansi Vallabhaneni
  */
-package rmi;
+package rmimessage;
 
 import java.lang.reflect.Method;
+
+import rmi.RemoteObjectReference;
 
 
 public class RMIRequest implements RMIMessage {

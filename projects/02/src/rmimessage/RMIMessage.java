@@ -1,4 +1,4 @@
-package rmi;
+package rmimessage;
 
 import java.io.Serializable;
 

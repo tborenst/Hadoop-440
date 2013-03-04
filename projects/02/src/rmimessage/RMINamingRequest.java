@@ -3,7 +3,7 @@
  * Author: Vansi Vallabhaneni
  */
 
-package rmi;
+package rmimessage;
 
 
 public class RMIObjRequest implements RMIMessage {
