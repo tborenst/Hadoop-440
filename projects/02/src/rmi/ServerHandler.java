@@ -67,7 +67,7 @@ public class ServerHandler {
 	}
 	
 	//for testing purposes
-	public RemoteObjectReference registerObject(Object o, String interfaceName, String name) throws AlreadyBoundException {
+	public RemoteObjectReference registerObject(Object o, String interfaceName, String name) throws AlreadyBoundException, NoSuchRORException {
 		return RMIIndex.registerObject(o, serverSocket.getHostname(), serverSocket.getPort(), interfaceName, name);
 	}
 	

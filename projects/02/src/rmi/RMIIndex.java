@@ -44,8 +44,9 @@ public class RMIIndex {
 	 * @param name
 	 * @return
 	 * @throws AlreadyBoundException 
+	 * @throws NoSuchRORException 
 	 */
-	public RemoteObjectReference registerObject(Object o, String hostname, int port, String interfaceName, String name) throws AlreadyBoundException {
+	public RemoteObjectReference registerObject(Object o, String hostname, int port, String interfaceName, String name) throws AlreadyBoundException, NoSuchRORException {
 		RemoteObjectReference ror = addObjectAsRor(o, hostname, port, interfaceName);
 		bind(name, ror);
 		return ror;
@@ -76,16 +77,26 @@ public class RMIIndex {
 	}
 	
 	/**
-	 * Returns true if successful, false if failed (already bound).
+	 * Bind a ROR to a particular name.
+	 * If the ROR does not exist on this registry throws 
+	 * If the name is already taken, this method throws AlreadyBoundException
 	 * @throws AlreadyBoundException 
+	 * @throws NoSuchRORException 
 	 */
-	public Boolean bind(String name, RemoteObjectReference ror) throws AlreadyBoundException{
+	public Boolean bind(String name, RemoteObjectReference ror) throws AlreadyBoundException, NoSuchRORException {
 		synchronized(nameToRor){
-			if(nameToRor.get(name) == null){
-				nameToRor.put(name, ror);
-				return true;
-			} else {
-				throw new AlreadyBoundException();
+			synchronized(uidToObj) {
+				if(uidToObj.get(ror.objectUID) == null) {
+					throw new NoSuchRORException();
+				}
+				else {
+					if(nameToRor.get(name) == null){
+						nameToRor.put(name, ror);
+						return true;
+					} else {
+						throw new AlreadyBoundException();
+					}
+				}
 			}
 		}
 	}
@@ -107,14 +118,18 @@ public class RMIIndex {
 	
 	/**
 	 * Returns true if successful, false if failed (no such binding).
+	 * @throws NoSuchRORException 
 	 */
-	public Boolean rebind(String name, RemoteObjectReference ror){
+	public Boolean rebind(String name, RemoteObjectReference ror) throws NoSuchRORException{
 		synchronized(nameToRor){
-			if(nameToRor.get(name) != null){
-				nameToRor.put(name, ror);
-				return true;
-			} else {
-				return false;
+			synchronized(uidToObj) {
+				if(uidToObj.get(ror.objectUID) == null) {
+					throw new NoSuchRORException();
+				}
+				else {
+					nameToRor.put(name, ror);
+					return true;
+				}
 			}
 		}
 	}

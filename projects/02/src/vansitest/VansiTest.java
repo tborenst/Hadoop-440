@@ -28,7 +28,7 @@ public class VansiTest {
 		
 		try {
 			//actually start doing shit
-			Person t = (Person) c.lookupOn(sock, "tomer");
+			Person t = (Person) c.lookup("tomer");
 			
 			
 			System.out.println("-------");

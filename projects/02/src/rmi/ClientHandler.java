@@ -82,13 +82,12 @@ public class ClientHandler {
 	 * @return
 	 * @throws Exception 
 	 */
-	public Proxy lookupOn(SIOClient socket, String name) throws Exception {
-		RMINamingRequest objRequestData = new RMINamingRequest(name);
+	private Proxy lookupOn(SIOClient socket, String name) throws Exception {
 		if(socket.isAlive()) {
+			RMINamingRequest objRequestData = new RMINamingRequest(name, null);
 			RMINamingResponse objResponseData = (RMINamingResponse) socket.request("lookupObject", objRequestData);
 			
 			if(objResponseData.isError) {
-				// TODO Figure out something better than the try and catch
 				throw (Exception) objResponseData.response;
 			}
 			
@@ -99,6 +98,7 @@ public class ClientHandler {
 			throw new RemoteException();
 		}
 	}
+	
 	
 	public Proxy makeProxy(RemoteObjectReference ror, SIOClient socket) {
 		Class<?> myInterface = implInterfaces.get(ror.interfaceName);
