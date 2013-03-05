@@ -1,5 +1,6 @@
 /**
  * Vansi Tests his code here.
+ * Author: Vansi Vallabaneni.
  */
 
 package vansitest;
@@ -31,7 +32,6 @@ public class VansiTest {
 			//actually start doing shit
 			Person t = (Person) c.lookup("tomer");
 			
-			/*
 			System.out.println("-------");
 			System.out.println(">> " + t.getName());
 			t.setName("doom_rectum");
@@ -39,8 +39,8 @@ public class VansiTest {
 			
 			System.out.println(">> " + t.getAge());
 			t.setAge(32142);
-			System.out.println(">> " + t.getAge());*/
-			/*
+			System.out.println(">> " + t.getAge());
+			
 			Person t2 = (Person) t.makeChild("toby");
 			System.out.println(">> " + t2.getName());
 			t2.setName("doom_rectum2");
@@ -67,15 +67,14 @@ public class VansiTest {
 			
 			Person tNotReallyChild = (Person) c.lookup("child");
 			System.out.println(tNotReallyChild.getName());
-			*/
 			
 			
 			Person toAdopt = (Person) c.lookup("adopt");
 			System.out.println("going to adopt: " + toAdopt.getName() + " " + (toAdopt instanceof Person));
 
-			System.out.println("\n------------ " + Integer.class.isInstance(new Integer(5)));
+			System.out.println("\n------------ ");
 			t.adoptChild(toAdopt);
-			Person toAdoptFromT = (Person) t.getChild(0);
+			Person toAdoptFromT = (Person) t.getChild(1);
 			System.out.println("adopted: "+toAdoptFromT.getName());
 			
 		} catch(Exception e) {

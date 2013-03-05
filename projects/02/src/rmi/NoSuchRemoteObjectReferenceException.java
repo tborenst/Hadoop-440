@@ -1,3 +1,8 @@
+/**
+ * Fired when the RemoteObjectReference is not in the RMIIndex.
+ * Author: Vansi Vallabaneni.
+ */
+
 package rmi;
 
 public class NoSuchRemoteObjectReferenceException extends Exception {

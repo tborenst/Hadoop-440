@@ -14,8 +14,6 @@ import rmimessage.RMINamingRequest;
 import rmimessage.RMINamingResponse;
 import rmimessage.RMIRequest;
 import rmimessage.RMIResponse;
-import vansitest.Util;
-
 import networking.SIOCommand;
 import networking.SIOServer;
 
@@ -24,6 +22,12 @@ public class ServerHandler {
 	public RMIIndex RMIIndex;
 	private HashMap<Class<?>, Class<?>> primToObj;
 	private SIOServer serverSocket;
+	
+	/**
+	 * Constructor for ServerHandler.
+	 * @param port
+	 * @param remoteInterface
+	 */
 	public ServerHandler(int port, Class<?> remoteInterface) {
 		this.RMIIndex = new RMIIndex();
 		this.serverSocket = new SIOServer(port);
@@ -38,10 +42,12 @@ public class ServerHandler {
 		primToObj.put(double.class, Double.class);
 		primToObj.put(void.class, Void.class);
 
+		/**
+		 * SIO Event handlers:
+		 */
 		serverSocket.on("invokeMethod", new SIOCommand() {
 			public void run() {
 				RMIRequest requestData = (RMIRequest) object;
-				System.out.println("Server: ror: "+requestData.ror.objectUID);
 				RMIResponse response = handle(requestData); //arg0 = RMIRequest
 				socket.respond(requestId, response);
 			}
@@ -49,41 +55,38 @@ public class ServerHandler {
 		
 		serverSocket.on("lookupObject", new SIOCommand() {
 			public void run() {
-				System.out.println("Server: recieved a lookupObject request.");
 				RMINamingResponse response = lookup((RMINamingRequest) object);
-				System.out.println("Responding: error=" + response.isError);
 				socket.respond(requestId, response);
 			}
 		});
 		
 		serverSocket.on("bindObject", new SIOCommand() {
 			public void run() {
-				System.out.println("Server: recieved a bindObject request.");
 				RMINamingResponse response = bind((RMINamingRequest) object);
-				System.out.println("Responding: error=" + response.isError);
 				socket.respond(requestId, response);
 			}
 		});
 		
 		serverSocket.on("rebindObject", new SIOCommand() {
 			public void run() {
-				System.out.println("Server: recieved a bindObject request.");
 				RMINamingResponse response = rebind((RMINamingRequest) object);
-				System.out.println("Responding: error=" + response.isError);
 				socket.respond(requestId, response);
 			}
 		});
 		
 		serverSocket.on("unbindObject", new SIOCommand() {
 			public void run() {
-				System.out.println("Server: recieved a bindObject request.");
 				RMINamingResponse response = unbind((RMINamingRequest) object);
-				System.out.println("Responding: error=" + response.isError);
 				socket.respond(requestId, response);
 			}
 		});
 	}
 	
+	/**
+	 * Binds the specified name to a remote object.
+	 * @param request
+	 * @return
+	 */
 	public RMINamingResponse bind(RMINamingRequest request) {
 		Object result;
 		boolean isError;
@@ -98,6 +101,11 @@ public class ServerHandler {
 		return new RMINamingResponse(result, isError);
 	}
 	
+	/**
+	 * Rebinds the specified name to a new remote object. Any existing binding for the name is replaced.
+	 * @param request
+	 * @return
+	 */
 	public RMINamingResponse rebind(RMINamingRequest request) {
 		Object result;
 		boolean isError;
@@ -112,6 +120,11 @@ public class ServerHandler {
 		return new RMINamingResponse(result, isError);
 	}
 	
+	/**
+	 * Destroys the binding for the specified name that is associated with a remote object.
+	 * @param request
+	 * @return
+	 */
 	public RMINamingResponse unbind(RMINamingRequest request) {
 		Object result;
 		boolean isError;
@@ -126,11 +139,25 @@ public class ServerHandler {
 		return new RMINamingResponse(result, isError);
 	}
 	
-	//for testing purposes
+	/**
+	 * Adds the object to the server.
+	 * FOR ASSIGNMENT'S TESTING PURPOSES ONLY.
+	 * @param o
+	 * @param interfaceName
+	 * @param name
+	 * @return
+	 * @throws AlreadyBoundException
+	 * @throws NoSuchRemoteObjectReferenceException
+	 */
 	public RemoteObjectReference registerObject(Object o, String interfaceName, String name) throws AlreadyBoundException, NoSuchRemoteObjectReferenceException {
 		return RMIIndex.registerObject(o, serverSocket.getHostname(), serverSocket.getPort(), interfaceName, name);
 	}
 	
+	/**
+	 * Register the class and interfaceName (the interface c implements and is casted to on the client side).
+	 * @param c
+	 * @param interfaceName
+	 */
 	public void registerClass(Class<?> c, String interfaceName) {
 		RMIIndex.registerClass(c, interfaceName);
 	}
@@ -145,7 +172,6 @@ public class ServerHandler {
 		boolean isError;
 		try {
 			result = RMIIndex.lookup(request.name);
-			System.out.println("Found ROR: "+ ((RemoteObjectReference) result).objectUID);
 			isError = false;
 		} catch(Exception e) {
 			result = e;
@@ -166,25 +192,17 @@ public class ServerHandler {
 		boolean isError = true;
 		boolean isROR = false;
 		RemoteObjectReference ror = request.ror;
-		System.out.println("Server.handle: ror: " + ror.objectUID);
 		
 		try {
 			for(int i = 0; request.args != null && i < request.args.length; i++) {
 				if(request.remotes[i]) {
 					Object a = RMIIndex.getObjectByRor((RemoteObjectReference) request.args[i]);
 					if(a != null) {
-						//System.out.println("Client passed by reference: Found the Object: "+a);
 						request.args[i] = a;
 					} else {
-						//System.out.println("Client passed by reference: Did NOT find the Object.");
 						throw new NoSuchRemoteObjectReferenceException();
 					}
 				}
-				//else {System.out.println("Arg not a remote obj!!");}
-			}
-			
-			if(request.args != null) {
-				System.out.println("Args for ClientRequest: "+Util.stringifyArray(request.args));
 			}
 			
 			result = runMethodOn(ror, request.methodName, request.args);
@@ -195,21 +213,17 @@ public class ServerHandler {
 					
 					if(objectInterfaceName != null) {
 						result = RMIIndex.addObjectAsRor(result, getHostname(), getPort(), objectInterfaceName); //returns an ror
-						System.out.println("should be here, created ror: "+result);
 						isROR = true;
 					}
 					else {
-						System.out.println("should not be here!!");
 						isROR = false;
 					}
 				}
-			}
-			
+			}			
 		} catch(Exception e) {
 			result = e;
 			isError = true;
 		}
-		
 		
 		return new RMIResponse(ror, result, isError, isROR);
 	}
@@ -226,18 +240,15 @@ public class ServerHandler {
 	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 */
-
 	public Object runMethodOn(RemoteObjectReference ror, String methodName, Object[] args) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		Object o = RMIIndex.getObjectByRor(ror);
 		Class<?> c = o.getClass();
 		
-		//System.out.println(args.length);
 		Class<?>[] argTypes = null;
 		if(args != null) {
 			argTypes = new Class<?>[args.length];
 			for(int i = 0; i < args.length; i++) {
 				argTypes[i] = args[i].getClass();
-				System.out.println("Found type: "+argTypes[i].toString());
 			}
 		}
 		
@@ -268,14 +279,10 @@ public class ServerHandler {
 	 * @throws NoSuchMethodException
 	 */
 	private Method findMethod(Class<?> c, String methodName, Object[] args, Class<?>[] argTypes) throws NoSuchMethodException {
-		//System.out.println("Server.findMethod: lets try my own method.");
 		Method[] methods = c.getMethods();
-		//System.out.println("Server.findMethod: found " + methods.length + " methods.");
 		for(int m = 0; m < methods.length; m++) {
-			//System.out.println("Server.findMethod: checking method " + methods[m].getName() +" for a match with "+methodName);
 			if(methodName.equals(methods[m].getName())) {
 				Class<?>[] otherArgTypes = methods[m].getParameterTypes();
-				//System.out.println(Util.stringifyArray(otherArgTypes));
 				if(argsOfType(args, otherArgTypes)) {return methods[m];}
 				
 			}
@@ -283,6 +290,12 @@ public class ServerHandler {
 		throw new NoSuchMethodException();
 	}
 	
+	/**
+	 * Checks if the array of args is of type described in argTypes.
+	 * @param args
+	 * @param argTypes
+	 * @return
+	 */
 	private boolean argsOfType(Object[] args, Class<?>[] argTypes) {
 		if(args == null) {
 			if(argTypes == null) {return true;}
@@ -306,10 +319,18 @@ public class ServerHandler {
 		return true;
 	}
 	
+	/**
+	 * Returns the hostname of the server.
+	 * @return
+	 */
 	public String getHostname() {
 		return serverSocket.getHostname();
 	}
 	
+	/**
+	 * Returns the port of the server's socket.
+	 * @return
+	 */
 	public int getPort() {
 		return serverSocket.getPort();
 	}

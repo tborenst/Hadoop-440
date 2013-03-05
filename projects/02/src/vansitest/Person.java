@@ -1,3 +1,8 @@
+/**
+ * A test case for RMI.
+ * Author: Vansi Vallabaneni.
+ */
+
 package vansitest;
 
 import rmi.MyRemote;

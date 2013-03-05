@@ -20,8 +20,12 @@ public class Stub implements InvocationHandler {
 	private SIOClient socket;
 	private ClientHandler client;
 
-
-	
+	/**
+	 * Constructor for Stub
+	 * @param ror
+	 * @param socket
+	 * @param client
+	 */
 	public Stub(RemoteObjectReference ror, SIOClient socket, ClientHandler client) {
 		System.out.println("New STUB with ROR: "+ror);
 		this.ror = ror;
@@ -29,7 +33,12 @@ public class Stub implements InvocationHandler {
 		this.client = client;
 	}
 	
-	
+	/**
+	 * Invoke handles function calls on the client side remote objects.
+	 * @param proxy
+	 * @param method
+	 * @param args
+	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
 		if(method.getName().equals("getROR") && args == null) {
@@ -52,17 +61,13 @@ public class Stub implements InvocationHandler {
 			}
 					
 			RMIRequest requestData = new RMIRequest(ror, method, args, remotes);
-			//System.out.println("Stub: Sending Ror " + requestData.methodName);
 			RMIResponse responseData = (RMIResponse) socket.request("invokeMethod", requestData);
 		
 			Object result = responseData.response;
-			//System.out.println("responseData.isROR: "+responseData.isROR);
-			//check response for errors (isThrowable)
 			if(responseData.isError) {
 				throw (Exception) responseData.response;
 			} else if(responseData.isROR) {
 				RemoteObjectReference resultROR = (RemoteObjectReference) responseData.response;
-				//System.out.println("Result ROR: "+resultROR);
 				result = client.makeProxy(resultROR, socket);
 			}
 			
@@ -72,21 +77,4 @@ public class Stub implements InvocationHandler {
 			throw new RemoteException();
 		}
 	}
-
-	
-	
-	
-	public static void main(String[] args) {
-		
-		/*InvocationHandler stub = new ClientHandler(); //not actually stub right???, should only be one instance per client
-		Proxy personProxy = (Proxy) Proxy.newProxyInstance(Person.class.getClassLoader(),
-										new Class[] { Person.class }, stub);
-		Person p = (Person) personProxy;
-		//p.aldsflkjafds();
-		System.out.println(p.getAge()); */
-
-	}
-
-
-
 }

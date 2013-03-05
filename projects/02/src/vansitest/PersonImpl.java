@@ -1,3 +1,8 @@
+/**
+ * A test class for RMI
+ * Author: Vansi Vallabaneni.
+ */
+
 package vansitest;
 
 import java.util.ArrayList;
