@@ -32,31 +32,37 @@ public class Stub implements InvocationHandler {
 	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
-		System.out.println("waerwae");
-		if(method.getName().equals("getROR")) {
+		if(method.getName().equals("getROR") && args == null) {
 			return ror;
 		}
 		
-		System.out.println("Method: " + method.getName());
-		
-		if(args != null) {
-			System.out.println("Args: " + args.toString());
-		}
-		
-		
-		RMIRequest requestData = new RMIRequest(ror, method, args);
-		//System.out.println("Stub: Sending Ror " + requestData.methodName);
-		RMIResponse responseData = (RMIResponse) socket.request("invokeMethod", requestData);
-		
 		if(socket.isAlive()) {
+			int argsLength = 0;
+			if(args != null) {argsLength = args.length;}
+			
+			boolean[] remotes = new boolean[argsLength];
+			for(int i = 0; i < argsLength; i++) {
+				if(args[i] instanceof Proxy) {
+					args[i] = ((MyRemote) args[i]).getROR();
+					remotes[i] = true;
+				}
+				else {
+					remotes[i] = false;
+				}
+			}
+					
+			RMIRequest requestData = new RMIRequest(ror, method, args, remotes);
+			//System.out.println("Stub: Sending Ror " + requestData.methodName);
+			RMIResponse responseData = (RMIResponse) socket.request("invokeMethod", requestData);
+		
 			Object result = responseData.response;
-			System.out.println("responseData.isROR: "+responseData.isROR);
+			//System.out.println("responseData.isROR: "+responseData.isROR);
 			//check response for errors (isThrowable)
 			if(responseData.isError) {
 				throw (Exception) responseData.response;
 			} else if(responseData.isROR) {
 				RemoteObjectReference resultROR = (RemoteObjectReference) responseData.response;
-				System.out.println("Result ROR: "+resultROR);
+				//System.out.println("Result ROR: "+resultROR);
 				result = client.makeProxy(resultROR, socket);
 			}
 			

@@ -19,11 +19,12 @@ public class VansiTest {
 		String serverHostname = s.getHostname();
 		s.registerClass(PersonImpl.class, Person.class.getSimpleName());
 		s.registerObject(new PersonImpl(1, "doom"), Person.class.getSimpleName(), "tomer");
+		s.registerObject(new PersonImpl(1, "tanya"), Person.class.getSimpleName(), "adopt");
 		
 		
 		ClientHandler c = new ClientHandler();
 		c.connectTo(serverHostname, serverPort);
-		c.addInterface(Person.class.getSimpleName(), Person.class);
+		c.registerInterface(Person.class, Person.class.getSimpleName());
 		
 		
 		try {
@@ -39,7 +40,7 @@ public class VansiTest {
 			System.out.println(">> " + t.getAge());
 			t.setAge(32142);
 			System.out.println(">> " + t.getAge());*/
-			
+			/*
 			Person t2 = (Person) t.makeChild("toby");
 			System.out.println(">> " + t2.getName());
 			t2.setName("doom_rectum2");
@@ -64,8 +65,18 @@ public class VansiTest {
 			//c.lookup("child");
 			c.rebind("child", t.getROR());
 			
-			Person t2CopyFromRebind = (Person) c.lookup("child");
-			System.out.println(t2CopyFromRebind.getName());
+			Person tNotReallyChild = (Person) c.lookup("child");
+			System.out.println(tNotReallyChild.getName());
+			*/
+			
+			
+			Person toAdopt = (Person) c.lookup("adopt");
+			System.out.println("going to adopt: " + toAdopt.getName() + " " + (toAdopt instanceof Person));
+
+			System.out.println("\n------------ " + Integer.class.isInstance(new Integer(5)));
+			t.adoptChild(toAdopt);
+			Person toAdoptFromT = (Person) t.getChild(0);
+			System.out.println("adopted: "+toAdoptFromT.getName());
 			
 		} catch(Exception e) {
 			e.printStackTrace();

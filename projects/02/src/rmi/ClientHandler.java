@@ -38,7 +38,7 @@ public class ClientHandler {
 	 * @param interfaceName
 	 * @param newInterface
 	 */
-	public void addInterface(String interfaceName, Class<?> newInterface) {
+	public void registerInterface(Class<?> newInterface, String interfaceName) {
 		implInterfaces.put(interfaceName, newInterface);
 	}
 	
@@ -177,7 +177,7 @@ public class ClientHandler {
 	//testing function
 	public static void main(String[] args) throws Exception {
 		ClientHandler client = new ClientHandler();
-		client.addInterface(Person.class.getSimpleName(), Person.class);
+		client.registerInterface(Person.class, Person.class.getSimpleName());
 		Person p = (Person) client.lookupOn(null, null);
 		p.getName();
 	}

@@ -8,12 +8,12 @@ public class PersonImpl implements Person{
 	private static final long serialVersionUID = -4668010808997778749L;
 	private int age;
 	private String name;
-	private ArrayList<PersonImpl> children;
+	private ArrayList<Person> children;
 	
 	public PersonImpl(int age, String name) {
 		this.age = age;
 		this.name = name;
-		this.children = new ArrayList<PersonImpl>();
+		this.children = new ArrayList<Person>();
 		System.out.println("New Person has been created: "+age+" "+name);
 	}
 	
@@ -57,8 +57,12 @@ public class PersonImpl implements Person{
 
 	@Override
 	public RemoteObjectReference getROR() {
-		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void adoptChild(Person child) {
+		System.out.println("Adopting Child: "+child);
+		children.add((Person) child);
 	}
 	
 }

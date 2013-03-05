@@ -16,16 +16,19 @@ public class RMIRequest implements RMIMessage {
 	public RemoteObjectReference ror;
 	public String methodName;
 	public Object[] args;
+	public boolean[] remotes;
 	
 	/**
 	 * Constructor for RMIRequest
 	 * @param ror
 	 * @param method
 	 * @param args
+	 * @param remotes 
 	 */
-	public RMIRequest(RemoteObjectReference ror, Method method, Object[] args) {
+	public RMIRequest(RemoteObjectReference ror, Method method, Object[] args, boolean[] remotes) {
 		this.ror = ror;
 		this.methodName = method.getName();
 		this.args = args;
+		this.remotes = remotes;
 	}
 }

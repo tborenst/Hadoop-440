@@ -14,6 +14,7 @@ import rmimessage.RMINamingRequest;
 import rmimessage.RMINamingResponse;
 import rmimessage.RMIRequest;
 import rmimessage.RMIResponse;
+import vansitest.Util;
 
 import networking.SIOCommand;
 import networking.SIOServer;
@@ -168,6 +169,24 @@ public class ServerHandler {
 		System.out.println("Server.handle: ror: " + ror.objectUID);
 		
 		try {
+			for(int i = 0; request.args != null && i < request.args.length; i++) {
+				if(request.remotes[i]) {
+					Object a = RMIIndex.getObjectByRor((RemoteObjectReference) request.args[i]);
+					if(a != null) {
+						//System.out.println("Client passed by reference: Found the Object: "+a);
+						request.args[i] = a;
+					} else {
+						//System.out.println("Client passed by reference: Did NOT find the Object.");
+						throw new NoSuchRemoteObjectReferenceException();
+					}
+				}
+				//else {System.out.println("Arg not a remote obj!!");}
+			}
+			
+			if(request.args != null) {
+				System.out.println("Args for ClientRequest: "+Util.stringifyArray(request.args));
+			}
+			
 			result = runMethodOn(ror, request.methodName, request.args);
 			isError = false;
 			if(result != null) {
@@ -226,7 +245,7 @@ public class ServerHandler {
 		try {
 			m = c.getMethod(methodName, argTypes);
 		} catch (NoSuchMethodException e) {
-			m = findMethod(c, methodName, argTypes);
+			m = findMethod(c, methodName, args, argTypes);
 		}
 		
 		if(m != null) {
@@ -248,7 +267,7 @@ public class ServerHandler {
 	 * @return
 	 * @throws NoSuchMethodException
 	 */
-	private Method findMethod(Class<?> c, String methodName, Class<?>[] argTypes) throws NoSuchMethodException {
+	private Method findMethod(Class<?> c, String methodName, Object[] args, Class<?>[] argTypes) throws NoSuchMethodException {
 		//System.out.println("Server.findMethod: lets try my own method.");
 		Method[] methods = c.getMethods();
 		//System.out.println("Server.findMethod: found " + methods.length + " methods.");
@@ -257,73 +276,41 @@ public class ServerHandler {
 			if(methodName.equals(methods[m].getName())) {
 				Class<?>[] otherArgTypes = methods[m].getParameterTypes();
 				//System.out.println(Util.stringifyArray(otherArgTypes));
-				if(typesArrayEqual(argTypes, otherArgTypes)) {return methods[m];}
+				if(argsOfType(args, otherArgTypes)) {return methods[m];}
+				
 			}
 		}
 		throw new NoSuchMethodException();
 	}
 	
-	/**
-	 * Checks if every element in the type arrays are equal.
-	 * @param t1Arr
-	 * @param t2Arr
-	 * @return
-	 */
-	private boolean typesArrayEqual(Class<?>[] t1Arr, Class<?>[] t2Arr) {
-		if(t1Arr.length != t2Arr.length) {return false;}
-		
-		for(int i = 0; i < t1Arr.length; i++) {
-			System.out.println("comparing: " + t1Arr[i].toString() +" & " + t2Arr[i].toString() 
-									+ " -> " + typeEqual(t1Arr[i], t2Arr[i]));
-			if(!typeEqual(t1Arr[i], t2Arr[i])) {return false;}
+	private boolean argsOfType(Object[] args, Class<?>[] argTypes) {
+		if(args == null) {
+			if(argTypes == null) {return true;}
+			else {return false;}
+		}
+		else if(argTypes == null && args != null) {return false;}
+		else {
+			if(args.length != argTypes.length) {return false;}
+			else {
+				for(int a = 0; a < args.length; a++) {
+					Class<?> argType = argTypes[a];
+					if(argType.isPrimitive()) {
+						argType = primToObj.get(argType);
+					}
+					if(!argType.isInstance(args[a])) {
+						return false;
+					}
+				}
+			}
 		}
 		return true;
 	}
 	
-	/**
-	 * Checks if the types are equal.
-	 * WARNING: treats primitive wrappers as primitives and objects when trying to test for equality
-	 * (e.g typeEqual(int.class, Integer.class) is true).
-	 * @param t1
-	 * @param t2
-	 * @return
-	 */
-	public boolean typeEqual(Class<?> t1, Class<?> t2) {
-		if(t1.equals(t2)) {
-			return true;
-		}
-		else {
-			Class<?> primitive = t1;
-			Class<?> object = t2;
-			if(t2.isPrimitive()) {
-				primitive = t2;
-				object = t1;
-			}
-			else if(!t1.isPrimitive()) {return false;}
-			
-			if(primToObj.containsKey(primitive)) {
-				return object.equals(primToObj.get(primitive));
-			}
-			else {
-				return false;
-			}
-				
-		}
-	}
-	
-
-
 	public String getHostname() {
 		return serverSocket.getHostname();
 	}
 	
 	public int getPort() {
 		return serverSocket.getPort();
-	}
-	
-	//testing
-	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		ServerHandler s = new ServerHandler(8080, MyRemote.class);
-		System.out.println(s.typeEqual(Integer.class, int.class));
 	}
 }
