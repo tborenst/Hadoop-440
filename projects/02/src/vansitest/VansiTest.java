@@ -12,6 +12,7 @@ public class VansiTest {
 
 	public static void main(String[] args) throws AlreadyBoundException, NoSuchRemoteObjectReferenceException {
 		
+		
 		//setup
 		int serverPort = 8080;
 		ServerHandler s = new ServerHandler(serverPort, MyRemote.class);
@@ -29,7 +30,7 @@ public class VansiTest {
 			//actually start doing shit
 			Person t = (Person) c.lookup("tomer");
 			
-			
+			/*
 			System.out.println("-------");
 			System.out.println(">> " + t.getName());
 			t.setName("doom_rectum");
@@ -37,7 +38,7 @@ public class VansiTest {
 			
 			System.out.println(">> " + t.getAge());
 			t.setAge(32142);
-			System.out.println(">> " + t.getAge());
+			System.out.println(">> " + t.getAge());*/
 			
 			Person t2 = (Person) t.makeChild("toby");
 			System.out.println(">> " + t2.getName());
@@ -52,7 +53,20 @@ public class VansiTest {
 			System.out.println(">> " + t2Copy.getName());
 			t2Copy.setName("trollFace");
 			System.out.println(">> "+t2.getName());
-			t2.getChild(0);
+//			t2.getChild(0);
+			System.out.println("------------");
+			RemoteObjectReference rorT2 = t2.getROR();
+			System.out.println(">> "+rorT2);
+			c.bind("child", rorT2);
+			Person t2FromBind = (Person) c.lookup("child");
+			System.out.println(t2FromBind.getName());
+			//c.unbind("child");
+			//c.lookup("child");
+			c.rebind("child", t.getROR());
+			
+			Person t2CopyFromRebind = (Person) c.lookup("child");
+			System.out.println(t2CopyFromRebind.getName());
+			
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

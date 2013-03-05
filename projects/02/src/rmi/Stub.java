@@ -23,6 +23,7 @@ public class Stub implements InvocationHandler {
 
 	
 	public Stub(RemoteObjectReference ror, SIOClient socket, ClientHandler client) {
+		System.out.println("New STUB with ROR: "+ror);
 		this.ror = ror;
 		this.socket = socket;
 		this.client = client;
@@ -31,11 +32,12 @@ public class Stub implements InvocationHandler {
 	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
+		System.out.println("waerwae");
 		if(method.getName().equals("getROR")) {
 			return ror;
 		}
 		
-		System.out.println("Method: " + method.toString());
+		System.out.println("Method: " + method.getName());
 		
 		if(args != null) {
 			System.out.println("Args: " + args.toString());
@@ -48,12 +50,13 @@ public class Stub implements InvocationHandler {
 		
 		if(socket.isAlive()) {
 			Object result = responseData.response;
-			
+			System.out.println("responseData.isROR: "+responseData.isROR);
 			//check response for errors (isThrowable)
 			if(responseData.isError) {
 				throw (Exception) responseData.response;
 			} else if(responseData.isROR) {
 				RemoteObjectReference resultROR = (RemoteObjectReference) responseData.response;
+				System.out.println("Result ROR: "+resultROR);
 				result = client.makeProxy(resultROR, socket);
 			}
 			

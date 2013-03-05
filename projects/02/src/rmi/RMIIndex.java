@@ -56,8 +56,8 @@ public class RMIIndex {
 		RemoteObjectReference ror = new RemoteObjectReference(hostname, port, o.hashCode(), interfaceName);
 		synchronized(uidToObj){
 			uidToObj.put(ror.objectUID, o);
-			return ror;
 		}
+		return ror;
 	}
 	
 	

@@ -23,13 +23,9 @@ public class ServerHandler {
 	public RMIIndex RMIIndex;
 	private HashMap<Class<?>, Class<?>> primToObj;
 	private SIOServer serverSocket;
-	private Class<?> remoteInterface;
-	
 	public ServerHandler(int port, Class<?> remoteInterface) {
 		this.RMIIndex = new RMIIndex();
 		this.serverSocket = new SIOServer(port);
-		this.remoteInterface = remoteInterface;
-		
 		this.primToObj = new HashMap<Class<?>, Class<?>>();
 		primToObj.put(boolean.class, Boolean.class);
 		primToObj.put(char.class, Character.class);
@@ -175,20 +171,17 @@ public class ServerHandler {
 			result = runMethodOn(ror, request.methodName, request.args);
 			isError = false;
 			if(result != null) {
-				Class<?>[] interfaces = result.getClass().getInterfaces();
-				for(int i = 0; i < interfaces.length; i++) {
-					if(remoteInterface.equals(interfaces[i])) {
-						String objectInterfaceName = RMIIndex.getInterfaceNameByClass(result.getClass());
-						
-						if(objectInterfaceName != null) {
-							result = RMIIndex.addObjectAsRor(result, getHostname(), getPort(), objectInterfaceName); //returns an ror
-							isROR = true;
-							break;
-						}
-						else {
-							isROR = false;
-							break;
-						}
+				if(result instanceof MyRemote) {
+					String objectInterfaceName = RMIIndex.getInterfaceNameByClass(result.getClass());
+					
+					if(objectInterfaceName != null) {
+						result = RMIIndex.addObjectAsRor(result, getHostname(), getPort(), objectInterfaceName); //returns an ror
+						System.out.println("should be here, created ror: "+result);
+						isROR = true;
+					}
+					else {
+						System.out.println("should not be here!!");
+						isROR = false;
 					}
 				}
 			}
