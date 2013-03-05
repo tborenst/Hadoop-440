@@ -6,6 +6,7 @@
 package vansitest;
 
 import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
 
 import rmi.*;
 
@@ -22,6 +23,7 @@ public class VansiTest {
 		s.registerObject(new PersonImpl(1, "doom"), Person.class.getSimpleName(), "tomer");
 		s.registerObject(new PersonImpl(1, "tanya"), Person.class.getSimpleName(), "adopt");
 		
+		//System.out.println(s.argsOfType(new Class<?>[]{}, new Class<?>[]{}));
 		
 		ClientHandler c = new ClientHandler();
 		c.connectTo(serverHostname, serverPort);
@@ -29,7 +31,7 @@ public class VansiTest {
 		
 		
 		try {
-			//actually start doing shit
+			//actually start doing work
 			Person t = (Person) c.lookup("tomer");
 			
 			System.out.println("-------");
@@ -61,8 +63,14 @@ public class VansiTest {
 			c.bind("child", rorT2);
 			Person t2FromBind = (Person) c.lookup("child");
 			System.out.println(t2FromBind.getName());
-			//c.unbind("child");
-			//c.lookup("child");
+			
+			c.unbind("child");
+			try{
+				c.lookup("child"); 
+			} catch(NotBoundException e) {
+				System.out.println("Unbind worked.");
+			}
+			
 			c.rebind("child", t.getROR());
 			
 			Person tNotReallyChild = (Person) c.lookup("child");
@@ -75,10 +83,12 @@ public class VansiTest {
 			System.out.println("\n------------ ");
 			t.adoptChild(toAdopt);
 			Person toAdoptFromT = (Person) t.getChild(1);
-			System.out.println("adopted: "+toAdoptFromT.getName());
+			System.out.println("Checking Adoption: "+toAdoptFromT.getName().equals(toAdopt.getName()));
 			
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		
+		System.out.println("Complete and Server Didn't Crash!");
 	}
 }
