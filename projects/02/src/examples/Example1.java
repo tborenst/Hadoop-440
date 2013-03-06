@@ -46,5 +46,6 @@ public class Example1 {
 		System.out.println("9 - 6 = " + remCalc.sub(9, 6));
 		System.out.println("8 / 4 = " + remCalc.div(8, 4));
 		
+		System.exit(0);
 	}
 }

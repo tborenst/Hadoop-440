@@ -15,8 +15,6 @@ import java.util.HashMap;
 import rmimessage.RMINamingRequest;
 import rmimessage.RMINamingResponse;
 
-import vansitest.Person;
-
 import networking.SIOClient;
 
 public class ClientHandler {

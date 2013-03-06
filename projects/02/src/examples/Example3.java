@@ -45,8 +45,12 @@ public class Example3 {
 			System.out.println("Testing error passing...");
 			System.out.println("5 / 0 = ...");
 			remCalc.div(5, 0);
-		} catch (ArithmeticException e){
+		} catch (Exception e){
 			e.printStackTrace();
 		}
+		
+		System.out.println("Server is still running!");
+		System.out.println("2 + 3 = " + remCalc.add(2, 3));
+		System.exit(0);
 	}
 }

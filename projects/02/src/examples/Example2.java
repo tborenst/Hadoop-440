@@ -98,5 +98,7 @@ public class Example2 {
 		} catch (Exception e){
 			System.out.println("Error! Could not find service.");
 		}
+		
+		System.exit(0);
 	}
 }
