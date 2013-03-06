@@ -38,7 +38,7 @@ public class ClientHandler {
 	 * @param interfaceName
 	 * @param newInterface
 	 */
-	public void addInterface(String interfaceName, Class<?> newInterface) {
+	public void registerInterface(Class<?> newInterface, String interfaceName) {
 		implInterfaces.put(interfaceName, newInterface);
 	}
 	
@@ -53,8 +53,12 @@ public class ClientHandler {
 		return newConnection;
 	}
 	
-	//TODO: handle removing connections, when a socket closes
-	
+	/**
+	 * Binds the specified name to a remote object.
+	 * @param name
+	 * @param ror
+	 * @throws Exception
+	 */
 	public void bind(String name, RemoteObjectReference ror) throws Exception {
 		if(ror == null) {throw new NoSuchRemoteObjectReferenceException();}
 		SIOClient socket = connections.get(ror.hostname + ":" + ror.port);
@@ -73,7 +77,12 @@ public class ClientHandler {
 		}
 	}
 	
-	
+	/**
+	 * Rebinds the specified name to a new remote object. Any existing binding for the name is replaced.
+	 * @param name
+	 * @param ror
+	 * @throws Exception
+	 */
 	public void rebind(String name, RemoteObjectReference ror) throws Exception {
 		if(ror == null) {throw new NoSuchRemoteObjectReferenceException();}
 		SIOClient socket = connections.get(ror.hostname + ":" + ror.port);
@@ -96,6 +105,11 @@ public class ClientHandler {
 		}
 	}
 	
+	/**
+	 * Destroys the binding for the specified name that is associated with a remote object.
+	 * @param name
+	 * @throws Exception
+	 */
 	public void unbind(String name) throws Exception {
 		RemoteObjectReference ror = nameToROR.get(name);
 		if(ror != null) {
@@ -161,7 +175,13 @@ public class ClientHandler {
 		}
 	}
 	
-	
+	/**
+	 * Constructs a new Proxy object for the client.
+	 * @param ror
+	 * @param socket
+	 * @return
+	 * @throws UnaddedInterfaceException
+	 */
 	public Proxy makeProxy(RemoteObjectReference ror, SIOClient socket) throws UnaddedInterfaceException {
 		Class<?> myInterface = implInterfaces.get(ror.interfaceName);
 		if(myInterface == null) {throw new UnaddedInterfaceException();}
@@ -169,7 +189,7 @@ public class ClientHandler {
 			Stub handler = new Stub(ror, socket, this);
 			
 			Proxy foundObj = (Proxy) Proxy.newProxyInstance(myInterface.getClassLoader(),
-					new Class[] { myInterface }, handler);
+											new Class[] { myInterface }, handler);
 			return foundObj;
 		}
 	}
@@ -177,7 +197,7 @@ public class ClientHandler {
 	//testing function
 	public static void main(String[] args) throws Exception {
 		ClientHandler client = new ClientHandler();
-		client.addInterface(Person.class.getSimpleName(), Person.class);
+		client.registerInterface(Person.class, Person.class.getSimpleName());
 		Person p = (Person) client.lookupOn(null, null);
 		p.getName();
 	}

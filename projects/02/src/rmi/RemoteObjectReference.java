@@ -28,11 +28,10 @@ public class RemoteObjectReference implements Serializable {
 		this.interfaceName = interfaceName;
 	}
 	
+	/**
+	 * Returns objectUID.
+	 */
 	public int hashCode() {
 		return objectUID;
 	}
-	
-	/*public equals(RemoteObjectReference otherRor) {
-		return this.hostname.equals(otherRor.hostname) && 
-	}*/
 }

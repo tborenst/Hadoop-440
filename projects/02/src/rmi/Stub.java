@@ -20,36 +20,50 @@ public class Stub implements InvocationHandler {
 	private SIOClient socket;
 	private ClientHandler client;
 
-
-	
+	/**
+	 * Constructor for Stub
+	 * @param ror
+	 * @param socket
+	 * @param client
+	 */
 	public Stub(RemoteObjectReference ror, SIOClient socket, ClientHandler client) {
+		System.out.println("New STUB with ROR: "+ror);
 		this.ror = ror;
 		this.socket = socket;
 		this.client = client;
 	}
 	
-	
+	/**
+	 * Invoke handles function calls on the client side remote objects.
+	 * @param proxy
+	 * @param method
+	 * @param args
+	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
-		if(method.getName().equals("getROR")) {
+		if(method.getName().equals("getROR") && args == null) {
 			return ror;
 		}
 		
-		System.out.println("Method: " + method.toString());
-		
-		if(args != null) {
-			System.out.println("Args: " + args.toString());
-		}
-		
-		
-		RMIRequest requestData = new RMIRequest(ror, method, args);
-		//System.out.println("Stub: Sending Ror " + requestData.methodName);
-		RMIResponse responseData = (RMIResponse) socket.request("invokeMethod", requestData);
-		
 		if(socket.isAlive()) {
-			Object result = responseData.response;
+			int argsLength = 0;
+			if(args != null) {argsLength = args.length;}
 			
-			//check response for errors (isThrowable)
+			boolean[] remotes = new boolean[argsLength];
+			for(int i = 0; i < argsLength; i++) {
+				if(args[i] instanceof Proxy) {
+					args[i] = ((MyRemote) args[i]).getROR();
+					remotes[i] = true;
+				}
+				else {
+					remotes[i] = false;
+				}
+			}
+					
+			RMIRequest requestData = new RMIRequest(ror, method, args, remotes);
+			RMIResponse responseData = (RMIResponse) socket.request("invokeMethod", requestData);
+		
+			Object result = responseData.response;
 			if(responseData.isError) {
 				throw (Exception) responseData.response;
 			} else if(responseData.isROR) {
@@ -63,21 +77,4 @@ public class Stub implements InvocationHandler {
 			throw new RemoteException();
 		}
 	}
-
-	
-	
-	
-	public static void main(String[] args) {
-		
-		/*InvocationHandler stub = new ClientHandler(); //not actually stub right???, should only be one instance per client
-		Proxy personProxy = (Proxy) Proxy.newProxyInstance(Person.class.getClassLoader(),
-										new Class[] { Person.class }, stub);
-		Person p = (Person) personProxy;
-		//p.aldsflkjafds();
-		System.out.println(p.getAge()); */
-
-	}
-
-
-
 }
