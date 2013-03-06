@@ -3,7 +3,7 @@
 clear
 
 
-cd bin
+cd src
 echo "Example 1 - basic usage..."
 java -cp . examples.Example1
 echo "Example 2 - pass by reference and bind..."
