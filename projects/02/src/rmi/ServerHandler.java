@@ -256,7 +256,7 @@ public class ServerHandler {
 		try {
 			m = c.getMethod(methodName, argTypes);
 		} catch (NoSuchMethodException e) {
-			m = findMethod(c, methodName, args);
+			m = findMethod(c, methodName, args, argTypes);
 		}
 		
 		if(m != null) {
@@ -278,7 +278,7 @@ public class ServerHandler {
 	 * @return
 	 * @throws NoSuchMethodException
 	 */
-	private Method findMethod(Class<?> c, String methodName, Object[] args) throws NoSuchMethodException {
+	private Method findMethod(Class<?> c, String methodName, Object[] args, Class<?>[] argTypes) throws NoSuchMethodException {
 		Method[] methods = c.getMethods();
 		for(int m = 0; m < methods.length; m++) {
 			if(methodName.equals(methods[m].getName())) {
@@ -296,20 +296,20 @@ public class ServerHandler {
 	 * @param argTypes
 	 * @return
 	 */
-	public boolean argsOfType(Object[] args, Class<?>[] argTypes) {
-		if(args == null || argTypes == null) {
-			return (args == null && argTypes == null);
+	private boolean argsOfType(Object[] args, Class<?>[] argTypes) {
+		if(args == null) {
+			if(argTypes == null) {return true;}
+			else {return false;}
 		}
+		else if(argTypes == null && args != null) {return false;}
 		else {
 			if(args.length != argTypes.length) {return false;}
-			else if(args.length == 0 || argTypes.length == 0) {return true;}
 			else {
 				for(int a = 0; a < args.length; a++) {
 					Class<?> argType = argTypes[a];
 					if(argType.isPrimitive()) {
 						argType = primToObj.get(argType);
 					}
-					
 					if(!argType.isInstance(args[a])) {
 						return false;
 					}

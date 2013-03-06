@@ -8,7 +8,7 @@ public class Util {
 	 * @return
 	 */
 	public static String stringifyArray(Object[] args) {
-		if(args == null || args.length == 0) {return "[]";}
+		if(args.length < 1) {return "[]";}
 		else {
 			String result = "["+args[0];
 			for(int a = 1; a < args.length; a++) {
@@ -16,7 +16,7 @@ public class Util {
 			}
 			result += "]";
 			return result;			
-		}
+		}		
 	}
 	
 	/**
