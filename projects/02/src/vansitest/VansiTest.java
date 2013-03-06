@@ -16,16 +16,16 @@ public class VansiTest {
 		
 		//setup
 		int serverPort = 8080;
-		ServerHandler s = new ServerHandler(serverPort, MyRemote.class);
+		ServerHandler s = new ServerHandler(serverPort);
 		String serverHostname = s.getHostname();
-		s.registerClass(PersonImpl.class, Person.class.getSimpleName());
-		s.registerObject(new PersonImpl(1, "doom"), Person.class.getSimpleName(), "tomer");
-		s.registerObject(new PersonImpl(1, "tanya"), Person.class.getSimpleName(), "adopt");
+		s.registerClass(PersonImpl.class, Person.class);
+		s.registerObject(new PersonImpl(1, "doom"), Person.class, "tomer");
+		s.registerObject(new PersonImpl(1, "tanya"), Person.class, "adopt");
 		
 		
 		ClientHandler c = new ClientHandler();
 		c.connectTo(serverHostname, serverPort);
-		c.registerInterface(Person.class, Person.class.getSimpleName());
+		c.registerInterface(Person.class);
 		
 		
 		try {

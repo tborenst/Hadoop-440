@@ -35,11 +35,10 @@ public class ClientHandler {
 	
 	/**
 	 * Add a supported Interface so the user can create Proxies of objects which implement this interface (newInterface)
-	 * @param interfaceName
-	 * @param newInterface
+	 * @param interfaceClass - the interface to register on the client
 	 */
-	public void registerInterface(Class<?> newInterface, String interfaceName) {
-		implInterfaces.put(interfaceName, newInterface);
+	public void registerInterface(Class<?> interfaceClass) {
+		implInterfaces.put(interfaceClass.getSimpleName(), interfaceClass);
 	}
 	
 	/**
@@ -62,7 +61,7 @@ public class ClientHandler {
 	public void bind(String name, RemoteObjectReference ror) throws Exception {
 		if(ror == null) {throw new NoSuchRemoteObjectReferenceException();}
 		SIOClient socket = connections.get(ror.hostname + ":" + ror.port);
-		if(socket.isAlive()) {
+		if(socket != null && socket.isAlive()) {
 			RMINamingRequest objRequestData = new RMINamingRequest(name, ror);
 			RMINamingResponse objResponseData = (RMINamingResponse) socket.request("bindObject", objRequestData);
 			
@@ -192,14 +191,6 @@ public class ClientHandler {
 											new Class[] { myInterface }, handler);
 			return foundObj;
 		}
-	}
-	
-	//testing function
-	public static void main(String[] args) throws Exception {
-		ClientHandler client = new ClientHandler();
-		client.registerInterface(Person.class, Person.class.getSimpleName());
-		Person p = (Person) client.lookupOn(null, null);
-		p.getName();
 	}
 
 }

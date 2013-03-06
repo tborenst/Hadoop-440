@@ -9,4 +9,9 @@ public abstract class SIOSocket {
 	//respond to a blocking request with id 'requestId', with an Object 'obj'
 	public void respond(int requestId, Object obj){
 	}
+	
+	//check whether this socket is alive
+	public Boolean isAlive(){
+		return null;
+	}
 }

@@ -28,7 +28,7 @@ public class ServerHandler {
 	 * @param port
 	 * @param remoteInterface
 	 */
-	public ServerHandler(int port, Class<?> remoteInterface) {
+	public ServerHandler(int port) {
 		this.RMIIndex = new RMIIndex();
 		this.serverSocket = new SIOServer(port);
 		this.primToObj = new HashMap<Class<?>, Class<?>>();
@@ -77,7 +77,7 @@ public class ServerHandler {
 		serverSocket.on("unbindObject", new SIOCommand() {
 			public void run() {
 				RMINamingResponse response = unbind((RMINamingRequest) object);
-				socket.respond(requestId, response);
+				if(socket != null && socket.isAlive()) socket.respond(requestId, response);
 			}
 		});
 	}
@@ -143,23 +143,24 @@ public class ServerHandler {
 	 * Adds the object to the server.
 	 * FOR ASSIGNMENT'S TESTING PURPOSES ONLY.
 	 * @param o
-	 * @param interfaceName
+	 * @param interfaceClass
 	 * @param name
 	 * @return
 	 * @throws AlreadyBoundException
 	 * @throws NoSuchRemoteObjectReferenceException
 	 */
-	public RemoteObjectReference registerObject(Object o, String interfaceName, String name) throws AlreadyBoundException, NoSuchRemoteObjectReferenceException {
-		return RMIIndex.registerObject(o, serverSocket.getHostname(), serverSocket.getPort(), interfaceName, name);
+	public RemoteObjectReference registerObject(Object o, Class<?> interfaceClass, String name) 
+		   throws AlreadyBoundException, NoSuchRemoteObjectReferenceException {
+		return RMIIndex.registerObject(o, serverSocket.getHostname(), serverSocket.getPort(), interfaceClass.getSimpleName(), name);
 	}
 	
 	/**
 	 * Register the class and interfaceName (the interface c implements and is casted to on the client side).
-	 * @param c
-	 * @param interfaceName
+	 * @param objectClass - the class to be register
+	 * @param interfaceClass - the interface to be registered with the class
 	 */
-	public void registerClass(Class<?> c, String interfaceName) {
-		RMIIndex.registerClass(c, interfaceName);
+	public void registerClass(Class<?> objectClass, Class<?> interfaceClass) {
+		RMIIndex.registerClass(objectClass, interfaceClass.getSimpleName());
 	}
 	
 	/**
@@ -210,7 +211,6 @@ public class ServerHandler {
 			if(result != null) {
 				if(result instanceof MyRemote) {
 					String objectInterfaceName = RMIIndex.getInterfaceNameByClass(result.getClass());
-					
 					if(objectInterfaceName != null) {
 						result = RMIIndex.addObjectAsRor(result, getHostname(), getPort(), objectInterfaceName); //returns an ror
 						isROR = true;

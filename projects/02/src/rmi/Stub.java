@@ -27,7 +27,6 @@ public class Stub implements InvocationHandler {
 	 * @param client
 	 */
 	public Stub(RemoteObjectReference ror, SIOClient socket, ClientHandler client) {
-		System.out.println("New STUB with ROR: "+ror);
 		this.ror = ror;
 		this.socket = socket;
 		this.client = client;
@@ -45,7 +44,7 @@ public class Stub implements InvocationHandler {
 			return ror;
 		}
 		
-		if(socket.isAlive()) {
+		if(socket != null && socket.isAlive()) {
 			int argsLength = 0;
 			if(args != null) {argsLength = args.length;}
 			
