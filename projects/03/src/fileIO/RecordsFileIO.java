@@ -5,8 +5,12 @@
 package fileIO;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 
 public class RecordsFileIO {
@@ -14,6 +18,9 @@ public class RecordsFileIO {
 	private RandomAccessFile raf;
 	private boolean isReadFile;
 	private long filePointer;
+	private int readRecordId;
+	private ObjectOutputStream writeStream;
+	private ObjectInputStream readStream;
 	
 	/**
 	 * Constructor for RecordsFileIO.
@@ -24,8 +31,8 @@ public class RecordsFileIO {
 	 */
 	public RecordsFileIO(String path, boolean createIfDoesntExist, boolean isReadFile) {
 		this.file = new File(path);
-		this.isReadFile = isReadFile;
 		this.filePointer = 0;
+		this.readRecordId = 0;
 		
 		if(!this.file.exists() && createIfDoesntExist) {
 			try {
@@ -38,6 +45,7 @@ public class RecordsFileIO {
 		}
 		
 		this.raf = open();
+		setIsReadFile(isReadFile);
 	}
 	
 	/**
@@ -50,14 +58,22 @@ public class RecordsFileIO {
 		isReadFile = newIsReadFile;
 		if(isReadFile) {
 			seek(0);
-		} else if(raf != null){
-			try {
-				seek(raf.length());
-			} catch (IOException e) {
-				// TODO: remove debugging
-				System.out.println("RecordsFileIO.RecordsFile(): failed to get raf.length(): " + getPath());
-				e.printStackTrace();
+			readRecordId = 0;
+			closeStreams();
+			readStream = openReadStream();
+		} else {
+			if(raf != null){
+				try {
+					seek(raf.length());
+				} catch (IOException e) {
+					// TODO: remove debugging
+					System.out.println("RecordsFileIO.RecordsFile(): failed to get raf.length(): " + getPath());
+					e.printStackTrace();
+				}
 			}
+			
+			closeStreams();
+			writeStream = openWriteStream();
 		}
 	}
 	
@@ -80,6 +96,74 @@ public class RecordsFileIO {
 	}
 	
 	/**
+	 * ObjectOutputStream openWriteStream(void):
+	 * Creates a ObjectOutputStream from File file.
+	 */
+	private ObjectOutputStream openWriteStream() {
+		if(file != null) {			
+			try {
+				return new ObjectOutputStream(new FileOutputStream(file.getPath()));
+			} catch (FileNotFoundException e) {
+				System.out.println("tFile.openWriteStream: unable to create FileOutputStream: "+file.getPath());
+				e.printStackTrace();
+			} catch (IOException e) {
+				System.out.println("tFile.openWriteStream: unable to create ObjectOutputStream: "+file.getPath());
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * ObjectInputStream openReadStream(void):
+	 * Creates a ObjectInputStream from File file.
+	 */
+	private ObjectInputStream openReadStream() {
+		if(file != null) {			
+			try {
+				return new ObjectInputStream(new FileInputStream(file.getPath()));
+			} catch (FileNotFoundException e) {
+				// TODO remove debugging
+				System.out.println("tFile.openReadStream: unable to create FileInputStream: " + file.getPath());
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO remove debugging
+				System.out.println("tFile.openReadStream: unable to create ObjectInputStream: " + file.getPath());
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Close writeStream and readStream.
+	 */
+	private void closeStreams() {
+		if(writeStream != null) {
+			try {
+				writeStream.flush();
+				writeStream.close();
+			} catch (IOException e) {
+				// TODO remove debugging
+				System.out.println("tFile.closeStreams: unable to flush and/or close writeStream at: " + file.getPath());
+				e.printStackTrace();
+			}
+			writeStream = null;
+		}
+		
+		if(readStream != null) {
+			try {
+				readStream.close();
+			} catch (IOException e) {
+				// TODO remove debugging
+				System.out.println("tFile.closeStreams: unable to close readStream at: " + file.getPath());
+				e.printStackTrace();
+			}
+			readStream = null;
+		}
+	}
+	
+	/**
 	 * Closes the file.
 	 */
 	public void close() {
@@ -88,10 +172,13 @@ public class RecordsFileIO {
 				raf.close();
 			} catch (IOException e) {
 				//TODO: remove debugging
-				System.out.println("RecordsFileIO.close(): failed to close file" + file.getPath());
+				System.out.println("RecordsFileIO.close(): failed to close raf at: " + file.getPath());
 				e.printStackTrace();
 			}
 		}
+		
+		closeStreams();
+		
 		file = null;
 		raf = null;
 	}
@@ -101,8 +188,8 @@ public class RecordsFileIO {
 	 * @param delimiter
 	 * @return
 	 */
-	public String readNextRecordStr(String delimiter) {
-		if(raf != null && this.isReadFile) {
+	public Record readNextRecord(String delimiter) {
+		if(raf != null && this.isReadFile && readStream != null) {
 			try {
 				long len = raf.length()-1;
 				if(this.filePointer < len) {
@@ -117,12 +204,15 @@ public class RecordsFileIO {
 					
 					// check if the delimiter is at the very end of file
 					delimiterIndex = s.indexOf(delimiter);
-					
+					String valueStr = "";
 					if(delimiterIndex != -1) {
-						return s.substring(0, delimiterIndex);
+						valueStr = s.substring(0, delimiterIndex);
 					} else {
-						return s.toString();
+						valueStr = s.toString();
 					}
+					
+					this.readRecordId++;
+					return new Record(getPath()+"_"+this.readRecordId, new Object[] {valueStr});
 				}
 			} catch (IOException e) {
 				//TODO: remove debugging
@@ -137,14 +227,15 @@ public class RecordsFileIO {
 	
 	/**
 	 * Writes a record as delimiter + recordStr to the end of the file.
-	 * @param recordStr
+	 * @param record
 	 * @param delimiter
 	 */
-	public void writeNextRecordStr(String recordStr, String delimiter) {
-		if(raf != null && !this.isReadFile) {
+	public void writeNextRecord(Record record, String delimiter) {
+		if(raf != null && !this.isReadFile && writeStream != null) {
 			try {
 				seek(raf.length());
-				raf.writeBytes(delimiter + recordStr);
+				raf.writeBytes(delimiter);
+				writeStream.writeObject(record);
 			} catch (IOException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.writeNextRecordStr(): error accessing/writing file: "+file.getPath());
@@ -168,9 +259,9 @@ public class RecordsFileIO {
 				RecordsFileIO newRecordsFile = new RecordsFileIO(newPaths[p], true, false);
 				String tempWriteDelimiter = "";
 				for(int r = 0; moreToRead && r < recordsPerPartition; r++) {
-					String recordStr = readNextRecordStr(readDelimiter);
-					if(recordStr != null) {
-						newRecordsFile.writeNextRecordStr(recordStr, tempWriteDelimiter);
+					Record record = readNextRecord(readDelimiter);
+					if(record != null) {
+						newRecordsFile.writeNextRecord(record, tempWriteDelimiter);
 						tempWriteDelimiter = writeDelimiter;
 					} else {
 						moreToRead = false;
@@ -182,47 +273,11 @@ public class RecordsFileIO {
 		}
 	}
 	
-		
-	/**
-	 * Moves file to the new specified destination.
-	 * Keeps file pointer consistent
-	 * @param destPath
-	 */
-	public void move(String destPath) {
-		if(file != null) {
-			File dest = new File(destPath);
-			boolean success = file.renameTo(dest);
-			if(success) {
-				long originalFilePointer = 0;
-				if(raf != null) {
-					try {
-						originalFilePointer = raf.getFilePointer();
-						raf.close();
-					} catch (IOException e) {
-						// TODO: remove debugging
-						System.out.println("RecordsFileIO.move(): failed to close original raf at: " + getPath());
-						e.printStackTrace();
-					}
-				}
-				
-				file = dest;
-				raf = open();
-				try {
-					raf.seek(originalFilePointer);
-				} catch (IOException e) {
-					// TODO: remove debugging
-					System.out.println("RecordsFileIO.move(): failed to seek to original file pointer of: " +  originalFilePointer + ", at: " + getPath());
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
 	/**
 	 * Seeks to newFilePointer.
 	 * @param newFilePointer
 	 */
-	public void seek(long newFilePointer) {
+	private void seek(long newFilePointer) {
 		if(raf != null) {
 			try {
 				raf.seek(newFilePointer);
@@ -239,21 +294,12 @@ public class RecordsFileIO {
 	 * Closes and deletes the file.
 	 */
 	public void delete() {
-		if(raf != null) {
-			try {
-				raf.close();
-			} catch (IOException e) {
-				// TODO: remove debugging
-				System.out.println("RecordsFileIO.delete(): failed to close raf at: " + getPath());
-				e.printStackTrace();
-			}
-			raf = null;
-		}
-		
 		if(file != null) {
 			file.delete();
 			file = null;
 		}
+		
+		close();
 		
 	}
 	

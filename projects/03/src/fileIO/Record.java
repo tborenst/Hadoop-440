@@ -13,7 +13,7 @@ public class Record implements Serializable{
 	public Object key;
 	public Object[] values;
 	
-	// TODO: Change from Object to Writeable type
+	// TODO: Change from Object to Writable type
 	public Record(Object key, Object[] values) {
 		this.key = key;
 		this.values = values;
