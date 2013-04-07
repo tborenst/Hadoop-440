@@ -1,6 +1,6 @@
 package vansitest;
 
-import fileIO.RecordsFile;
+import fileIO.RecordsFileIO;
 
 public class RecordsFileTester {
 	public static void main(String[] args) {
@@ -12,9 +12,10 @@ public class RecordsFileTester {
 						" mischievous cat, wearing a tall, red and white-striped \n" +
 						"hat and a red bow tie.";
 		
-		RecordsFile rec = new RecordsFile(dir + fileName, true, true);
+		RecordsFileIO rec = new RecordsFileIO(dir + fileName, true, false);
 		rec.writeNextRecordStr(data, "");
 		
+		rec.setIsReadFile(true);
 		String readData = rec.readNextRecordStr(" \n") + " \n" + rec.readNextRecordStr(" \n") + " \n"
 							+ rec.readNextRecordStr(" \n");
 		System.out.println("read: "+readData);
