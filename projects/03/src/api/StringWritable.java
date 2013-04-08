@@ -1,5 +1,5 @@
 /**
- * Writable wrapper around String objects.
+ * Writable wrapper around a String object.
  */
 package api;
 
