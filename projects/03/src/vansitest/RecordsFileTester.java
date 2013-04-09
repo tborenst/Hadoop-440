@@ -57,25 +57,25 @@ public class RecordsFileTester {
 		RecordsFileIO recsA = new RecordsFileIO(dir + "RecordsFileTest_A.txt", true, true);
 		
 		Record recA_1 = recsA.readNextRecord("\n");
-		int recA_1Key = ((IntWritable) recA_1.key).getValue();
-		String recA_1Value = ((StringWritable) recA_1.values[0]).getValue();
+		int recA_1Key = ((IntWritable) recA_1.getKey()).getValue();
+		String recA_1Value = ((StringWritable) recA_1.getValues()[0]).getValue();
 		System.out.println("<" + recA_1Key + ", " + recA_1Value + ">");
 		
 		Record recA_2 = recsA.readNextRecord("\n");
-		int recA_2Key = ((IntWritable) recA_2.key).getValue();
-		String recA_2Value = ((StringWritable) recA_2.values[0]).getValue();
+		int recA_2Key = ((IntWritable) recA_2.getKey()).getValue();
+		String recA_2Value = ((StringWritable) recA_2.getValues()[0]).getValue();
 		System.out.println("<" + recA_2Key + ", " + recA_2Value + ">");
 		
 		RecordsFileIO recsB = new RecordsFileIO(dir + "RecordsFileTest_B.txt", true, true);
 		
 		Record recB_1 = recsB.readNextRecord("\n");
-		int recB_1Key = ((IntWritable) recB_1.key).getValue();
-		String recB_1Value = ((StringWritable) recB_1.values[0]).getValue();
+		int recB_1Key = ((IntWritable) recB_1.getKey()).getValue();
+		String recB_1Value = ((StringWritable) recB_1.getValues()[0]).getValue();
 		System.out.println("<" + recB_1Key + ", " + recB_1Value + ">");
 		
 		Record recB_2 = recsB.readNextRecord("\n");
-		int recB_2Key = ((IntWritable) recB_2.key).getValue();
-		String recB_2Value = ((StringWritable) recB_2.values[0]).getValue();
+		int recB_2Key = ((IntWritable) recB_2.getKey()).getValue();
+		String recB_2Value = ((StringWritable) recB_2.getValues()[0]).getValue();
 		System.out.println("<" + recB_2Key + ", " + recB_2Value + ">");
 		
 		
