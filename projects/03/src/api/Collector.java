@@ -1,6 +1,7 @@
 /**
  * The Collector class is used by map and reduce functions to store key-value pairs.
- * The Collector buffers key-value pairs in memory for a while and then writes them to disk to prevent memory overflow.
+ * Collector buffers key-value pairs in memory for a while and then uses dumpBuffer() to write them to disk to prevent memory overflow.
+ * Collector can also read back records from a file (the one given by its path) if the 'read' parameter is set to true.
  * @author Tomer Borenstein
  */
 package api;
@@ -73,7 +74,7 @@ public class Collector implements Serializable{
 	}
 	
 	/**
-	 * DEBUGGING FUNCTION - PRINT ALL RECORDS
+	 * DEBUGGING FUNCTION - PRINT ALL RECORDS (to stdout)
 	 */
 	public void printAllRecords(){
 		Iterator<Record> it = pairs.iterator();
