@@ -25,6 +25,7 @@ public class RecordsFileIO {
 	private File file;
 	private boolean isReadFile;
 	private int readRecordId;
+	private int writeRecordId;
 	private ObjectOutputStream writeStream;
 	private ObjectInputStream readStream;
 	
@@ -38,6 +39,7 @@ public class RecordsFileIO {
 	public RecordsFileIO(String path, boolean createIfDoesntExist, boolean isReadFile) {
 		this.file = new File(path);
 		this.readRecordId = 0;
+		this.writeRecordId = 0;
 		
 		if(!this.file.exists() && createIfDoesntExist) {
 			try {
@@ -273,8 +275,10 @@ public class RecordsFileIO {
 	public void writeNextRecord(Record record, String delimiter) {
 		if(!isReadFile && writeStream != null) {
 			try {
-				writeStream.writeBytes(delimiter);
+				String del = (writeRecordId == 0) ? "" : delimiter;
+				writeStream.writeBytes(del);
 				writeStream.writeObject(record);
+				writeRecordId++;
 			} catch (IOException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.writeNextRecord(): error accessing/writing file at: " + getPath());
@@ -291,7 +295,9 @@ public class RecordsFileIO {
 	public void writeNextString(String recordStr, String delimiter) {
 		if(!isReadFile && writeStream != null) {
 			try {
-				writeStream.writeBytes(delimiter + recordStr);
+				String del = (writeRecordId == 0) ? "" : delimiter;
+				writeStream.writeBytes(del + recordStr);
+				writeRecordId++;
 			} catch (IOException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.writeNextString(): error accessing/writing file at: " + getPath());
@@ -308,8 +314,10 @@ public class RecordsFileIO {
 	public void writeNextBytes(Byte[] recordBytes, String delimiter) {
 		if(!isReadFile && writeStream != null) {
 			try {
-				writeStream.writeBytes(delimiter);
+				String del = (writeRecordId == 0) ? "" : delimiter;
+				writeStream.writeBytes(del);
 				writeStream.write(Util.tobyteArray(recordBytes));
+				writeRecordId++;
 			} catch (IOException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.writeNextString(): error accessing/writing file at: " + getPath());

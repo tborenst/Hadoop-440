@@ -1,6 +1,6 @@
 package api;
 
-public class ByteWritable implements Writable {
+public class ByteWritable implements Writable<Byte> {
 	private static final long serialVersionUID = 5864951662997680711L;
 	private Byte value;
 	
@@ -10,5 +10,11 @@ public class ByteWritable implements Writable {
 	
 	public Byte getValue(){
 		return value;
+	}
+
+	public int compare(Writable<Byte> w) {
+		Byte myVal = value;
+		Byte wVal  = w.getValue();
+		return myVal.compareTo(wVal);
 	}
 }

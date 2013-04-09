@@ -42,7 +42,7 @@ public class Collector implements Serializable{
 	/**
 	 * dumpBuffer - write all key-value pairs to file and clean the 'pairs' buffer.
 	 */
-	private void dumpBuffer(){
+	public void dumpBuffer(){
 		Iterator<Record> itr = pairs.iterator();
 		while(itr.hasNext()){
 			Record record = itr.next();

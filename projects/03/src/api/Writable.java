@@ -7,6 +7,15 @@ package api;
 
 import java.io.Serializable;
 
-public interface Writable extends Serializable{
-
+public interface Writable<T> extends Serializable{
+	
+	/**
+	 * getValue - returns the value held by the Writable
+	 */
+	public T getValue();
+	
+	/**
+	 * compare - returns x, where (this < w) => (x < 0), (this = w) => (x = 0), (this > w) => (x > 0)
+	 */
+	public int compare(Writable<T> w);
 }

@@ -5,28 +5,24 @@
 package fileIO;
 
 import java.io.Serializable;
-
-import api.StringWritable;
 import api.Writable;
 
-import vansitest.tFile;
 
 public class Record implements Serializable{
 	private static final long serialVersionUID = -8308858610647756046L;
-	public Writable key;
-	public Writable[] values;
+	private Writable key;
+	private Writable[] values;
 	
 	public Record(Writable key, Writable[] values) {
 		this.key = key;
 		this.values = values;
 	}
 	
-	// TODO: remove main function
-	public static void main(String[] args) {
-		tFile t = new tFile("poop.txt", true);
-		Writable[] writablearray = {new StringWritable("value")};
-		t.writeObj(new Record(new StringWritable("hey"), writablearray));
-		String data = t.read();
-		System.out.println(data.indexOf("\n"));
+	public Writable getKey(){
+		return key;
+	}
+	
+	public Writable[] getValues(){
+		return values;
 	}
 }
