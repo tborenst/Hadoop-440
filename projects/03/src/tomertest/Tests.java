@@ -13,6 +13,7 @@ import util.Executer;
 
 public class Tests {
 	public static void main(String[] args) throws IOException{
+		
 //		//=============================
 //		// Dynamically Load Class Files
 //		// - initiate objects
@@ -37,15 +38,16 @@ public class Tests {
 //		// - read back out of file
 //		//=============================
 //		
-//		Collector output = new Collector("/Users/tomer/Desktop/text.txt");
+//		Collector output1 = new Collector("/Users/tomer/Desktop/text.txt", false);
 //		for(Integer i = 0; i < 10; i++){
 //			IntWritable key = new IntWritable(i);
 //			StringWritable val = new StringWritable("Hey there!");
-//			output.collect(key, val);
+//			output1.collect(key, val);
 //		}
-//		output.dumpBuffer();
-//		output.printAllRecords();
-//		output.collectAllFromFile();
-//		output.printAllRecords();
+//		output1.dumpBuffer();
+//		Collector output2 = new Collector("/Users/tomer/Desktop/text.txt", true);
+//		output2.collectAllFromFile();
+//		output2.printAllRecords();
+		
 	}
 }

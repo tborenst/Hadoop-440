@@ -23,11 +23,12 @@ public class Collector implements Serializable{
 	/**
 	 * Collector - constructor
 	 * @param path - path of file to write key-value pairs to (will create if not exist).
+	 * @param read - should the collector be initially set to read? If false, it will override the file given by its path.
 	 */
-	public Collector(String path){
+	public Collector(String path, Boolean read){
 		this.pairs = new ArrayList<Record>();
 		this.path = path;
-		this.io = new RecordsFileIO(path, true, false);
+		this.io = new RecordsFileIO(path, true, read);
 	}
 	
 	/**
