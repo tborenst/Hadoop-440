@@ -16,7 +16,9 @@ public class Collector implements Serializable{
 	private static final long serialVersionUID = -3698360081977942111L;
 	
 	private ArrayList<Record> pairs;
+	private String path;
 	private RecordsFileIO io;
+	private String delimiter = "\n";
 	
 	/**
 	 * Collector - constructor
@@ -24,6 +26,7 @@ public class Collector implements Serializable{
 	 */
 	public Collector(String path){
 		this.pairs = new ArrayList<Record>();
+		this.path = path;
 		this.io = new RecordsFileIO(path, true, false);
 	}
 	
@@ -35,8 +38,25 @@ public class Collector implements Serializable{
 		pairs.add(pair);
 	}
 	
+	/**
+	 * collectAllFromFile - erases the current collection buffer and reads all records
+	 * from the file given by the path of this Collector.
+	 */
+	public void collectAllFromFile(){
+		io.setIsReadFile(true); //set mode to "reading"
+		pairs = new ArrayList<Record>(); //erase current buffer
+		
+		//load all from file into buffer
+		Record rec;
+		while((rec = io.readNextRecord(delimiter)) != null){
+			pairs.add(rec);
+		}
+		
+		io.setIsReadFile(false); //set mode back to "writing"
+	}
+	
 	public String getPath(){
-		return io.getPath();
+		return path;
 	}
 	
 	/**
@@ -46,8 +66,25 @@ public class Collector implements Serializable{
 		Iterator<Record> itr = pairs.iterator();
 		while(itr.hasNext()){
 			Record record = itr.next();
-			io.writeNextRecord(record, "\n"); //write buffer
+			io.writeNextRecord(record, delimiter); //write buffer
 		}
 		pairs = new ArrayList<Record>(); //clean buffer
+	}
+	
+	/**
+	 * DEBUGGING FUNCTION - PRINT ALL RECORDS
+	 */
+	public void printAllRecords(){
+		Iterator<Record> it = pairs.iterator();
+		System.out.println("======================");
+		System.out.println("PRINTING ALL RECORDS: ");
+		while(it.hasNext()){
+			Record rec = it.next();
+			System.out.println("KEY: " + rec.getKey().getValue());
+			for(int i = 0; i < rec.getValues().length; i++){
+				System.out.println("V " + i + ": " + rec.getValues()[i].getValue());
+			}
+		}
+		System.out.println("======================");
 	}
 }

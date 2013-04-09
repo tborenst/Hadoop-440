@@ -38,22 +38,14 @@ public class Tests {
 //		//=============================
 //		
 //		Collector output = new Collector("/Users/tomer/Desktop/text.txt");
-//		for(Integer i = 0; i < 50; i++){
-//			if(i%9 == 0){
-//				output.dumpBuffer();
-//			}
+//		for(Integer i = 0; i < 10; i++){
 //			IntWritable key = new IntWritable(i);
-//			StringWritable val = new StringWritable("Tomer");
+//			StringWritable val = new StringWritable("Hey there!");
 //			output.collect(key, val);
 //		}
 //		output.dumpBuffer();
-//		
-//		RecordsFileIO io = new RecordsFileIO("/Users/tomer/Desktop/text.txt", true, true);
-//		for(Integer i = 0; i < 50; i++){
-//			Record rec = io.readNextRecord("\n");
-//			System.out.println("Key: " + rec.getKey().getValue());
-//			System.out.println("Value: " + rec.getValues()[0].getValue());
-//			System.out.println("===============");
-//		}
+//		output.printAllRecords();
+//		output.collectAllFromFile();
+//		output.printAllRecords();
 	}
 }
