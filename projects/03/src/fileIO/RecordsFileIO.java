@@ -362,19 +362,44 @@ public class RecordsFileIO {
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 */
+	public void partitionData(String[] newPaths, int recordsPerPartition, String readDelimiter, String writeDelimiter) {
+		if(isReadFile) {
+			boolean moreToRead = true;
+			for(int p = 0; moreToRead && p < newPaths.length; p++) {
+				// TODO: lets hope the file doesn't already exist or bad shit happens
+				RecordsFileIO newRecordsFile = new RecordsFileIO(newPaths[p], true, false);
+				for(int r = 0; moreToRead && r < recordsPerPartition; r++) {
+					Record record = readNextBytes(readDelimiter);
+					if(record != null) {
+						ByteArrayWritable bytes = (ByteArrayWritable) record.getValues()[0];
+						newRecordsFile.writeNextBytes(bytes.getValue(), writeDelimiter);
+					} else {
+						moreToRead = false;
+					}
+				}
+				
+				newRecordsFile.close();
+			}
+		}
+	}
+	
+	/**
+	 * Partitions the records and writes them into the files located at the paths in newPaths.
+	 * @param newPaths
+	 * @param recordsPerPartition
+	 * @param readDelimiter
+	 * @param writeDelimiter
+	 */
 	public void partitionRecords(String[] newPaths, int recordsPerPartition, String readDelimiter, String writeDelimiter) {
 		if(isReadFile) {
 			boolean moreToRead = true;
 			for(int p = 0; moreToRead && p < newPaths.length; p++) {
 				// TODO: lets hope the file doesn't already exist or bad shit happens
 				RecordsFileIO newRecordsFile = new RecordsFileIO(newPaths[p], true, false);
-				String tempWriteDelimiter = "";
 				for(int r = 0; moreToRead && r < recordsPerPartition; r++) {
 					Record record = readNextRecord(readDelimiter);
 					if(record != null) {
-						//ByteArrayWritable bytes = (ByteArrayWritable) record.values[0];
-						newRecordsFile.writeNextRecord(record, tempWriteDelimiter);
-						tempWriteDelimiter = writeDelimiter;
+						newRecordsFile.writeNextRecord(record, writeDelimiter);
 					} else {
 						moreToRead = false;
 					}

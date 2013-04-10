@@ -194,12 +194,98 @@ public class RecordsFileTester {
 		System.out.println("5: <" + readRec5Key + ", " + readRec5ValueStr + ">");
 	}
 	
-	public static void main(String[] args) {		
+	private static void testPartitioningRecords(String originalPath, String[] newPaths) {
+		System.out.println("***Testing with records***");
+		System.out.println("Writing records...");
+		RecordsFileIO recRecords = new RecordsFileIO(originalPath, true, false);
+		
+		StringWritable rec1Key = new StringWritable("doom");
+		IntWritable rec1Value = new IntWritable(2);
+		Record rec1 = new Record(rec1Key, new Writable[] {rec1Value});
+		recRecords.writeNextRecord(rec1, "\n");
+		
+		StringWritable rec2Key = new StringWritable("rectum");
+		IntWritable rec2Value = new IntWritable(1);
+		Record rec2 = new Record(rec2Key, new Writable[] {rec2Value});
+		recRecords.writeNextRecord(rec2, "\n");
+		
+		StringWritable rec3Key = new StringWritable("vansi");
+		IntWritable rec3Value = new IntWritable(131);
+		Record rec3 = new Record(rec3Key, new Writable[] {rec3Value});
+		recRecords.writeNextRecord(rec3, "\n");
+		
+		StringWritable rec4Key = new StringWritable("tomer");
+		IntWritable rec4Value = new IntWritable(42);
+		Record rec4 = new Record(rec4Key, new Writable[] {rec4Value});
+		recRecords.writeNextRecord(rec4, "\n");
+		
+		StringWritable rec5Key = new StringWritable("foopanda");
+		IntWritable rec5Value = new IntWritable(21);
+		Record rec5 = new Record(rec5Key, new Writable[] {rec5Value});
+		recRecords.writeNextRecord(rec5, "\n");
+		
+		recRecords.close();
+		recRecords = new RecordsFileIO(originalPath, true, true);
+		System.out.println("Partitioning records...");
+		recRecords.partitionRecords(newPaths, 2, "\n", "\n");
+		recRecords.close();
+		
+		System.out.println("Reading records...");
+		RecordsFileIO recRecordsA = new RecordsFileIO(newPaths[0], true, true);
+		Record readRec1 = recRecordsA.readNextRecord("\n");
+		String readRec1Key = ((StringWritable) readRec1.getKey()).getValue();
+		int readRec1Value = ((IntWritable) readRec1.getValues()[0]).getValue();
+		System.out.println("1: <" + readRec1Key + ", " + readRec1Value + ">");
+		
+	
+		Record readRec2 = recRecordsA.readNextRecord("\n");
+		String readRec2Key = ((StringWritable) readRec2.getKey()).getValue();
+		int readRec2Value = ((IntWritable) readRec2.getValues()[0]).getValue();
+		System.out.println("2: <" + readRec2Key + ", " + readRec2Value + ">");
+
+		RecordsFileIO recRecordsB = new RecordsFileIO(newPaths[1], true, true);
+		Record readRec3 = recRecordsB.readNextRecord("\n");
+		String readRec3Key = ((StringWritable) readRec3.getKey()).getValue();
+		int readRec3Value = ((IntWritable) readRec3.getValues()[0]).getValue();
+		System.out.println("3: <" + readRec3Key + ", " + readRec3Value + ">");
+				
+		Record readRec4 = recRecordsB.readNextRecord("\n");
+		String readRec4Key = ((StringWritable) readRec4.getKey()).getValue();
+		int readRec4Value = ((IntWritable) readRec4.getValues()[0]).getValue();
+		System.out.println("4: <" + readRec4Key + ", " + readRec4Value + ">");
+
+		RecordsFileIO recRecordsC = new RecordsFileIO(newPaths[2], true, true);
+		Record readRec5 = recRecordsC.readNextRecord("\n");
+		String readRec5Key = ((StringWritable) readRec5.getKey()).getValue();
+		int readRec5Value = ((IntWritable) readRec5.getValues()[0]).getValue();
+		System.out.println("5: <" + readRec5Key + ", " + readRec5Value + ">");
+	}
+	
+	private static void testPartitioningStrings(String recordsPath, String[] newPaths) {
+		System.out.println("***Testing with strings***");
+		System.out.println("Writing strings...");
+		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, false);
+		
+		recRecords.writeNextString("doom", "\n");
+		
+		recRecords.writeNextString("rectum", "\n");
+		
+		recRecords.writeNextString("vansi", "\n");
+		
+		recRecords.writeNextString("tomer", "\n");
+		
+		recRecords.writeNextString("foopanda", "\n");
+		
+		recRecords.close();
+		recRecords = new RecordsFileIO(recordsPath, true, true);
+		recRecords.partitionData(newPaths, 2, "\n", "\n");
+	}
+	
+	public static void main(String[] args) {
 		// write test
 		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO/";
-		int test = 4; //1 for records, 2 for strings, 3 for bytes
+		int test = 6;
 
-		RecordsFileTester.testBytes(dir + "bytesTest.txt");
 		switch(test) {
 		
 		case 1:
@@ -215,8 +301,18 @@ public class RecordsFileTester {
 			break;
 			
 		case 4:
+			RecordsFileTester.testBytes(dir + "bytesTest.txt");
 			break;
 		
+		case 5: 
+			RecordsFileTester.testPartitioningRecords(dir + "recordPartitionTest.txt",
+						new String[] {dir + "recordPartitionTestA.txt", dir + "recordPartitionTestB.txt", dir + "recordPartitionTestC.txt"});
+			break;
+			
+		case 6: 
+			RecordsFileTester.testPartitioningStrings(dir + "stringPartitionTest.txt",
+						new String[] {dir + "stringPartitionTestA.txt", dir + "stringPartitionTestB.txt", dir + "stringPartitionTestC.txt"});
+			break;
 		}
 	}
 }
