@@ -255,7 +255,7 @@ public class RecordsFileIO {
 				try {
 					byte b = raf.readByte();
 					s.add(b);
-					System.out.println("found: "+(char) b);
+					//System.out.println("found: "+(char) b);
 					if(delimiterBArr[delimiterMatches] == b) {
 						delimiterMatches++;
 					}
@@ -283,7 +283,7 @@ public class RecordsFileIO {
 			
 			Byte[] sBytes = new Byte[s.size()];
 			sBytes = s.toArray(sBytes);
-			System.out.println("readBytes: "+sBytes);
+			//System.out.println("readBytes: " + new String(Util.tobyteArray(sBytes)));
 			
 			Writable[] values = new Writable[] {new ByteArrayWritable(sBytes)};
 			r = new Record(new StringWritable(getPath() + "_" + readRecordId), values);

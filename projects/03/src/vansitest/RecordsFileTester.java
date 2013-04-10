@@ -1,5 +1,6 @@
 package vansitest;
 
+import util.Util;
 import api.IntWritable;
 import api.StringWritable;
 import api.ByteArrayWritable;
@@ -86,7 +87,7 @@ public class RecordsFileTester {
 		
 		recRecords.close();
 		recRecords = new RecordsFileIO(recordsPath, true, true);
-		System.out.println("Reading records...");
+		System.out.println("Reading strings...");
 		
 		Record readRec1 = recRecords.readNextString("\n");
 		String readRec1Key = ((StringWritable) readRec1.getKey()).getValue();
@@ -118,7 +119,7 @@ public class RecordsFileTester {
 	private static void testReadStrings(String recordsPath) {
 		System.out.println("***Testing with read strings***");
 		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, true);
-		System.out.println("Reading records...");
+		System.out.println("Reading strings...");
 		
 		Record readRec1 = recRecords.readNextString("\n");
 		String readRec1Key = ((StringWritable) readRec1.getKey()).getValue();
@@ -142,11 +143,63 @@ public class RecordsFileTester {
 		System.out.println("4: <" + readRec4Key + ", " + readRec4Value + ">");
 	}
 	
+	private static void testBytes(String recordsPath) {
+		System.out.println("***Testing with strings***");
+		System.out.println("Writing bytes...");
+		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, false);
+		
+		recRecords.writeNextBytes(Util.toByteArray("doom".getBytes()), "\n");
+		
+		recRecords.writeNextBytes(Util.toByteArray("rectum".getBytes()), "\n");
+		
+		recRecords.writeNextBytes(Util.toByteArray("vansi".getBytes()), "\n");
+		
+		recRecords.writeNextBytes(Util.toByteArray("tomer".getBytes()), "\n");
+		
+		recRecords.writeNextBytes(Util.toByteArray("foopanda".getBytes()), "\n");
+		
+		recRecords.close();
+		recRecords = new RecordsFileIO(recordsPath, true, true);
+		System.out.println("Reading bytes...");
+		
+		Record readRec1 = recRecords.readNextBytes("\n");
+		String readRec1Key = ((StringWritable) readRec1.getKey()).getValue();
+		Byte[] readRec1Value = ((ByteArrayWritable) readRec1.getValues()[0]).getValue();
+		String readRec1ValueStr = new String(Util.tobyteArray(readRec1Value));
+		System.out.println("1: <" + readRec1Key + ", " + readRec1ValueStr + ">");
+		
+	
+		Record readRec2 = recRecords.readNextBytes("\n");
+		String readRec2Key = ((StringWritable) readRec2.getKey()).getValue();
+		Byte[] readRec2Value = ((ByteArrayWritable) readRec2.getValues()[0]).getValue();
+		String readRec2ValueStr = new String(Util.tobyteArray(readRec2Value));
+		System.out.println("2: <" + readRec2Key + ", " + readRec2ValueStr + ">");
+		
+		Record readRec3 = recRecords.readNextBytes("\n");
+		String readRec3Key = ((StringWritable) readRec3.getKey()).getValue();
+		Byte[] readRec3Value = ((ByteArrayWritable) readRec3.getValues()[0]).getValue();
+		String readRec3ValueStr = new String(Util.tobyteArray(readRec3Value));
+		System.out.println("3: <" + readRec3Key + ", " + readRec3ValueStr + ">");
+				
+		Record readRec4 = recRecords.readNextBytes("\n");
+		String readRec4Key = ((StringWritable) readRec4.getKey()).getValue();
+		Byte[] readRec4Value = ((ByteArrayWritable) readRec4.getValues()[0]).getValue();
+		String readRec4ValueStr = new String(Util.tobyteArray(readRec4Value));
+		System.out.println("4: <" + readRec4Key + ", " + readRec4ValueStr + ">");
+		
+		Record readRec5 = recRecords.readNextBytes("\n");
+		String readRec5Key = ((StringWritable) readRec5.getKey()).getValue();
+		Byte[] readRec5Value = ((ByteArrayWritable) readRec5.getValues()[0]).getValue();
+		String readRec5ValueStr = new String(Util.tobyteArray(readRec5Value));
+		System.out.println("5: <" + readRec5Key + ", " + readRec5ValueStr + ">");
+	}
+	
 	public static void main(String[] args) {		
 		// write test
 		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO/";
-		int test = 3; //1 for records, 2 for strings, 3 for bytes
-		
+		int test = 4; //1 for records, 2 for strings, 3 for bytes
+
+		RecordsFileTester.testBytes(dir + "bytesTest.txt");
 		switch(test) {
 		
 		case 1:
@@ -159,6 +212,9 @@ public class RecordsFileTester {
 			
 		case 3:
 			RecordsFileTester.testReadStrings(dir + "readStringsTest.txt");
+			break;
+			
+		case 4:
 			break;
 		
 		}

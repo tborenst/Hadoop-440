@@ -37,4 +37,13 @@ public class Util {
 		
 		return result;
 	}
+	
+	public static  Byte[] toByteArray(byte[] primArr) {
+		Byte[] result = new Byte[primArr.length];
+		for(int o = 0; o < primArr.length; o++) {
+			result[o] = (Byte) primArr[o];
+		}
+		
+		return result;
+	}
 }
