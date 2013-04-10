@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -28,6 +29,7 @@ public class RecordsFileIO {
 	private int writeRecordId;
 	private ObjectOutputStream writeStream;
 	private ObjectInputStream readStream;
+	private RandomAccessFile raf;
 	
 	/**
 	 * Constructor for RecordsFileIO.
@@ -51,6 +53,9 @@ public class RecordsFileIO {
 			}
 		}
 		
+		this.raf = open();
+		this.readStream = null;
+		this.writeStream = null;
 		setIsReadFile(isReadFile);
 	}
 	
@@ -66,10 +71,42 @@ public class RecordsFileIO {
 			readRecordId = 0;
 			closeStreams();
 			readStream = openReadStream();
+			if(raf != null) {
+				try {
+					raf.seek(0);
+				} catch (IOException e) {
+					// TODO: remove debugging
+					System.out.println("RecordsFileIO.setIsReadFile: unable to set raf file pointer to start at: " + getPath());
+					e.printStackTrace();
+				}
+			}
 		} else {
 			closeStreams();
 			writeStream = openWriteStream();
+			if(raf != null) {
+				try {
+					raf.seek(raf.length());
+				} catch (IOException e) { 
+					// TODO: remove debugging
+					System.out.println("RecordsFileIO.setIsReadFile: unable to set raf file pointer to end at: " + getPath());
+					e.printStackTrace();
+				}
+			}
 		}
+	}
+	
+	private RandomAccessFile open() {
+		if(file != null) {
+			try {
+				return new RandomAccessFile(file, "rw");
+			} catch (FileNotFoundException e) {
+				// TODO: remove debugging
+				System.out.println("RecordsFileIO.open: unable to open raf at: " + getPath());
+				e.printStackTrace();
+			}
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -144,6 +181,17 @@ public class RecordsFileIO {
 	 * Closes the file.
 	 */
 	public void close() {
+		if(raf != null) {
+			try {
+				raf.close();
+			} catch (IOException e) {
+				// TODO: remove debugging
+				System.out.println("RecordsFileIO.close: unable to close raf at: " + getPath());
+				e.printStackTrace();
+			}
+			raf = null;
+		}
+		
 		closeStreams();
 		file = null;
 	}
@@ -182,40 +230,41 @@ public class RecordsFileIO {
 	 */
 	public Record readNextString(String delimiter) {
 		Record r = null;
-		if(isReadFile && readStream != null) {
+		if(isReadFile && raf != null) {
 			
 			StringBuilder s = new StringBuilder();
 			
-			boolean moreToRead = false;
+			boolean moreToRead = true;
 			while(moreToRead) {
-				StringBuilder temp = new StringBuilder();
-				for(int b = 0; moreToRead && b < delimiter.length(); b++) {
-					try {
-						temp.append((char) readStream.readByte());
-					} catch(EOFException e) {
-						moreToRead = false;
-						if(s.length() + temp.length() == 0) {
-							// if we haven't ready anything and we get an EOF, this means there was no record
-							return null;
-						}
-					} catch (IOException e) {
-						//TODO: remove debugging
-						System.out.println("RecordsFileIO.readNextString: failed to read byte at: " + getPath());
-						e.printStackTrace();
+				try {
+					char c = (char) raf.readByte();
+					s.append(c);
+					//System.out.println("found: " + c);
+				} catch(EOFException e) {
+					moreToRead = false;
+					if(s.length() == 0) {
+						// if we haven't ready anything and we get an EOF, this means there was no record
+						return null;
 					}
+				} catch (IOException e) {
+					//TODO: remove debugging
+					System.out.println("RecordsFileIO.readNextString: failed to read byte at: " + getPath());
+					e.printStackTrace();
 				}
 				
-				if(temp.indexOf(delimiter) == -1) {
-					s.append(temp);
-				} else {
+				int delimiterIndex = s.indexOf(delimiter);
+				
+				if(delimiterIndex != -1) {
 					moreToRead = false;
+					s.delete(delimiterIndex, s.length());
 				}
 			}
-			
+			//System.out.println("readNextString: " + s.toString());
 			Writable[] values = new Writable[] {new StringWritable(s.toString())};
 			r = new Record(new StringWritable(getPath() + "_" + readRecordId), values);
 			readRecordId++;
 		}
+		
 		return r;
 	}
 	
@@ -226,41 +275,49 @@ public class RecordsFileIO {
 	 */
 	public Record readNextBytes(String delimiter) {
 		Record r = null;
-		if(isReadFile && readStream != null) {
+		if(isReadFile && raf != null) {
 			
 			ArrayList<Byte> s = new ArrayList<Byte>();
 			byte[] delimiterBArr = (byte[]) delimiter.getBytes();
-			boolean moreToRead = false;
 			
+			boolean moreToRead = true;
+			
+			int delimiterMatches = 0;
 			while(moreToRead) {
-				byte[] temp = new byte[delimiterBArr.length];
-				for(int b = 0; moreToRead && b < delimiterBArr.length; b++) {
-					try {
-						temp[b] = readStream.readByte();
-					} catch(EOFException e) {
-						moreToRead = false;
-						if(s.size() + b == 0) {
-							// if we haven't ready anything and we get an EOF, this means there was no record
-							return null;
-						}
-					} catch (IOException e) {
-						//TODO: remove debugging
-						System.out.println("RecordsFileIO.readNextByte: failed to read byte at: " + getPath());
-						e.printStackTrace();
+				try {
+					byte b = raf.readByte();
+					s.add(b);
+					System.out.println("found: "+(char) b);
+					if(delimiterBArr[delimiterMatches] == b) {
+						delimiterMatches++;
 					}
+				} catch(EOFException e) {
+					moreToRead = false;
+					if(s.size() == 0) {
+						// if we haven't ready anything and we get an EOF, this means there was no record
+						return null;
+					}
+				} catch (IOException e) {
+					//TODO: remove debugging
+					System.out.println("RecordsFileIO.readNextBytes: failed to read byte at: " + getPath());
+					e.printStackTrace();
 				}
 				
-				if(!Arrays.equals(temp, delimiterBArr)) {
-					for(int t = 0; t < temp.length; t++) {
-						s.add((Byte) temp[t]);
-					}
-				} else {
+				
+				
+				if(delimiterMatches == delimiterBArr.length) {
 					moreToRead = false;
+					for(int d = 0; d < delimiterBArr.length; d++) {
+						s.remove(s.size()-1);
+					}
 				}
 			}
 			
 			Byte[] sBytes = new Byte[s.size()];
-			Writable[] values = new Writable[] {new ByteArrayWritable(s.toArray(sBytes))};
+			sBytes = s.toArray(sBytes);
+			System.out.println("readBytes: "+sBytes);
+			
+			Writable[] values = new Writable[] {new ByteArrayWritable(sBytes)};
 			r = new Record(new StringWritable(getPath() + "_" + readRecordId), values);
 			readRecordId++;
 		}
@@ -293,10 +350,10 @@ public class RecordsFileIO {
 	 * @param delimiter
 	 */
 	public void writeNextString(String recordStr, String delimiter) {
-		if(!isReadFile && writeStream != null) {
+		if(!isReadFile && raf != null) {
 			try {
 				String del = (writeRecordId == 0) ? "" : delimiter;
-				writeStream.writeBytes(del + recordStr);
+				raf.writeBytes(del + recordStr);
 				writeRecordId++;
 			} catch (IOException e) {
 				//TODO: remove debugging
@@ -312,11 +369,11 @@ public class RecordsFileIO {
 	 * @param delimiter
 	 */
 	public void writeNextBytes(Byte[] recordBytes, String delimiter) {
-		if(!isReadFile && writeStream != null) {
+		if(!isReadFile && raf != null) {
 			try {
 				String del = (writeRecordId == 0) ? "" : delimiter;
-				writeStream.writeBytes(del);
-				writeStream.write(Util.tobyteArray(recordBytes));
+				raf.writeBytes(del);
+				raf.write(Util.tobyteArray(recordBytes));
 				writeRecordId++;
 			} catch (IOException e) {
 				//TODO: remove debugging
@@ -362,7 +419,6 @@ public class RecordsFileIO {
 	public void delete() {
 		if(file != null) {
 			file.delete();
-			file = null;
 		}
 		
 		close();

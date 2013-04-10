@@ -8,15 +8,33 @@ import fileIO.Record;
 import fileIO.RecordsFileIO;
 
 public class RecordsFileTester {
-	public static void main(String[] args) {
+	public static void main(String[] args) {		
 		// write test
 		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/";
+		/*String asdfPath = dir + "asdf.txt";
+		tFile t = new tFile(asdfPath, true);
+		t.write("asdf\n");
+		t = null;
+		RecordsFileIO tR = new RecordsFileIO(asdfPath, false, true);
+
+		Record tRec = tR.readNextString("\n");
+		String tRecKey = ((StringWritable) tRec.getKey()).getValue();
+		String tRecValue = ((StringWritable) tRec.getValues()[0]).getValue();
+		System.out.println("<" + tRecKey + ", " + tRecValue + ">");
+		
+		Record tRec2 = tR.readNextString("\n");*/
+		
+		
 		String fileName = "RecordsFileTest1.txt";
-		RecordsFileIO recs = new RecordsFileIO(dir + fileName, true, false);
-			
+		RecordsFileIO recs = new RecordsFileIO(dir + fileName, false, false);
+		
+		recs.writeNextString("asdf1", "\n");
+		recs.writeNextString("asdf2", "\n");
+		
+		/*
 		Writable[] val1 = {new StringWritable("value1")};
 		Record rec1 = new Record(new IntWritable(1), val1);
-		recs.writeNextRecord(rec1, "");
+		recs.writeNextRecord(rec1, "\n");
 		
 		Writable[] val2 = {new StringWritable("value2")};
 		Record rec2 = new Record(new IntWritable(2), val2);
@@ -29,19 +47,21 @@ public class RecordsFileTester {
 		Writable[] val4 = {new StringWritable("value4")};
 		Record rec4 = new Record(new IntWritable(4), val4);
 		recs.writeNextRecord(rec4, "\n");
+		*/
 		
 		recs.setIsReadFile(true);
 		
-		/*
+		
 		Record recA = recs.readNextBytes("\n");
-		String recAKey = ((StringWritable) recA.key).getValue();
-		Byte[] recAValue = ((ByteArrayWritable) recA.values[0]).getValue();
+		recA = recs.readNextBytes("\n");
+		String recAKey = ((StringWritable) recA.getKey()).getValue();
+		Byte[] recAValue = ((ByteArrayWritable) recA.getValues()[0]).getValue();
 		System.out.println("<" + recAKey + ", " + recAValue + ">");
 		
 		
 		return;
-		*/
 		
+		/*
 		String[] paths = new String[] {
 			dir + "RecordsFileTest_A.txt",
 			dir + "RecordsFileTest_B.txt",
