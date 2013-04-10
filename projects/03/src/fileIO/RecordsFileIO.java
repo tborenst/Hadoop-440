@@ -14,8 +14,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Arrays;
-
 import util.Util;
 
 import api.ByteArrayWritable;
@@ -27,8 +25,6 @@ public class RecordsFileIO {
 	private boolean isReadFile;
 	private int readRecordId;
 	private int writeRecordId;
-	private ObjectOutputStream writeStream;
-	private ObjectInputStream readStream;
 	private RandomAccessFile raf;
 	
 	/**
@@ -40,8 +36,6 @@ public class RecordsFileIO {
 	 */
 	public RecordsFileIO(String path, boolean createIfDoesntExist, boolean isReadFile) {
 		this.file = new File(path);
-		this.readRecordId = 0;
-		this.writeRecordId = 0;
 		
 		if(!this.file.exists() && createIfDoesntExist) {
 			try {
@@ -54,8 +48,6 @@ public class RecordsFileIO {
 		}
 		
 		this.raf = open();
-		this.readStream = null;
-		this.writeStream = null;
 		setIsReadFile(isReadFile);
 	}
 	
@@ -69,8 +61,6 @@ public class RecordsFileIO {
 		isReadFile = newIsReadFile;
 		if(isReadFile) {
 			readRecordId = 0;
-			closeStreams();
-			readStream = openReadStream();
 			if(raf != null) {
 				try {
 					raf.seek(0);
@@ -81,8 +71,7 @@ public class RecordsFileIO {
 				}
 			}
 		} else {
-			closeStreams();
-			writeStream = openWriteStream();
+			writeRecordId = 0;
 			if(raf != null) {
 				try {
 					raf.seek(raf.length());
@@ -150,34 +139,6 @@ public class RecordsFileIO {
 	}
 	
 	/**
-	 * Close writeStream and readStream.
-	 */
-	private void closeStreams() {
-		if(writeStream != null) {
-			try {
-				writeStream.flush();
-				writeStream.close();
-			} catch (IOException e) {
-				// TODO remove debugging
-				System.out.println("tFile.closeStreams: unable to flush and/or close writeStream at: " + getPath());
-				e.printStackTrace();
-			}
-			writeStream = null;
-		}
-		
-		if(readStream != null) {
-			try {
-				readStream.close();
-			} catch (IOException e) {
-				// TODO remove debugging
-				System.out.println("tFile.closeStreams: unable to close readStream at: " + file.getPath());
-				e.printStackTrace();
-			}
-			readStream = null;
-		}
-	}
-	
-	/**
 	 * Closes the file.
 	 */
 	public void close() {
@@ -192,7 +153,6 @@ public class RecordsFileIO {
 			raf = null;
 		}
 		
-		closeStreams();
 		file = null;
 	}
 	
@@ -203,7 +163,9 @@ public class RecordsFileIO {
 	 */
 	public Record readNextRecord(String delimiter) {
 		Record r = null;
-		if(isReadFile && readStream != null) {
+		if(isReadFile) {
+			ObjectInputStream readStream = openReadStream();
+			
 			try {
 				r = (Record) readStream.readObject();
 				readStream.skipBytes(delimiter.length());
@@ -218,7 +180,16 @@ public class RecordsFileIO {
 				System.out.println("RecordsFileIO.readNextRecord: failed to read object or skip bytes at: " + getPath());
 				e1.printStackTrace();
 			}
+			
 			readRecordId++;
+			
+			try {
+				readStream.close();
+			} catch (IOException e) {
+				//TODO: remove debugging
+				System.out.println("RecordsFileIO.readNextRecord: failed to close stream: " + getPath());
+				e.printStackTrace();
+			}
 		}
 		return r;
 	}
@@ -330,7 +301,9 @@ public class RecordsFileIO {
 	 * @param delimiter
 	 */
 	public void writeNextRecord(Record record, String delimiter) {
-		if(!isReadFile && writeStream != null) {
+		if(!isReadFile) {
+			ObjectOutputStream writeStream = openWriteStream();
+			
 			try {
 				String del = (writeRecordId == 0) ? "" : delimiter;
 				writeStream.writeBytes(del);
@@ -339,6 +312,15 @@ public class RecordsFileIO {
 			} catch (IOException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.writeNextRecord(): error accessing/writing file at: " + getPath());
+				e.printStackTrace();
+			}
+			
+			try {
+				writeStream.flush();
+				writeStream.close();
+			} catch (IOException e) {
+				// TODO remove debugging
+				System.out.println("tFile.closeStreams: unable to flush and/or close writeStream at: " + getPath());
 				e.printStackTrace();
 			}
 		}

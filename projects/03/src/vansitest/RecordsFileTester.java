@@ -52,10 +52,10 @@ public class RecordsFileTester {
 		recs.setIsReadFile(true);
 		
 		
-		Record recA = recs.readNextBytes("\n");
-		recA = recs.readNextBytes("\n");
+		Record recA = recs.readNextString("\n");
+		recA = recs.readNextString("\n");
 		String recAKey = ((StringWritable) recA.getKey()).getValue();
-		Byte[] recAValue = ((ByteArrayWritable) recA.getValues()[0]).getValue();
+		String recAValue = ((StringWritable) recA.getValues()[0]).getValue();
 		System.out.println("<" + recAKey + ", " + recAValue + ">");
 		
 		
