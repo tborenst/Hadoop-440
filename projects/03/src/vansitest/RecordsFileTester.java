@@ -8,112 +8,159 @@ import fileIO.Record;
 import fileIO.RecordsFileIO;
 
 public class RecordsFileTester {
+	private static void testRecords(String recordsPath) {
+		System.out.println("***Testing with records***");
+		System.out.println("Writing records...");
+		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, false);
+		
+		StringWritable rec1Key = new StringWritable("doom");
+		IntWritable rec1Value = new IntWritable(2);
+		Record rec1 = new Record(rec1Key, new Writable[] {rec1Value});
+		recRecords.writeNextRecord(rec1, "\n");
+		
+		StringWritable rec2Key = new StringWritable("rectum");
+		IntWritable rec2Value = new IntWritable(1);
+		Record rec2 = new Record(rec2Key, new Writable[] {rec2Value});
+		recRecords.writeNextRecord(rec2, "\n");
+		
+		StringWritable rec3Key = new StringWritable("vansi");
+		IntWritable rec3Value = new IntWritable(131);
+		Record rec3 = new Record(rec3Key, new Writable[] {rec3Value});
+		recRecords.writeNextRecord(rec3, "\n");
+		
+		StringWritable rec4Key = new StringWritable("tomer");
+		IntWritable rec4Value = new IntWritable(42);
+		Record rec4 = new Record(rec4Key, new Writable[] {rec4Value});
+		recRecords.writeNextRecord(rec4, "\n");
+		
+		StringWritable rec5Key = new StringWritable("foopanda");
+		IntWritable rec5Value = new IntWritable(21);
+		Record rec5 = new Record(rec5Key, new Writable[] {rec5Value});
+		recRecords.writeNextRecord(rec5, "\n");
+		
+		recRecords.close();
+		recRecords = new RecordsFileIO(recordsPath, true, true);
+		System.out.println("Reading records...");
+		
+		Record readRec1 = recRecords.readNextRecord("\n");
+		String readRec1Key = ((StringWritable) readRec1.getKey()).getValue();
+		int readRec1Value = ((IntWritable) readRec1.getValues()[0]).getValue();
+		System.out.println("1: <" + readRec1Key + ", " + readRec1Value + ">");
+		
+	
+		Record readRec2 = recRecords.readNextRecord("\n");
+		String readRec2Key = ((StringWritable) readRec2.getKey()).getValue();
+		int readRec2Value = ((IntWritable) readRec2.getValues()[0]).getValue();
+		System.out.println("2: <" + readRec2Key + ", " + readRec2Value + ">");
+		
+		Record readRec3 = recRecords.readNextRecord("\n");
+		String readRec3Key = ((StringWritable) readRec3.getKey()).getValue();
+		int readRec3Value = ((IntWritable) readRec3.getValues()[0]).getValue();
+		System.out.println("3: <" + readRec3Key + ", " + readRec3Value + ">");
+				
+		Record readRec4 = recRecords.readNextRecord("\n");
+		String readRec4Key = ((StringWritable) readRec4.getKey()).getValue();
+		int readRec4Value = ((IntWritable) readRec4.getValues()[0]).getValue();
+		System.out.println("4: <" + readRec4Key + ", " + readRec4Value + ">");
+		
+		Record readRec5 = recRecords.readNextRecord("\n");
+		String readRec5Key = ((StringWritable) readRec5.getKey()).getValue();
+		int readRec5Value = ((IntWritable) readRec5.getValues()[0]).getValue();
+		System.out.println("5: <" + readRec5Key + ", " + readRec5Value + ">");
+	}
+	
+	private static void testStrings(String recordsPath) {
+		System.out.println("***Testing with strings***");
+		System.out.println("Writing strings...");
+		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, false);
+		
+		recRecords.writeNextString("doom", "\n");
+		
+		recRecords.writeNextString("rectum", "\n");
+		
+		recRecords.writeNextString("vansi", "\n");
+		
+		recRecords.writeNextString("tomer", "\n");
+		
+		recRecords.writeNextString("foopanda", "\n");
+		
+		recRecords.close();
+		recRecords = new RecordsFileIO(recordsPath, true, true);
+		System.out.println("Reading records...");
+		
+		Record readRec1 = recRecords.readNextString("\n");
+		String readRec1Key = ((StringWritable) readRec1.getKey()).getValue();
+		String readRec1Value = ((StringWritable) readRec1.getValues()[0]).getValue();
+		System.out.println("1: <" + readRec1Key + ", " + readRec1Value + ">");
+		
+	
+		Record readRec2 = recRecords.readNextString("\n");
+		String readRec2Key = ((StringWritable) readRec2.getKey()).getValue();
+		String readRec2Value = ((StringWritable) readRec2.getValues()[0]).getValue();
+		System.out.println("2: <" + readRec2Key + ", " + readRec2Value + ">");
+		
+		Record readRec3 = recRecords.readNextString("\n");
+		String readRec3Key = ((StringWritable) readRec3.getKey()).getValue();
+		String readRec3Value = ((StringWritable) readRec3.getValues()[0]).getValue();
+		System.out.println("3: <" + readRec3Key + ", " + readRec3Value + ">");
+				
+		Record readRec4 = recRecords.readNextString("\n");
+		String readRec4Key = ((StringWritable) readRec4.getKey()).getValue();
+		String readRec4Value = ((StringWritable) readRec4.getValues()[0]).getValue();
+		System.out.println("4: <" + readRec4Key + ", " + readRec4Value + ">");
+		
+		Record readRec5 = recRecords.readNextString("\n");
+		String readRec5Key = ((StringWritable) readRec5.getKey()).getValue();
+		String readRec5Value = ((StringWritable) readRec5.getValues()[0]).getValue();
+		System.out.println("5: <" + readRec5Key + ", " + readRec5Value + ">");
+	}
+	
+	private static void testReadStrings(String recordsPath) {
+		System.out.println("***Testing with read strings***");
+		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, true);
+		System.out.println("Reading records...");
+		
+		Record readRec1 = recRecords.readNextString("\n");
+		String readRec1Key = ((StringWritable) readRec1.getKey()).getValue();
+		String readRec1Value = ((StringWritable) readRec1.getValues()[0]).getValue();
+		System.out.println("1: <" + readRec1Key + ", " + readRec1Value + ">");
+		
+	
+		Record readRec2 = recRecords.readNextString("\n");
+		String readRec2Key = ((StringWritable) readRec2.getKey()).getValue();
+		String readRec2Value = ((StringWritable) readRec2.getValues()[0]).getValue();
+		System.out.println("2: <" + readRec2Key + ", " + readRec2Value + ">");
+		
+		Record readRec3 = recRecords.readNextString("\n");
+		String readRec3Key = ((StringWritable) readRec3.getKey()).getValue();
+		String readRec3Value = ((StringWritable) readRec3.getValues()[0]).getValue();
+		System.out.println("3: <" + readRec3Key + ", " + readRec3Value + ">");
+				
+		Record readRec4 = recRecords.readNextString("\n");
+		String readRec4Key = ((StringWritable) readRec4.getKey()).getValue();
+		String readRec4Value = ((StringWritable) readRec4.getValues()[0]).getValue();
+		System.out.println("4: <" + readRec4Key + ", " + readRec4Value + ">");
+	}
+	
 	public static void main(String[] args) {		
 		// write test
-		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/";
-		/*String asdfPath = dir + "asdf.txt";
-		tFile t = new tFile(asdfPath, true);
-		t.write("asdf\n");
-		t = null;
-		RecordsFileIO tR = new RecordsFileIO(asdfPath, false, true);
-
-		Record tRec = tR.readNextString("\n");
-		String tRecKey = ((StringWritable) tRec.getKey()).getValue();
-		String tRecValue = ((StringWritable) tRec.getValues()[0]).getValue();
-		System.out.println("<" + tRecKey + ", " + tRecValue + ">");
+		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO/";
+		int test = 3; //1 for records, 2 for strings, 3 for bytes
 		
-		Record tRec2 = tR.readNextString("\n");*/
+		switch(test) {
 		
+		case 1:
+			RecordsFileTester.testRecords(dir + "recordsTest.txt");
+			break;
 		
-		String fileName = "RecordsFileTest1.txt";
-		RecordsFileIO recs = new RecordsFileIO(dir + fileName, false, false);
+		case 2:
+			RecordsFileTester.testStrings(dir + "stringsTest.txt");
+			break;
+			
+		case 3:
+			RecordsFileTester.testReadStrings(dir + "readStringsTest.txt");
+			break;
 		
-		recs.writeNextString("asdf1", "\n");
-		recs.writeNextString("asdf2", "\n");
-		
-		/*
-		Writable[] val1 = {new StringWritable("value1")};
-		Record rec1 = new Record(new IntWritable(1), val1);
-		recs.writeNextRecord(rec1, "\n");
-		
-		Writable[] val2 = {new StringWritable("value2")};
-		Record rec2 = new Record(new IntWritable(2), val2);
-		recs.writeNextRecord(rec2, "\n");
-		
-		Writable[] val3 = {new StringWritable("value3")};
-		Record rec3 = new Record(new IntWritable(3), val3);
-		recs.writeNextRecord(rec3, "\n");
-		
-		Writable[] val4 = {new StringWritable("value4")};
-		Record rec4 = new Record(new IntWritable(4), val4);
-		recs.writeNextRecord(rec4, "\n");
-		*/
-		
-		recs.setIsReadFile(true);
-		
-		
-		Record recA = recs.readNextString("\n");
-		recA = recs.readNextString("\n");
-		String recAKey = ((StringWritable) recA.getKey()).getValue();
-		String recAValue = ((StringWritable) recA.getValues()[0]).getValue();
-		System.out.println("<" + recAKey + ", " + recAValue + ">");
-		
-		
-		return;
-		
-		/*
-		String[] paths = new String[] {
-			dir + "RecordsFileTest_A.txt",
-			dir + "RecordsFileTest_B.txt",
-			dir + "RecordsFileTest_C.txt"
-		};
-		
-		System.out.println("Partitioning Records...");
-		
-		recs.partitionRecords(paths, 2, "\n", "\n");
-		
-		System.out.println("Partitioned Records");
-		
-		RecordsFileIO recsA = new RecordsFileIO(dir + "RecordsFileTest_A.txt", true, true);
-		
-		Record recA_1 = recsA.readNextRecord("\n");
-		int recA_1Key = ((IntWritable) recA_1.getKey()).getValue();
-		String recA_1Value = ((StringWritable) recA_1.getValues()[0]).getValue();
-		System.out.println("<" + recA_1Key + ", " + recA_1Value + ">");
-		
-		Record recA_2 = recsA.readNextRecord("\n");
-		int recA_2Key = ((IntWritable) recA_2.getKey()).getValue();
-		String recA_2Value = ((StringWritable) recA_2.getValues()[0]).getValue();
-		System.out.println("<" + recA_2Key + ", " + recA_2Value + ">");
-		
-		RecordsFileIO recsB = new RecordsFileIO(dir + "RecordsFileTest_B.txt", true, true);
-		
-		Record recB_1 = recsB.readNextRecord("\n");
-		int recB_1Key = ((IntWritable) recB_1.getKey()).getValue();
-		String recB_1Value = ((StringWritable) recB_1.getValues()[0]).getValue();
-		System.out.println("<" + recB_1Key + ", " + recB_1Value + ">");
-		
-		Record recB_2 = recsB.readNextRecord("\n");
-		int recB_2Key = ((IntWritable) recB_2.getKey()).getValue();
-		String recB_2Value = ((StringWritable) recB_2.getValues()[0]).getValue();
-		System.out.println("<" + recB_2Key + ", " + recB_2Value + ">");
-		
-		
-		RecordsFileIO recsC = new RecordsFileIO(dir + "RecordsFileTest_C.txt", true, true);
-		
-		Record recC_1 = recsC.readNextRecord("");
-		System.out.println(recC_1);
-		
-		
-		/*Record rec1_2 = recs.readNextRecord("\n");
-		int rec1_2Key = ((IntWritable) rec1_2.key).getValue();
-		String rec1_2Value = ((StringWritable) rec1_2.values[0]).getValue();
-		System.out.println("<" + rec1_2Key + ", " + rec1_2Value + ">");
-		
-		Record rec2_2 = recs.readNextRecord("\n");
-		int rec2_2Key = ((IntWritable) rec2_2.key).getValue();
-		String rec2_2Value = ((StringWritable) rec2_2.values[0]).getValue();		
-		System.out.println("<" + rec2_2Key + ", " + rec2_2Value + ">");
-		*/
+		}
 	}
 }

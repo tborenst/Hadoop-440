@@ -26,6 +26,8 @@ public class RecordsFileIO {
 	private int readRecordId;
 	private int writeRecordId;
 	private RandomAccessFile raf;
+	private ObjectInputStream readObjectStream;
+	private ObjectOutputStream writeObjectStream;
 	
 	/**
 	 * Constructor for RecordsFileIO.
@@ -57,7 +59,7 @@ public class RecordsFileIO {
 	 * or to the end of newIsReadFile is false.
 	 * @param newIsReadFile
 	 */
-	public void setIsReadFile(boolean newIsReadFile) {
+	private void setIsReadFile(boolean newIsReadFile) {
 		isReadFile = newIsReadFile;
 		if(isReadFile) {
 			readRecordId = 0;
@@ -81,6 +83,7 @@ public class RecordsFileIO {
 					e.printStackTrace();
 				}
 			}
+			writeObjectStream = openWriteStream();
 		}
 	}
 	
@@ -164,11 +167,13 @@ public class RecordsFileIO {
 	public Record readNextRecord(String delimiter) {
 		Record r = null;
 		if(isReadFile) {
-			ObjectInputStream readStream = openReadStream();
+			if(readObjectStream == null) {
+				readObjectStream = openReadStream();
+			}
 			
 			try {
-				r = (Record) readStream.readObject();
-				readStream.skipBytes(delimiter.length());
+				r = (Record) readObjectStream.readObject();
+				readObjectStream.skipBytes(delimiter.length());
 			} catch (EOFException e) {
 				return null;
 			} catch (ClassNotFoundException e1) {
@@ -182,14 +187,6 @@ public class RecordsFileIO {
 			}
 			
 			readRecordId++;
-			
-			try {
-				readStream.close();
-			} catch (IOException e) {
-				//TODO: remove debugging
-				System.out.println("RecordsFileIO.readNextRecord: failed to close stream: " + getPath());
-				e.printStackTrace();
-			}
 		}
 		return r;
 	}
@@ -302,25 +299,18 @@ public class RecordsFileIO {
 	 */
 	public void writeNextRecord(Record record, String delimiter) {
 		if(!isReadFile) {
-			ObjectOutputStream writeStream = openWriteStream();
+			if(writeObjectStream == null) {
+				writeObjectStream = openWriteStream();
+			}
 			
 			try {
 				String del = (writeRecordId == 0) ? "" : delimiter;
-				writeStream.writeBytes(del);
-				writeStream.writeObject(record);
+				writeObjectStream.writeBytes(del);
+				writeObjectStream.writeObject(record);
 				writeRecordId++;
 			} catch (IOException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.writeNextRecord(): error accessing/writing file at: " + getPath());
-				e.printStackTrace();
-			}
-			
-			try {
-				writeStream.flush();
-				writeStream.close();
-			} catch (IOException e) {
-				// TODO remove debugging
-				System.out.println("tFile.closeStreams: unable to flush and/or close writeStream at: " + getPath());
 				e.printStackTrace();
 			}
 		}
