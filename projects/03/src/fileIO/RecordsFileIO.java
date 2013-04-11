@@ -2,7 +2,7 @@
  * RecordFileIO handles IO requests to the file of records.
  */
 
-package fileIO;
+package fileio;
 
 import java.io.EOFException;
 import java.io.File;
@@ -362,11 +362,13 @@ public class RecordsFileIO {
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 */
+	// TODO: this has the same comment as partitionRecords() - change it so that the difference is clear
 	public void partitionData(String[] newPaths, int recordsPerPartition, String readDelimiter, String writeDelimiter) {
 		if(isReadFile) {
 			boolean moreToRead = true;
 			for(int p = 0; moreToRead && p < newPaths.length; p++) {
 				// TODO: lets hope the file doesn't already exist or bad shit happens
+				// TODO: fix this ASAP!!!
 				RecordsFileIO newRecordsFile = new RecordsFileIO(newPaths[p], true, false);
 				for(int r = 0; moreToRead && r < recordsPerPartition; r++) {
 					Record record = readNextBytes(readDelimiter);

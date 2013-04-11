@@ -2,7 +2,7 @@
  * Record is a key values pair to store intermediary results.
  */
 
-package fileIO;
+package fileio;
 
 import java.io.Serializable;
 import api.Writable;

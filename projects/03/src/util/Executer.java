@@ -48,6 +48,7 @@ public class Executer extends ClassLoader{
 		} catch (Exception e){
 			//TODO: remove debugging line
 			System.out.println("Failed in: Executer.instantiate()");
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -77,6 +78,7 @@ public class Executer extends ClassLoader{
 		} catch (Exception e){
 			//TODO: remove debuggling line
 			System.out.println("Failed in: Executer.execute()");
+			e.printStackTrace();
 			return null;
 		}
 	}

@@ -5,8 +5,8 @@ import api.IntWritable;
 import api.StringWritable;
 import api.ByteArrayWritable;
 import api.Writable;
-import fileIO.Record;
-import fileIO.RecordsFileIO;
+import fileio.Record;
+import fileio.RecordsFileIO;
 
 public class RecordsFileTester {
 	private static void testRecords(String recordsPath) {

@@ -1,7 +1,6 @@
 /**
  * The Collector class is used by map and reduce functions to store key-value pairs.
  * Collector buffers key-value pairs in memory for a while and then uses dumpBuffer() to write them to disk to prevent memory overflow.
- * Collector can also read back records from a file (the one given by its path) if the 'read' parameter is set to true.
  * @author Tomer Borenstein
  */
 package api;
@@ -10,8 +9,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import fileIO.Record;
-import fileIO.RecordsFileIO;
+import fileio.Record;
+import fileio.RecordsFileIO;
 
 public class Collector implements Serializable{
 	private static final long serialVersionUID = -3698360081977942111L;
@@ -26,10 +25,10 @@ public class Collector implements Serializable{
 	 * @param path - path of file to write key-value pairs to (will create if not exist).
 	 * @param read - should the collector be initially set to read? If false, it will override the file given by its path.
 	 */
-	public Collector(String path, Boolean read){
+	public Collector(String path){
 		this.pairs = new ArrayList<Record>();
 		this.path = path;
-		this.io = new RecordsFileIO(path, true, read);
+		this.io = new RecordsFileIO(path, true, false);
 	}
 	
 	/**
@@ -45,7 +44,6 @@ public class Collector implements Serializable{
 	 * from the file given by the path of this Collector.
 	 */
 	public void collectAllFromFile(){
-		io.setIsReadFile(true); //set mode to "reading"
 		pairs = new ArrayList<Record>(); //erase current buffer
 		
 		//load all from file into buffer
@@ -53,8 +51,6 @@ public class Collector implements Serializable{
 		while((rec = io.readNextRecord(delimiter)) != null){
 			pairs.add(rec);
 		}
-		
-		io.setIsReadFile(false); //set mode back to "writing"
 	}
 	
 	public String getPath(){
