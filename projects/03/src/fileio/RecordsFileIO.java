@@ -379,8 +379,10 @@ public class RecordsFileIO {
 	 * @param newPaths
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @returns int - The index of the last path read from, -1 if partitionData fails.
 	 */
-	public void partitionData(String[] newPaths, String readDelimiter, String writeDelimiter) {
+	public int partitionData(String[] newPaths, String readDelimiter, String writeDelimiter) {
+		int currPathIdx = -1;
 		if(isReadFile) {
 			RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newPaths.length];
 			for(int f = 0; f < newPaths.length; f++) {
@@ -388,9 +390,10 @@ public class RecordsFileIO {
 			}
 			
 			Record rec;
-			for(int f = 0; (rec = readNextBytes(readDelimiter)) != null; f++) {
-				f = f % newPaths.length; //make f wrap around
-				
+			
+			for(int f = 0; (rec = readNextBytes(readDelimiter)) != null;
+					f = (f + 1) % newPaths.length) {
+				currPathIdx = f;
 				ByteArrayWritable bytes = (ByteArrayWritable) rec.getValues()[0];
 				newRecordsFiles[f].writeNextBytes(bytes.getValue(), writeDelimiter);
 			}
@@ -399,6 +402,46 @@ public class RecordsFileIO {
 				newRecordsFiles[f].close();
 			}
 		}
+		return currPathIdx;
+	}
+	
+	/**
+	 * Partitions the data located at paths in dataPaths 
+	 * and writes them into the files located at the paths in newRecordFilesPaths.
+	 * @param dataPaths
+	 * @param newDataFilesPaths
+	 * @param readDelimiter
+	 * @param writeDelimiter
+	 * @returns int - The index of the last record written to, -1 if partitionData fails.
+	 */
+	public static int partitionDataTo(String[] dataPaths, String[] newDataFilesPaths, String readDelimiter, String writeDelimiter) {
+		int currRecordPathIdx = -1;
+		
+		RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newDataFilesPaths.length];
+		for(int f = 0; f < newDataFilesPaths.length; f++) {
+			newRecordsFiles[f] = new RecordsFileIO(newDataFilesPaths[f], true, false);
+		}
+		
+		
+		for(int d = 0; d < dataPaths.length; d++) {
+			RecordsFileIO dataFile = new RecordsFileIO(dataPaths[d], true, true);
+			Record rec;
+			for(int f = 0; (rec = dataFile.readNextBytes(readDelimiter)) != null;
+					f = (f + 1) % newRecordsFiles.length) {
+				currRecordPathIdx = d;
+				ByteArrayWritable bytes = (ByteArrayWritable) rec.getValues()[0];
+				newRecordsFiles[f].writeNextBytes(bytes.getValue(), writeDelimiter);
+			}
+			
+			dataFile.close();
+		}
+		
+		
+		for(int f = 0; f < newRecordsFiles.length; f++) {
+			newRecordsFiles[f].close();
+		}
+		
+		return currRecordPathIdx;
 	}
 	
 	/**
@@ -415,9 +458,8 @@ public class RecordsFileIO {
 			}
 			
 			Record rec;
-			for(int f = 0; (rec = readNextRecord(readDelimiter)) != null; f++) {
-				f = f % newPaths.length; //make f wrap around
-				
+			for(int f = 0; (rec = readNextRecord(readDelimiter)) != null; 
+					f = (f + 1) % newRecordsFiles.length) {				
 				newRecordsFiles[f].writeNextRecord(rec, writeDelimiter);
 			}
 			
@@ -425,6 +467,44 @@ public class RecordsFileIO {
 				newRecordsFiles[f].close();
 			}
 		}
+	}
+	
+	/**
+	 * Partitions the data located at paths in dataPaths 
+	 * and writes them into the files located at the paths in newRecordFilesPaths.
+	 * @param recordsPath
+	 * @param newRecordFilesPaths
+	 * @param readDelimiter
+	 * @param writeDelimiter
+	 * @returns int - The index of the last record written to, -1 if partitionData fails.
+	 */
+	public static int partitionRecordsTo(String[] recordsPath, String[] newRecordFilesPaths, String readDelimiter, String writeDelimiter) {
+		int currRecordPathIdx = -1;
+		
+		RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newRecordFilesPaths.length];
+		for(int f = 0; f < newRecordFilesPaths.length; f++) {
+			newRecordsFiles[f] = new RecordsFileIO(newRecordFilesPaths[f], true, false);
+		}
+		
+		
+		for(int d = 0; d < recordsPath.length; d++) {
+			RecordsFileIO recordsFile = new RecordsFileIO(recordsPath[d], true, true);
+			Record rec;
+			for(int f = 0; (rec = recordsFile.readNextBytes(readDelimiter)) != null;
+					f = (f + 1) % newRecordsFiles.length) {
+				currRecordPathIdx = d;
+				newRecordsFiles[f].writeNextRecord(rec, writeDelimiter);
+			}
+			
+			recordsFile.close();
+		}
+		
+		
+		for(int f = 0; f < newRecordsFiles.length; f++) {
+			newRecordsFiles[f].close();
+		}
+		
+		return currRecordPathIdx;
 	}
 	
 	/**
