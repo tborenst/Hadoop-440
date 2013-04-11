@@ -25,4 +25,8 @@ public class Record implements Serializable{
 	public Writable[] getValues(){
 		return values;
 	}
+	
+	public int compare(Record rec) {
+		return key.compare(rec.getKey());
+	}
 }

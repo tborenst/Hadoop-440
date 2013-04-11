@@ -14,6 +14,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import util.Util;
 
 import api.ByteArrayWritable;
@@ -406,6 +412,56 @@ public class RecordsFileIO {
 				}
 				
 				newRecordsFile.close();
+			}
+		}
+	}
+	
+	/**
+	 * Merges all the records in the files at oldPaths in to this file, in a sorted order.
+	 * @param oldPaths
+	 * @param readDelimiter
+	 * @param writeDelimiter
+	 */
+	public void mergeRecords(String[] oldPaths, String readDelimiter, String writeDelimiter) {
+		if(!isReadFile) {
+			//System.out.println("Merging files into: " + getPath());
+			HashMap<Writable, ArrayList<Writable>> mergedRecords = new HashMap<Writable, ArrayList<Writable>>();
+			
+			for(int p = 0; p < oldPaths.length; p++) {
+				RecordsFileIO recsFile = new RecordsFileIO(oldPaths[p], true, true);
+				Record rec;
+				while((rec = recsFile.readNextRecord(readDelimiter)) != null) {
+					Writable key = rec.getKey();
+					//System.out.println("read: <" + key.getValue() + ", " + rec.getValues()[0].getValue() + ">");
+					ArrayList<Writable> values = mergedRecords.get(key);
+					if(values == null) {
+						values = new ArrayList<Writable>();
+						//System.out.println("Created new");
+					}
+					values.addAll(Arrays.asList(rec.getValues()));
+					mergedRecords.put(key, values);
+				}
+			}
+			
+			Set<Writable> keySet = mergedRecords.keySet();
+			Writable[] keys = keySet.toArray(new Writable[keySet.size()]);
+			Arrays.sort(keys, new Comparator<Writable>() {
+
+				@Override
+				public int compare(Writable key1, Writable key2) {
+					return key1.compare(key2);
+				}
+				
+			});
+			
+			for(int k = 0; k < keys.length; k++) {
+				Writable key = keys[k];
+				ArrayList<Writable> valuesList = mergedRecords.get(key);
+				if(valuesList != null) {
+					Writable[] values = valuesList.toArray(new Writable[valuesList.size()]);
+					Record rec = new Record(key, values);
+					this.writeNextRecord(rec, writeDelimiter);
+				}
 			}
 		}
 	}

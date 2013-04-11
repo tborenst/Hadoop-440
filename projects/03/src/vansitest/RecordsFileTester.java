@@ -194,7 +194,7 @@ public class RecordsFileTester {
 		System.out.println("5: <" + readRec5Key + ", " + readRec5ValueStr + ">");
 	}
 	
-	private static void testPartitioningRecords(String originalPath, String[] newPaths) {
+	private static void testPartitioningRecords(String originalPath, String[] newPaths, String mergePath) {
 		System.out.println("***Testing with records***");
 		System.out.println("Writing records...");
 		RecordsFileIO recRecords = new RecordsFileIO(originalPath, true, false);
@@ -231,18 +231,19 @@ public class RecordsFileTester {
 		recRecords.close();
 		
 		System.out.println("Reading records...");
+		
 		RecordsFileIO recRecordsA = new RecordsFileIO(newPaths[0], true, true);
 		Record readRec1 = recRecordsA.readNextRecord("\n");
 		String readRec1Key = ((StringWritable) readRec1.getKey()).getValue();
 		int readRec1Value = ((IntWritable) readRec1.getValues()[0]).getValue();
 		System.out.println("1: <" + readRec1Key + ", " + readRec1Value + ">");
 		
-	
 		Record readRec2 = recRecordsA.readNextRecord("\n");
 		String readRec2Key = ((StringWritable) readRec2.getKey()).getValue();
 		int readRec2Value = ((IntWritable) readRec2.getValues()[0]).getValue();
 		System.out.println("2: <" + readRec2Key + ", " + readRec2Value + ">");
-
+		recRecordsA.close();
+		
 		RecordsFileIO recRecordsB = new RecordsFileIO(newPaths[1], true, true);
 		Record readRec3 = recRecordsB.readNextRecord("\n");
 		String readRec3Key = ((StringWritable) readRec3.getKey()).getValue();
@@ -253,12 +254,48 @@ public class RecordsFileTester {
 		String readRec4Key = ((StringWritable) readRec4.getKey()).getValue();
 		int readRec4Value = ((IntWritable) readRec4.getValues()[0]).getValue();
 		System.out.println("4: <" + readRec4Key + ", " + readRec4Value + ">");
-
+		recRecordsB.close();
+		
 		RecordsFileIO recRecordsC = new RecordsFileIO(newPaths[2], true, true);
 		Record readRec5 = recRecordsC.readNextRecord("\n");
 		String readRec5Key = ((StringWritable) readRec5.getKey()).getValue();
 		int readRec5Value = ((IntWritable) readRec5.getValues()[0]).getValue();
 		System.out.println("5: <" + readRec5Key + ", " + readRec5Value + ">");
+		recRecordsC.close();
+		
+		
+		System.out.println("Merging files...");
+		RecordsFileIO recMerged = new RecordsFileIO(mergePath, true, false);
+		recMerged.mergeRecords(newPaths, "\n",  "\n");
+		recMerged.close();
+		recMerged = new RecordsFileIO(mergePath, true, true);
+		
+		Record readRec1M = recMerged.readNextRecord("\n");
+		String readRec1KeyM = ((StringWritable) readRec1M.getKey()).getValue();
+		int readRec1ValueM = ((IntWritable) readRec1M.getValues()[0]).getValue();
+		System.out.println("1: <" + readRec1KeyM + ", " + readRec1ValueM + ">");
+		
+		Record readRec2M = recMerged.readNextRecord("\n");
+		String readRec2KeyM = ((StringWritable) readRec2M.getKey()).getValue();
+		int readRec2ValueM = ((IntWritable) readRec2M.getValues()[0]).getValue();
+		System.out.println("2: <" + readRec2KeyM + ", " + readRec2ValueM + ">");
+		
+		Record readRec3M = recMerged.readNextRecord("\n");
+		String readRec3KeyM = ((StringWritable) readRec3M.getKey()).getValue();
+		int readRec3ValueM = ((IntWritable) readRec3M.getValues()[0]).getValue();
+		System.out.println("3: <" + readRec3KeyM + ", " + readRec3ValueM + ">");
+				
+		Record readRec4M = recMerged.readNextRecord("\n");
+		String readRec4KeyM = ((StringWritable) readRec4M.getKey()).getValue();
+		int readRec4ValueM = ((IntWritable) readRec4M.getValues()[0]).getValue();
+		System.out.println("4: <" + readRec4KeyM + ", " + readRec4ValueM + ">");
+		
+		Record readRec5M = recMerged.readNextRecord("\n");
+		String readRec5KeyM = ((StringWritable) readRec5M.getKey()).getValue();
+		int readRec5ValueM = ((IntWritable) readRec5M.getValues()[0]).getValue();
+		System.out.println("5: <" + readRec5KeyM + ", " + readRec5ValueM + ">");
+		
+		recMerged.close();
 	}
 	
 	private static void testPartitioningStrings(String recordsPath, String[] newPaths) {
@@ -284,7 +321,7 @@ public class RecordsFileTester {
 	public static void main(String[] args) {
 		// write test
 		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO/";
-		int test = 6;
+		int test = 5;
 
 		switch(test) {
 		
@@ -306,7 +343,9 @@ public class RecordsFileTester {
 		
 		case 5: 
 			RecordsFileTester.testPartitioningRecords(dir + "recordPartitionTest.txt",
-						new String[] {dir + "recordPartitionTestA.txt", dir + "recordPartitionTestB.txt", dir + "recordPartitionTestC.txt"});
+						new String[] {dir + "recordPartitionTestA.txt", dir + "recordPartitionTestB.txt", 
+										dir + "recordPartitionTestC.txt"},
+						dir + "recordPartitionTestMerged.txt");
 			break;
 			
 		case 6: 
