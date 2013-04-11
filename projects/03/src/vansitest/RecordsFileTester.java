@@ -227,7 +227,7 @@ public class RecordsFileTester {
 		recRecords.close();
 		recRecords = new RecordsFileIO(originalPath, true, true);
 		System.out.println("Partitioning records...");
-		recRecords.partitionRecords(newPaths, 2, "\n", "\n");
+		recRecords.partitionRecords(newPaths, "\n", "\n");
 		recRecords.close();
 		
 		System.out.println("Reading records...");
@@ -315,7 +315,7 @@ public class RecordsFileTester {
 		
 		recRecords.close();
 		recRecords = new RecordsFileIO(recordsPath, true, true);
-		recRecords.partitionData(newPaths, 2, "\n", "\n");
+		recRecords.partitionData(newPaths, "\n", "\n");
 	}
 	
 	public static void main(String[] args) {

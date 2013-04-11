@@ -364,27 +364,26 @@ public class RecordsFileIO {
 	/**
 	 * Partitions the records and writes them into the files located at the paths in newPaths.
 	 * @param newPaths
-	 * @param recordsPerPartition
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 */
-	public void partitionData(String[] newPaths, int recordsPerPartition, String readDelimiter, String writeDelimiter) {
+	public void partitionData(String[] newPaths, String readDelimiter, String writeDelimiter) {
 		if(isReadFile) {
-			boolean moreToRead = true;
-			for(int p = 0; moreToRead && p < newPaths.length; p++) {
-				// TODO: lets hope the file doesn't already exist or bad shit happens
-				RecordsFileIO newRecordsFile = new RecordsFileIO(newPaths[p], true, false);
-				for(int r = 0; moreToRead && r < recordsPerPartition; r++) {
-					Record record = readNextBytes(readDelimiter);
-					if(record != null) {
-						ByteArrayWritable bytes = (ByteArrayWritable) record.getValues()[0];
-						newRecordsFile.writeNextBytes(bytes.getValue(), writeDelimiter);
-					} else {
-						moreToRead = false;
-					}
-				}
+			RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newPaths.length];
+			for(int f = 0; f < newPaths.length; f++) {
+				newRecordsFiles[f] = new RecordsFileIO(newPaths[f], true, false);
+			}
+			
+			Record rec;
+			for(int f = 0; (rec = readNextBytes(readDelimiter)) != null; f++) {
+				f = f % newPaths.length; //make f wrap around
 				
-				newRecordsFile.close();
+				ByteArrayWritable bytes = (ByteArrayWritable) rec.getValues()[0];
+				newRecordsFiles[f].writeNextBytes(bytes.getValue(), writeDelimiter);
+			}
+			
+			for(int f = 0; f < newPaths.length; f++) {
+				newRecordsFiles[f].close();
 			}
 		}
 	}
@@ -392,26 +391,25 @@ public class RecordsFileIO {
 	/**
 	 * Partitions the records and writes them into the files located at the paths in newPaths.
 	 * @param newPaths
-	 * @param recordsPerPartition
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 */
-	public void partitionRecords(String[] newPaths, int recordsPerPartition, String readDelimiter, String writeDelimiter) {
+	public void partitionRecords(String[] newPaths, String readDelimiter, String writeDelimiter) {
 		if(isReadFile) {
-			boolean moreToRead = true;
-			for(int p = 0; moreToRead && p < newPaths.length; p++) {
-				// TODO: lets hope the file doesn't already exist or bad shit happens
-				RecordsFileIO newRecordsFile = new RecordsFileIO(newPaths[p], true, false);
-				for(int r = 0; moreToRead && r < recordsPerPartition; r++) {
-					Record record = readNextRecord(readDelimiter);
-					if(record != null) {
-						newRecordsFile.writeNextRecord(record, writeDelimiter);
-					} else {
-						moreToRead = false;
-					}
-				}
+			RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newPaths.length];
+			for(int f = 0; f < newPaths.length; f++) {
+				newRecordsFiles[f] = new RecordsFileIO(newPaths[f], true, false);
+			}
+			
+			Record rec;
+			for(int f = 0; (rec = readNextRecord(readDelimiter)) != null; f++) {
+				f = f % newPaths.length; //make f wrap around
 				
-				newRecordsFile.close();
+				newRecordsFiles[f].writeNextRecord(rec, writeDelimiter);
+			}
+			
+			for(int f = 0; f < newPaths.length; f++) {
+				newRecordsFiles[f].close();
 			}
 		}
 	}
@@ -460,7 +458,7 @@ public class RecordsFileIO {
 				if(valuesList != null) {
 					Writable[] values = valuesList.toArray(new Writable[valuesList.size()]);
 					Record rec = new Record(key, values);
-					this.writeNextRecord(rec, writeDelimiter);
+					writeNextRecord(rec, writeDelimiter);
 				}
 			}
 		}
