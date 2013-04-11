@@ -1,8 +1,8 @@
 /**
- * RecordFileIO handles IO requests to the file of records.
+ * RecordFileIO handles io requests to the file of records.
  */
 
-package fileIO;
+package fileio;
 
 import java.io.EOFException;
 import java.io.File;
@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import util.Util;
@@ -40,7 +39,8 @@ public class RecordsFileIO {
 	 * RecordsFileIO can only read or write, not both.
 	 * @param path
 	 * @param createIfDoesntExist
-	 * @param isReadFile
+	 * @param isReadFile - The RecordsFileIO can only read or write. 
+	 * 		Set to true if RecordsFileIO reads only and writes only if false.
 	 */
 	public RecordsFileIO(String path, boolean createIfDoesntExist, boolean isReadFile) {
 		this.file = new File(path);
@@ -93,6 +93,10 @@ public class RecordsFileIO {
 		}
 	}
 	
+	/**
+	 * Opens a RandomAccessFile of file.
+	 * @return RandomAccessFile
+	 */
 	private RandomAccessFile open() {
 		if(file != null) {
 			try {
@@ -110,6 +114,7 @@ public class RecordsFileIO {
 	/**
 	 * ObjectOutputStream openWriteStream(void):
 	 * Creates a ObjectOutputStream from File file.
+	 * @return ObjectOutputStream
 	 */
 	private ObjectOutputStream openWriteStream() {
 		if(file != null) {			
@@ -129,6 +134,7 @@ public class RecordsFileIO {
 	/**
 	 * ObjectInputStream openReadStream(void):
 	 * Creates a ObjectInputStream from File file.
+	 * @return ObjectInputStream
 	 */
 	private ObjectInputStream openReadStream() {
 		if(file != null) {			
@@ -148,7 +154,7 @@ public class RecordsFileIO {
 	}
 	
 	/**
-	 * Closes the file.
+	 * Closes the file and raf.
 	 */
 	public void close() {
 		if(raf != null) {
@@ -166,9 +172,9 @@ public class RecordsFileIO {
 	}
 	
 	/**
-	 * Reads the next record.
+	 * Reads and deserializes the next record.
 	 * @param delimiter
-	 * @return
+	 * @return Record
 	 */
 	public Record readNextRecord(String delimiter) {
 		Record r = null;
@@ -200,7 +206,7 @@ public class RecordsFileIO {
 	/**
 	 * Reads the next String.
 	 * @param delimiter
-	 * @return
+	 * @return Record - The key is the path + record id.
 	 */
 	public Record readNextString(String delimiter) {
 		Record r = null;
@@ -245,7 +251,7 @@ public class RecordsFileIO {
 	/**
 	 * Reads the next record as an array of bytes.
 	 * @param delimiter
-	 * @return
+	 * @return Record - The key is the path + record id.
 	 */
 	public Record readNextBytes(String delimiter) {
 		Record r = null;
@@ -310,8 +316,10 @@ public class RecordsFileIO {
 			}
 			
 			try {
-				String del = (writeRecordId == 0) ? "" : delimiter;
-				writeObjectStream.writeBytes(del);
+				if(writeRecordId > 0) {
+					writeObjectStream.writeBytes(delimiter);
+				}
+				
 				writeObjectStream.writeObject(record);
 				writeRecordId++;
 			} catch (IOException e) {
@@ -330,8 +338,11 @@ public class RecordsFileIO {
 	public void writeNextString(String recordStr, String delimiter) {
 		if(!isReadFile && raf != null) {
 			try {
-				String del = (writeRecordId == 0) ? "" : delimiter;
-				raf.writeBytes(del + recordStr);
+				if(writeRecordId > 0) {
+					raf.writeBytes(delimiter);
+				}
+				
+				raf.writeBytes(recordStr);
 				writeRecordId++;
 			} catch (IOException e) {
 				//TODO: remove debugging
@@ -349,8 +360,10 @@ public class RecordsFileIO {
 	public void writeNextBytes(Byte[] recordBytes, String delimiter) {
 		if(!isReadFile && raf != null) {
 			try {
-				String del = (writeRecordId == 0) ? "" : delimiter;
-				raf.writeBytes(del);
+				if(writeRecordId > 0) {
+					raf.writeBytes(delimiter);
+				}
+				
 				raf.write(Util.tobyteArray(recordBytes));
 				writeRecordId++;
 			} catch (IOException e) {
@@ -488,7 +501,7 @@ public class RecordsFileIO {
 	}
 	
 	/**
-	 * Returns true if the file exists and false if the file does not exist.
+	 * Returns true if the file exists.
 	 */
 	public boolean exists() {
 		return file != null && file.exists();
