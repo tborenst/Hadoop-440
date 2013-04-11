@@ -1,5 +1,5 @@
 /**
- * RecordFileIO handles IO requests to the file of records.
+ * RecordFileIO handles io requests to the file of records.
  */
 
 package fileio;
@@ -14,6 +14,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Set;
+
 import util.Util;
 
 import api.ByteArrayWritable;
@@ -34,7 +39,8 @@ public class RecordsFileIO {
 	 * RecordsFileIO can only read or write, not both.
 	 * @param path
 	 * @param createIfDoesntExist
-	 * @param isReadFile
+	 * @param isReadFile - The RecordsFileIO can only read or write. 
+	 * 		Set to true if RecordsFileIO reads only and writes only if false.
 	 */
 	public RecordsFileIO(String path, boolean createIfDoesntExist, boolean isReadFile) {
 		this.file = new File(path);
@@ -87,6 +93,10 @@ public class RecordsFileIO {
 		}
 	}
 	
+	/**
+	 * Opens a RandomAccessFile of file.
+	 * @return RandomAccessFile
+	 */
 	private RandomAccessFile open() {
 		if(file != null) {
 			try {
@@ -104,6 +114,7 @@ public class RecordsFileIO {
 	/**
 	 * ObjectOutputStream openWriteStream(void):
 	 * Creates a ObjectOutputStream from File file.
+	 * @return ObjectOutputStream
 	 */
 	private ObjectOutputStream openWriteStream() {
 		if(file != null) {			
@@ -123,6 +134,7 @@ public class RecordsFileIO {
 	/**
 	 * ObjectInputStream openReadStream(void):
 	 * Creates a ObjectInputStream from File file.
+	 * @return ObjectInputStream
 	 */
 	private ObjectInputStream openReadStream() {
 		if(file != null) {			
@@ -142,7 +154,7 @@ public class RecordsFileIO {
 	}
 	
 	/**
-	 * Closes the file.
+	 * Closes the file and raf.
 	 */
 	public void close() {
 		if(raf != null) {
@@ -160,9 +172,9 @@ public class RecordsFileIO {
 	}
 	
 	/**
-	 * Reads the next record.
+	 * Reads and deserializes the next record.
 	 * @param delimiter
-	 * @return
+	 * @return Record
 	 */
 	public Record readNextRecord(String delimiter) {
 		Record r = null;
@@ -194,7 +206,7 @@ public class RecordsFileIO {
 	/**
 	 * Reads the next String.
 	 * @param delimiter
-	 * @return
+	 * @return Record - The key is the path + record id.
 	 */
 	public Record readNextString(String delimiter) {
 		Record r = null;
@@ -239,7 +251,7 @@ public class RecordsFileIO {
 	/**
 	 * Reads the next record as an array of bytes.
 	 * @param delimiter
-	 * @return
+	 * @return Record - The key is the path + record id.
 	 */
 	public Record readNextBytes(String delimiter) {
 		Record r = null;
@@ -304,8 +316,10 @@ public class RecordsFileIO {
 			}
 			
 			try {
-				String del = (writeRecordId == 0) ? "" : delimiter;
-				writeObjectStream.writeBytes(del);
+				if(writeRecordId > 0) {
+					writeObjectStream.writeBytes(delimiter);
+				}
+				
 				writeObjectStream.writeObject(record);
 				writeRecordId++;
 			} catch (IOException e) {
@@ -324,8 +338,11 @@ public class RecordsFileIO {
 	public void writeNextString(String recordStr, String delimiter) {
 		if(!isReadFile && raf != null) {
 			try {
-				String del = (writeRecordId == 0) ? "" : delimiter;
-				raf.writeBytes(del + recordStr);
+				if(writeRecordId > 0) {
+					raf.writeBytes(delimiter);
+				}
+				
+				raf.writeBytes(recordStr);
 				writeRecordId++;
 			} catch (IOException e) {
 				//TODO: remove debugging
@@ -343,8 +360,10 @@ public class RecordsFileIO {
 	public void writeNextBytes(Byte[] recordBytes, String delimiter) {
 		if(!isReadFile && raf != null) {
 			try {
-				String del = (writeRecordId == 0) ? "" : delimiter;
-				raf.writeBytes(del);
+				if(writeRecordId > 0) {
+					raf.writeBytes(delimiter);
+				}
+				
 				raf.write(Util.tobyteArray(recordBytes));
 				writeRecordId++;
 			} catch (IOException e) {
@@ -358,29 +377,25 @@ public class RecordsFileIO {
 	/**
 	 * Partitions the records and writes them into the files located at the paths in newPaths.
 	 * @param newPaths
-	 * @param recordsPerPartition
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 */
-	// TODO: this has the same comment as partitionRecords() - change it so that the difference is clear
-	public void partitionData(String[] newPaths, int recordsPerPartition, String readDelimiter, String writeDelimiter) {
-		if(isReadFile) {
-			boolean moreToRead = true;
-			for(int p = 0; moreToRead && p < newPaths.length; p++) {
-				// TODO: lets hope the file doesn't already exist or bad shit happens
-				// TODO: fix this ASAP!!!
-				RecordsFileIO newRecordsFile = new RecordsFileIO(newPaths[p], true, false);
-				for(int r = 0; moreToRead && r < recordsPerPartition; r++) {
-					Record record = readNextBytes(readDelimiter);
-					if(record != null) {
-						ByteArrayWritable bytes = (ByteArrayWritable) record.getValues()[0];
-						newRecordsFile.writeNextBytes(bytes.getValue(), writeDelimiter);
-					} else {
-						moreToRead = false;
-					}
-				}
 				
-				newRecordsFile.close();
+	public void partitionData(String[] newPaths, String readDelimiter, String writeDelimiter) {
+		if(isReadFile) {
+			RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newPaths.length];
+			for(int f = 0; f < newPaths.length; f++) {
+				newRecordsFiles[f] = new RecordsFileIO(newPaths[f], true, false);
+			}
+			Record rec;
+			for(int f = 0; (rec = readNextBytes(readDelimiter)) != null; f++) {
+				f = f % newPaths.length; //make f wrap around
+				ByteArrayWritable bytes = (ByteArrayWritable) rec.getValues()[0];
+				newRecordsFiles[f].writeNextBytes(bytes.getValue(), writeDelimiter);
+			}
+			
+			for(int f = 0; f < newPaths.length; f++) {
+				newRecordsFiles[f].close();
 			}
 		}
 	}
@@ -388,26 +403,75 @@ public class RecordsFileIO {
 	/**
 	 * Partitions the records and writes them into the files located at the paths in newPaths.
 	 * @param newPaths
-	 * @param recordsPerPartition
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 */
-	public void partitionRecords(String[] newPaths, int recordsPerPartition, String readDelimiter, String writeDelimiter) {
+	public void partitionRecords(String[] newPaths, String readDelimiter, String writeDelimiter) {
 		if(isReadFile) {
-			boolean moreToRead = true;
-			for(int p = 0; moreToRead && p < newPaths.length; p++) {
-				// TODO: lets hope the file doesn't already exist or bad shit happens
-				RecordsFileIO newRecordsFile = new RecordsFileIO(newPaths[p], true, false);
-				for(int r = 0; moreToRead && r < recordsPerPartition; r++) {
-					Record record = readNextRecord(readDelimiter);
-					if(record != null) {
-						newRecordsFile.writeNextRecord(record, writeDelimiter);
-					} else {
-						moreToRead = false;
+			RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newPaths.length];
+			for(int f = 0; f < newPaths.length; f++) {
+				newRecordsFiles[f] = new RecordsFileIO(newPaths[f], true, false);
+			}
+			
+			Record rec;
+			for(int f = 0; (rec = readNextRecord(readDelimiter)) != null; f++) {
+				f = f % newPaths.length; //make f wrap around
+				
+				newRecordsFiles[f].writeNextRecord(rec, writeDelimiter);
+			}
+			
+			for(int f = 0; f < newPaths.length; f++) {
+				newRecordsFiles[f].close();
+			}
+		}
+	}
+	
+	/**
+	 * Merges all the records in the files at oldPaths in to this file, in a sorted order.
+	 * @param oldPaths
+	 * @param readDelimiter
+	 * @param writeDelimiter
+	 */
+	public void mergeRecords(String[] oldPaths, String readDelimiter, String writeDelimiter) {
+		if(!isReadFile) {
+			//System.out.println("Merging files into: " + getPath());
+			HashMap<Writable, ArrayList<Writable>> mergedRecords = new HashMap<Writable, ArrayList<Writable>>();
+			
+			for(int p = 0; p < oldPaths.length; p++) {
+				RecordsFileIO recsFile = new RecordsFileIO(oldPaths[p], true, true);
+				Record rec;
+				while((rec = recsFile.readNextRecord(readDelimiter)) != null) {
+					Writable key = rec.getKey();
+					//System.out.println("read: <" + key.getValue() + ", " + rec.getValues()[0].getValue() + ">");
+					ArrayList<Writable> values = mergedRecords.get(key);
+					if(values == null) {
+						values = new ArrayList<Writable>();
+						//System.out.println("Created new");
 					}
+					values.addAll(Arrays.asList(rec.getValues()));
+					mergedRecords.put(key, values);
+				}
+			}
+			
+			Set<Writable> keySet = mergedRecords.keySet();
+			Writable[] keys = keySet.toArray(new Writable[keySet.size()]);
+			Arrays.sort(keys, new Comparator<Writable>() {
+
+				@Override
+				public int compare(Writable key1, Writable key2) {
+					return key1.compare(key2);
 				}
 				
-				newRecordsFile.close();
+			});
+			
+			for(int k = 0; k < keys.length; k++) {
+				Writable key = keys[k];
+				ArrayList<Writable> valuesList = mergedRecords.get(key);
+				if(valuesList != null) {
+					Writable[] values = valuesList.toArray(new Writable[valuesList.size()]);
+					Record rec = new Record(key, values);
+					writeNextRecord(rec, writeDelimiter);
+				}
 			}
 		}
 	}
@@ -436,7 +500,7 @@ public class RecordsFileIO {
 	}
 	
 	/**
-	 * Returns true if the file exists and false if the file does not exist.
+	 * Returns true if the file exists.
 	 */
 	public boolean exists() {
 		return file != null && file.exists();
