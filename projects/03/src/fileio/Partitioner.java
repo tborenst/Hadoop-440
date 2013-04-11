@@ -26,7 +26,7 @@ public class Partitioner {
 		int pathCount = 0;
 		String path   = newPaths[pathCount];
 		
-		RecordsFileIO readIO  = new RecordsFileIO(oldPath, false, true);
+		RecordsFileIO readIO  = new RecordsFileIO(oldPath, false, true); 
 		RecordsFileIO writeIO = new RecordsFileIO(path, true, false);
 		
 		while((line = readIO.readNextString("\n")) != null){
