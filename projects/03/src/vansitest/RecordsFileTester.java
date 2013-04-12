@@ -227,7 +227,7 @@ public class RecordsFileTester {
 		recRecords.close();
 				
 		System.out.println("Partitioning records...");
-		RecordsFileIO.partitionRecordsTo(new String[] {originalPath}, newPaths, "\n", "\n");
+		RecordsFileIO.dealRecordsTo(new String[] {originalPath}, newPaths, "\n", "\n");
 		
 		System.out.println("Reading records...");
 		
@@ -298,7 +298,7 @@ public class RecordsFileTester {
 		
 		recRecords.close();
 		recRecords = new RecordsFileIO(recordsPath, true, true);
-		recRecords.partitionData(newPaths, "\n", "\n");
+		recRecords.dealData(newPaths, "\n", "\n");
 	}
 	
 	
@@ -332,7 +332,7 @@ public class RecordsFileTester {
 		
 		recRecords.close();
 		System.out.println("Partitioning Records...");
-		RecordsFileIO.partitionRecordsTo(new String[] {originalPath}, partitionPaths, "\n", "\n");
+		RecordsFileIO.dealRecordsTo(new String[] {originalPath}, partitionPaths, "\n", "\n");
 		System.out.println("Partitioning Complete");
 		
 		System.out.println("Merge Sorting Records...");
@@ -360,7 +360,7 @@ public class RecordsFileTester {
 	public static void main(String[] args) {
 		// write test
 		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO/";
-		int test = 7;
+		int test = 4;
 
 		switch(test) {
 		
