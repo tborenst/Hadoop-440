@@ -1,6 +1,7 @@
 package tomertest;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import fileio.Partitioner;
 import fileio.Record;
@@ -10,10 +11,13 @@ import api.Collector;
 import api.IntWritable;
 import api.StringWritable;
 import api.Writable;
+import system.Job;
 import util.Executer;
 
+import system.Task;
+
 public class Tests {
-	public static void main(String[] args) throws IOException{
+	public static void main(String[] args) throws Throwable{
 		
 //		//=============================
 //		// Dynamically Load Class Files
@@ -83,33 +87,55 @@ public class Tests {
 //			r = partitioner.readNextRecord(paths[1], "\n");
 //		}
 		
+//		//=============================
+//		// Map Test
+//		// - run a typical word-count mapper
+//		//=============================
+//		
+//		String[] paths = {"/Users/tomer/Desktop/mapper1.txt", "/Users/tomer/Desktop/mapper2.txt"};
+//		String path = "/Users/tomer/Desktop/text.txt";
+//		
+//		Partitioner partitioner = new Partitioner();
+//		String mapPath = "/Users/tomer/Desktop/Box/school/15440/projects/03/bin/tomertest";
+//		Executer executer = new Executer();
+//		Class <?> testClass = executer.getClass(mapPath, "MapperTest.class", "tomertest.MapperTest");
+//		Object mapObject = executer.instantaite(testClass, null);
+//		Object[] methodArgs = new Object[3];
+//		
+//		Collector collector = new Collector("/Users/tomer/Desktop/map1_output.txt");
+//		Record r = partitioner.readNextRecord(paths[0], "\n");
+//		while(r != null){
+//			Writable key = r.getKey();
+//			Writable val = r.getValues()[0];
+//			methodArgs[0] = key;
+//			methodArgs[1] = val;
+//			methodArgs[2] = collector;
+//			executer.execute(mapObject, "map", methodArgs);
+//			r = partitioner.readNextRecord(paths[0], "\n");
+//		}
+//		
+//		collector.printAllRecords();
+		
 		//=============================
-		// Map Test
-		// - run a typical word-count mapper
+		// Job Testing
+		// - create job
+		// - generate tasks
+		// - print tasks
 		//=============================
 		
-		String[] paths = {"/Users/tomer/Desktop/mapper1.txt", "/Users/tomer/Desktop/mapper2.txt"};
-		String path = "/Users/tomer/Desktop/text.txt";
+		String[] from = {"Users/MapReduce/Data/text1.txt", "Users/MapReduce/Data/text2.txt",
+						 "Users/MapReduce/Data/text3.txt", "Users/MapReduce/Data/text4.txt"};
 		
-		Partitioner partitioner = new Partitioner();
-		String mapPath = "/Users/tomer/Desktop/Box/school/15440/projects/03/bin/tomertest";
-		Executer executer = new Executer();
-		Class <?> testClass = executer.getClass(mapPath, "MapperTest.class", "tomertest.MapperTest");
-		Object mapObject = executer.instantaite(testClass, null);
-		Object[] methodArgs = new Object[3];
+		Job job = new Job(1, 4, 2, "Users/MapReduce/WorkDir", from, "Users/MapReduce/Results");
+		job.setMapper("Users/MapReduce/maps", "WordCountM.class", "maps.WordCount");
+		job.setReducer("/Users/MapReduce/reducers", "WordCountR.class", "reudcers.WordCount");
 		
-		Collector collector = new Collector("/Users/tomer/Desktop/map1_output.txt");
-		Record r = partitioner.readNextRecord(paths[0], "\n");
-		while(r != null){
-			Writable key = r.getKey();
-			Writable val = r.getValues()[0];
-			methodArgs[0] = key;
-			methodArgs[1] = val;
-			methodArgs[2] = collector;
-			executer.execute(mapObject, "map", methodArgs);
-			r = partitioner.readNextRecord(paths[0], "\n");
-		}
+		HashMap<Integer, Task> mapTasks = job.generateMapTasks();
+		Task sortTask = job.generateSortTask();
+		HashMap<Integer, Task> reduceTasks = job.generateReduceTasks();
 		
-		collector.printAllRecords();
+		job.printMapTasks();
+		job.printSortTask();
+		job.printRedcueTasks();
 	}
 }
