@@ -5,6 +5,9 @@
 package fileio;
 
 import java.io.Serializable;
+
+import api.IntWritable;
+import api.StringWritable;
 import api.Writable;
 
 
@@ -46,5 +49,35 @@ public class Record implements Serializable{
 	 */
 	public int compare(Record rec) {
 		return key.compare(rec.getKey());
+	}
+	
+	/**
+	 * Appends newValues to values array.
+	 * @param newValues
+	 */
+	public void addValues(Writable[] newValues) {
+		Writable[] mergedValues = new Writable[values.length + newValues.length];
+		
+		for(int v = 0; v < values.length; v++) {
+			mergedValues[v] = values[v];
+		}
+		
+		for(int v = 0; v < newValues.length; v++) {
+			mergedValues[v + values.length] = newValues[v];
+		}
+		
+		values = mergedValues;
+	}
+	
+	public String toString() {
+		String result = "<" + key.getValue() + ", [";
+		for(int v = 0; v < values.length; v++) {
+			if(v != 0) {
+				result += ", ";
+			}
+			result += values[v].getValue();
+		}
+		result += "]>";
+		return result;
 	}
 }

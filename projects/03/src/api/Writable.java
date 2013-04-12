@@ -16,6 +16,9 @@ public interface Writable<T> extends Serializable{
 	
 	/**
 	 * compare - returns x, where (this < w) => (x < 0), (this = w) => (x = 0), (this > w) => (x > 0)
+	 * this - w
 	 */
 	public int compare(Writable<T> w);
+	
+	public int hashCode();
 }

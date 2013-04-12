@@ -1,0 +1,4 @@
+Hello Hadoop
+Hello Yourself
+Goodbye Hadoop
+Hadoop Yourself
