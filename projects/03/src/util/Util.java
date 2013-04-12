@@ -1,5 +1,7 @@
 package util;
 
+import java.util.Random;
+
 public class Util {
 	/**
 	 * String stringifyArray(String[] args):
@@ -29,7 +31,7 @@ public class Util {
 		return args.substring(1, args.length()-1).split(",");
 	}
 
-	public static  byte[] tobyteArray(Byte[] objArr) {
+	public static byte[] tobyteArray(Byte[] objArr) {
 		byte[] result = new byte[objArr.length];
 		for(int o = 0; o < objArr.length; o++) {
 			result[o] = objArr[o].byteValue();
@@ -38,12 +40,17 @@ public class Util {
 		return result;
 	}
 	
-	public static  Byte[] toByteArray(byte[] primArr) {
+	public static Byte[] toByteArray(byte[] primArr) {
 		Byte[] result = new Byte[primArr.length];
 		for(int o = 0; o < primArr.length; o++) {
 			result[o] = (Byte) primArr[o];
 		}
 		
 		return result;
+	}
+	
+	public static String generateRandomPath(String dir, String prefix, String format) {
+		Random r = new Random();
+		return dir + prefix + r.nextInt(100000000) + "." + format;
 	}
 }
