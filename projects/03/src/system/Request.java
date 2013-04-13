@@ -33,6 +33,13 @@ public class Request {
 		public String getBinaryName() {
 			return binaryName;
 		}
+
+		public boolean isValid() {
+			return numMappers > 0
+					&& directory != null && (new File(directory)).exists()
+					&& fileName != null && (new File(directory + "/" + fileName)).exists()
+					&& binaryName != null;
+		}
 	}
 	
 	public class Combiner {
@@ -50,6 +57,12 @@ public class Request {
 
 		public String getBinaryName() {
 			return binaryName;
+		}
+
+		public boolean isValid() {
+			return directory != null && (new File(directory)).exists()
+					&& fileName != null && (new File(directory + "/" + fileName)).exists()
+					&& binaryName != null;
 		}
 	}
 	
@@ -74,13 +87,20 @@ public class Request {
 		public String getBinaryName() {
 			return binaryName;
 		}
+
+		public boolean isValid() {
+			return numReducers > 0
+					&& directory != null && (new File(directory)).exists()
+					&& fileName != null && (new File(directory + "/" + fileName)).exists()
+					&& binaryName != null;
+		}
 	}
 	
-	public Mapper Map;
-	public Combiner Combine;
-	public Reducer Reduce;	
-	public String[] dataPaths;	
-	public String[] resultPaths;
+	private Mapper Map;
+	private Combiner Combine;
+	private Reducer Reduce;	
+	private String[] dataPaths;	
+	private String[] resultPaths;
 	
 	public Request() {}
 	
@@ -105,10 +125,6 @@ public class Request {
 		return req;
 	}
 	
-	private boolean isValid() {
-		return Reduce.getNumReducers() == resultPaths.length;
-	}
-
 	public void exportTo(String exportPath) {
 		ObjectMapper m = new ObjectMapper();
 		
@@ -128,5 +144,70 @@ public class Request {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private boolean isValid() {
+		
+		return Map != null && Map.isValid() 
+				&& Combine != null && Combine.isValid()
+				&& Reduce != null && Reduce.isValid() 
+				&& dataPaths != null && dataPaths.length > 0
+				&& resultPaths != null &&  resultPaths.length > 0
+				&& Reduce.getNumReducers() == resultPaths.length;
+	}
+
+	// Map Data Getters
+	public int getNumMappers() {
+		return Map.getNumMappers();
+	}
+	
+	public String getMapperDirectory() {
+		return Map.getDirectory();
+	}
+
+	public String getMapperFileName() {
+		return Map.getFileName();
+	}
+
+	public String getMapperBinaryName() {
+		return Map.getBinaryName();
+	}
+	
+	// Combine Data Getters
+	public String getCombinerDirectory() {
+		return Combine.getDirectory();
+	}
+
+	public String getCombinerFileName() {
+		return Combine.getFileName();
+	}
+
+	public String getCombinerBinaryName() {
+		return Combine.getBinaryName();
+	}
+	
+	// Reduce Data Getter
+	public int getNumReducers() {
+		return Reduce.getNumReducers();
+	}
+	
+	public String getReducerDirectory() {
+		return Reduce.getDirectory();
+	}
+
+	public String getReducerFileName() {
+		return Reduce.getFileName();
+	}
+
+	public String getReducerBinaryName() {
+		return Reduce.getBinaryName();
+	}
+	
+	public String[] getDataPaths() {
+		return dataPaths;
+	}
+	
+	public String[] getResultPaths() {
+		return resultPaths;
 	}
 }

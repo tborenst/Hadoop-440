@@ -601,7 +601,7 @@ public class RecordsFileIO {
 	 * @throws DirectoryNotFoundException 
 	 */
 	public static void mergeSortRecords(String[] srcPaths, String[] destPaths, String workingDir, String readDelimiter, String writeDelimiter) throws DirectoryNotFoundException {
-		if(!(new File(workingDir).exists())) {
+		if(!Util.isValidDirectory(workingDir)) {
 			throw new DirectoryNotFoundException();
 		}
 		
@@ -615,7 +615,7 @@ public class RecordsFileIO {
 		int numPathsMerged = srcPaths.length;
 		RecordsFileIO mergedRecs = null;
 		while(recsQueue.size() >= 2) {
-			String destPath = Util.generateRandomPath(workingDir, "mergeSortIntermediary_", "txt");
+			String destPath = Util.generateRandomPath(workingDir, "/mergeSortIntermediary_", "txt");
 			RecordsFileIO recs1 =  recsQueue.remove();
 			recs1.setIsReadFile(true);
 			RecordsFileIO recs2 = recsQueue.remove();
