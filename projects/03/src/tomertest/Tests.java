@@ -144,45 +144,6 @@ public class Tests {
 //		job.printSortTask();
 //		job.printRedcueTasks();
 		
-		MasterRoutine master = new MasterRoutine(15237, "workdir");
 		
-		Thread.sleep(500);
-		
-		SIOClient c1 = new SIOClient("localhost", 15237);
-		SIOClient c2 = new SIOClient("localhost", 15237);
-		
-		c1.on(Constants.TASK_REQUEST, new SIOCommand(){
-			public void run(){
-				try {
-					Task t = (Task)object;
-					System.out.println("CLIENT 1 - NEW TASK");
-					t.printTask();
-					Thread.sleep(500);
-					socket.emit(Constants.TASK_COMPLETE, t);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				
-			}
-		});
-		
-		c2.on(Constants.TASK_REQUEST, new SIOCommand(){
-			public void run(){
-				try {
-					Task t = (Task)object;
-					System.out.println("CLIENT 2 - NEW TASK");
-					t.printTask();
-					Thread.sleep(500);
-					socket.emit(Constants.TASK_COMPLETE, t);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				
-			}
-		});
-		
-		
-		String[] from = {"Users/MapReduce/Data/text1.txt", "poop", "Users/MapReduce/Data/text2.txt"};
-		master.createJob(3, 1, "mprdr", "mprfl", "mprnm", "rdcdr", "rdcfl", "rdcnm", "cmrdr", "cmrfl", "cmrnm", from, "resultsDir");
 	}
 }

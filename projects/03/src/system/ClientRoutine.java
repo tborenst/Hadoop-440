@@ -175,7 +175,7 @@ public class ClientRoutine {
 		// TODO: change status != "COMPLETE" to use constants && change message obj (jobId) if needed
 		} else if(status != "COMPLETE") {
 			if(socket != null && socket.isAlive()) {
-				socket.emit("jobStatus", jobId);
+				socket.emit(Constants.JOB_STATUS, jobId);
 				synchronized(numPendingStatusUpdates) {
 					numPendingStatusUpdates++;
 				}
@@ -226,7 +226,7 @@ public class ClientRoutine {
 	private void runMapReduce(String configFilePath) throws JsonParseException, JsonMappingException, FileNotFoundException, InValidConfigFileException, SocketFailureException {
 		Request req = Request.constructFromFile(configFilePath);
 		if(socket != null && socket.isAlive()) {
-			socket.emit("jobRequest", req);
+			socket.emit(Constants.JOB_REQUEST, req);
 		} else {
 			throw new SocketFailureException();
 		}

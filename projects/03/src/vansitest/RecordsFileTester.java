@@ -5,6 +5,7 @@ import api.IntWritable;
 import api.StringWritable;
 import api.ByteArrayWritable;
 import api.Writable;
+import fileio.DirectoryNotFoundException;
 import fileio.Record;
 import fileio.RecordsFileIO;
 
@@ -194,7 +195,7 @@ public class RecordsFileTester {
 		System.out.println("5: <" + readRec5Key + ", " + readRec5ValueStr + ">");
 	}
 	
-	private static void testPartitioningRecords(String workingDir, String originalPath, String[] newPaths, String mergePath) {
+	private static void testPartitioningRecords(String workingDir, String originalPath, String[] newPaths, String mergePath) throws DirectoryNotFoundException {
 		System.out.println("***Testing with records***");
 		System.out.println("Writing records...");
 		RecordsFileIO recRecords = new RecordsFileIO(originalPath, true, false);
@@ -302,7 +303,7 @@ public class RecordsFileTester {
 	}
 	
 	
-	public static void testParititionAndMerge(String workingDir, String originalPath, String[] partitionPaths, String mergePath) {
+	public static void testParititionAndMerge(String workingDir, String originalPath, String[] partitionPaths, String mergePath) throws DirectoryNotFoundException {
 		RecordsFileIO recRecords = new RecordsFileIO(originalPath, true, false);
 		
 		StringWritable rec1Key = new StringWritable("doom");
@@ -357,7 +358,7 @@ public class RecordsFileTester {
 		mergedRecs.close();
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws DirectoryNotFoundException {
 		// write test
 		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO/";
 		int test = 4;
