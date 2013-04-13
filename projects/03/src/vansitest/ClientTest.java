@@ -11,7 +11,7 @@ import system.InValidConfigFileException;
 public class ClientTest {
 	public static void main(String[] args) throws JsonParseException, JsonMappingException, FileNotFoundException, InValidConfigFileException {
 		Request r = Request.constructFromFile("C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/config.json");
-		System.out.println(r.Map.getDirectory());
+		System.out.println(r.getMapperDirectory());
 		r.exportTo("C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/configExp.json");
 		
 		
