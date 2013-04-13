@@ -598,8 +598,13 @@ public class RecordsFileIO {
 	 * @param workingDir - temporary holding area for intermediary files
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws DirectoryNotFoundException 
 	 */
-	public static void mergeSortRecords(String[] srcPaths, String[] destPaths, String workingDir, String readDelimiter, String writeDelimiter) {
+	public static void mergeSortRecords(String[] srcPaths, String[] destPaths, String workingDir, String readDelimiter, String writeDelimiter) throws DirectoryNotFoundException {
+		if(!(new File(workingDir).exists())) {
+			throw new DirectoryNotFoundException();
+		}
+		
 		LinkedList<RecordsFileIO> recsQueue = new LinkedList<RecordsFileIO>();
 		for(int p = 0; p < srcPaths.length; p++) {
 			RecordsFileIO recs = new RecordsFileIO(srcPaths[p], true, true);
