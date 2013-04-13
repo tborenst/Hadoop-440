@@ -117,6 +117,37 @@ public class RecordsFileTester {
 		System.out.println("5: <" + readRec5Key + ", " + readRec5Value + ">");
 	}
 	
+	private static void testDealStringsTo(String originalPath, String[] newPaths) {
+		System.out.println("***Testing with strings***");
+		System.out.println("Writing strings...");
+
+		RecordsFileIO.dealStringsAsRecordsTo(new String[] {originalPath}, newPaths, "\n", "\n");
+		
+		RecordsFileIO recA = new RecordsFileIO(newPaths[0], true, true);
+
+		Record recA1 = recA.readNextRecord("\n");
+		System.out.println("1: " + recA1.toString());
+		
+		Record recA2 = recA.readNextRecord("\n");
+		System.out.println("2: " + recA2.toString());
+		
+		Record recA3 = recA.readNextRecord("\n");
+		System.out.println("3: " + recA3.toString());
+		
+		recA.close();
+				
+		RecordsFileIO recB = new RecordsFileIO(newPaths[1], true, true);
+		Record recB1 = recB.readNextRecord("\n");
+		System.out.println("B1: " + recB1.toString());
+		
+		Record recB2 = recB.readNextRecord("\n");
+		System.out.println("B1: " + recB2.toString());
+		
+		recB.close();
+		
+		
+	}
+	
 	private static void testReadStrings(String recordsPath) {
 		System.out.println("***Testing with read strings***");
 		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, true);
@@ -361,7 +392,7 @@ public class RecordsFileTester {
 	public static void main(String[] args) throws DirectoryNotFoundException {
 		// write test
 		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO";
-		int test = 7;
+		int test = 8;
 
 		switch(test) {
 		
@@ -396,6 +427,9 @@ public class RecordsFileTester {
 			RecordsFileTester.testParititionAndMerge(dir, dir + "/recordPartitionTest.txt",
 					new String[] {dir + "/recordPartitionTestA.txt", dir + "/recordPartitionTestB.txt"},
 					dir + "/recordPartitionTestMerged.txt");
+		case 8:
+			RecordsFileTester.testDealStringsTo(dir + "/recordsDealStringsTest.txt",
+					new String[] {dir + "/recordPartitionTestA.txt", dir + "/recordPartitionTestB.txt"});
 		}
 	}
 }
