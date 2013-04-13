@@ -12,4 +12,5 @@ public class Constants {
 	// SIO event names
 	public static String TASK_COMPLETE = "TASK_COMPLETE";
 	public static String TASK_REQUEST = "TASK_REQUEST";
+	public static String TASK_ERROR = "TASK_ERROR";
 }
