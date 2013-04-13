@@ -3,6 +3,10 @@ package tomertest;
 import java.io.IOException;
 import java.util.HashMap;
 
+import networking.SIOClient;
+import networking.SIOCommand;
+import networking.SIOServer;
+
 import fileio.Partitioner;
 import fileio.Record;
 import fileio.RecordsFileIO;
@@ -12,9 +16,11 @@ import api.IntWritable;
 import api.StringWritable;
 import api.Writable;
 import system.Job;
+import system.MasterRoutine;
 import util.Executer;
 
 import system.Task;
+import system.Constants;
 
 public class Tests {
 	public static void main(String[] args) throws Throwable{
@@ -116,26 +122,67 @@ public class Tests {
 //		
 //		collector.printAllRecords();
 		
-		//=============================
-		// Job Testing
-		// - create job
-		// - generate tasks
-		// - print tasks
-		//=============================
+//		//=============================
+//		// Job Testing
+//		// - create job
+//		// - generate tasks
+//		// - print tasks
+//		//=============================
+//		
+//		String[] from = {"Users/MapReduce/Data/text1.txt", "Users/MapReduce/Data/text2.txt",
+//						 "Users/MapReduce/Data/text3.txt", "Users/MapReduce/Data/text4.txt"};
+//		
+//		Job job = new Job(1, 4, 2, "Users/MapReduce/WorkDir", from, "Users/MapReduce/Results");
+//		job.setMapper("Users/MapReduce/maps", "WordCountM.class", "maps.WordCount");
+//		job.setReducer("/Users/MapReduce/reducers", "WordCountR.class", "reudcers.WordCount");
+//		
+//		HashMap<Integer, Task> mapTasks = job.generateMapTasks();
+//		Task sortTask = job.generateSortTask();
+//		HashMap<Integer, Task> reduceTasks = job.generateReduceTasks();
+//		
+//		job.printMapTasks();
+//		job.printSortTask();
+//		job.printRedcueTasks();
 		
-		String[] from = {"Users/MapReduce/Data/text1.txt", "Users/MapReduce/Data/text2.txt",
-						 "Users/MapReduce/Data/text3.txt", "Users/MapReduce/Data/text4.txt"};
+		MasterRoutine master = new MasterRoutine(15237, "workdir");
 		
-		Job job = new Job(1, 4, 2, "Users/MapReduce/WorkDir", from, "Users/MapReduce/Results");
-		job.setMapper("Users/MapReduce/maps", "WordCountM.class", "maps.WordCount");
-		job.setReducer("/Users/MapReduce/reducers", "WordCountR.class", "reudcers.WordCount");
+		Thread.sleep(500);
 		
-		HashMap<Integer, Task> mapTasks = job.generateMapTasks();
-		Task sortTask = job.generateSortTask();
-		HashMap<Integer, Task> reduceTasks = job.generateReduceTasks();
+		SIOClient c1 = new SIOClient("localhost", 15237);
+		SIOClient c2 = new SIOClient("localhost", 15237);
 		
-		job.printMapTasks();
-		job.printSortTask();
-		job.printRedcueTasks();
+		c1.on(Constants.TASK_REQUEST, new SIOCommand(){
+			public void run(){
+				try {
+					Task t = (Task)object;
+					System.out.println("CLIENT 1 - NEW TASK");
+					t.printTask();
+					Thread.sleep(500);
+					socket.emit(Constants.TASK_COMPLETE, t);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+			}
+		});
+		
+		c2.on(Constants.TASK_REQUEST, new SIOCommand(){
+			public void run(){
+				try {
+					Task t = (Task)object;
+					System.out.println("CLIENT 2 - NEW TASK");
+					t.printTask();
+					Thread.sleep(500);
+					socket.emit(Constants.TASK_COMPLETE, t);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+			}
+		});
+		
+		
+		String[] from = {"Users/MapReduce/Data/text1.txt", "poop", "Users/MapReduce/Data/text2.txt"};
+		master.createJob(3, 1, "mprdr", "mprfl", "mprnm", "rdcdr", "rdcfl", "rdcnm", "cmrdr", "cmrfl", "cmrnm", from, "resultsDir");
 	}
 }

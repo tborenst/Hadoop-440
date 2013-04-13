@@ -42,6 +42,7 @@ public class SIOClient extends SIOSocket{
 	 * Listen to messages from the server.
 	 */
 	private void listen(){
+		final SIOSocket self = this;
 		new Thread(new Runnable(){
 			@Override
 			public void run() {
@@ -66,6 +67,7 @@ public class SIOClient extends SIOSocket{
 									SIOCommand command = bindings.get(message);
 									if(command != null){
 										command.passObject(object);
+										command.passSocket(self);
 										try{
 											command.run();
 										} catch (Exception e){

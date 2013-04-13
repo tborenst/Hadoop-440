@@ -19,6 +19,9 @@ public class Task implements Serializable{
 	private String classFile;    // name of .class file of mapper, reducer, etc...
 	private String className;    // binary name of .class file of mapper, reducer, etc...
 	
+	// NOTE: map and reduce tasks should only have 1 'from' path and 1 'to' path.
+	// On the other hand, sort tasks may have multiple 'from' and 'to' paths. 
+	// The client should check that invariant when executing tasks.
 	private String[] pathsFrom;  // path of initial records to map
 	private String[] pathsTo;    // path to place results of map
 	

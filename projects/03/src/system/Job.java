@@ -5,7 +5,6 @@
 
 package system;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -18,6 +17,10 @@ public class Job {
 	
 	private int mappers;                        // how many mappers will be working on this job
 	private int reducers;                       // how many reducers will be working on this job
+	
+	private int mapTasksDone;                   // keeps count of how many map tasks are complete
+	private int sortTasksDone;                  // keeps count of how many sort tasks are complete (should be 0 or 1)
+	private int reduceTasksDone;                // keeps count of how many reduce tasks are complete
 	
 	// TASK MANIPULATION //
 	private HashMap<Integer, Task> mapTasks;    // map tasks (id, task)
@@ -48,18 +51,26 @@ public class Job {
 	 * @param workDir - system's working directory
 	 * @param from - array of paths to input files (should already be partitioned by the master)
 	 * @param to - array of directory to put results in (there will be as many result files as there are reducers)
-	 * @throws error - if the number of mappers does not equal the number of input files (String[] from)
 	 */
-	public Job(int id, int mappers, int reducers, String workDir, String[] from, String to) throws Throwable{
+	public Job(int id, int mappers, int reducers, String workDir, String[] from, String to){
 		// check that number of mappers is the same as the number of "from" paths
 		if(mappers != from.length){
-			throw new Throwable("Number of mappers is not the same as number of input data files for job [id #" + jobID + "]");
+			try{
+				throw new Throwable("Number of mappers is not the same as number of input data files for job [id #" + jobID + "]");
+			} catch (Throwable e){
+				e.printStackTrace();
+			}
 		}
+		
 		this.jobID = id;
 		this.taskCount = 0;
 		
 		this.mappers = mappers;
 		this.reducers = reducers;
+		
+		this.mapTasksDone = 0;
+		this.sortTasksDone = 0;
+		this.reduceTasksDone = 0;
 		
 		this.mapTasks = new HashMap<Integer, Task>();
 		this.mapTasks = new HashMap<Integer, Task>();
@@ -100,12 +111,15 @@ public class Job {
 	/**
 	 * generateMapTasks - add all requried map tasks for this job, to this job, and return them
 	 * @return tasks - HashMap<Integer, Task>, mapping task ids to tasks
-	 * @throws error - if mapper not configured before using
 	 */
-	public HashMap<Integer, Task> generateMapTasks() throws Throwable{
+	public HashMap<Integer, Task> generateMapTasks(){
 		// check that a mapper has been set, throw an error if not
-		if(mapperDir == null || mapperFile == null || mapperName == null){
-			throw new Throwable("Mapper not configured for job [id #" + jobID + "]");
+		try{
+			if(mapperDir == null || mapperFile == null || mapperName == null){
+				throw new Throwable("Mapper not configured for job [id #" + jobID + "]");
+			}
+		} catch (Throwable e){
+			e.printStackTrace();
 		}
 		
 		// generate map tasks
@@ -144,10 +158,14 @@ public class Job {
 	 * @return tasks - HashMap<Integer, Task>, mapping task ids to tasks
 	 * @throws error - if mapper not configured before using
 	 */
-	public HashMap<Integer, Task> generateReduceTasks() throws Throwable{
+	public HashMap<Integer, Task> generateReduceTasks(){
 		// check that a reducer has been set, throw an error if not
-		if(reducerDir == null || reducerFile == null || reducerName == null){
-			throw new Throwable("Reducer not configured for job [id #" + jobID + "]");
+		try{
+			if(reducerDir == null || reducerFile == null || reducerName == null){
+				throw new Throwable("Reducer not configured for job [id #" + jobID + "]");
+			}
+		} catch (Throwable e){
+			e.printStackTrace();
 		}
 		
 		// generate reduce tasks
@@ -161,6 +179,127 @@ public class Job {
 		}
 		
 		return reduceTasks;
+	}
+	
+	/**
+	 * updateMapTask - set the map task represented by id to a certain status. If all map tasks are
+	 * complete, this method will return true (so you know you need to sort next, etc...), otherwise it will
+	 * return false.
+	 * @param id - map task's id
+	 * @param status - new task status
+	 * @return boolean - true if all map tasks are complete, false otherwise
+	 */
+	public boolean updateMapTask(int id, String status){
+		Task task = mapTasks.get(id); // get map task
+		
+		if(task == null){
+			return false;
+		}
+		
+		task.setStatus(status); // update task status
+		mapTasks.put(id, task); // put map task back into table
+		
+		if(status.equals(Constants.COMPLETED)){
+			mapTasksDone++;
+		}
+		
+		
+		// make sure everything makes sense
+		if(mapTasksDone > mappers){
+			try {
+				throw new Throwable("More map tasks done than mappers for job [id #" + jobID + "]");
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if(mapTasksDone == mappers){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * updateSortTask - set the sort task represented by id to a certain status. If all (1 of) sort tasks are
+	 * complete, this method will return true (so you know to reduce next, etc...), otherwise it will return false.
+	 * @param id - sort task's id
+	 * @param status - new task status
+	 * @return boolean - true if all sort tasks are complete, false otherwise
+	 */
+	public boolean updateSortTask(int id, String status){
+		Task task = sortTask;
+		
+		// make sure everything makes sense
+		if(task.getTaskID() != id){
+			try {
+				throw new Throwable("Task ID does not match sort task ID for job [id #" + jobID + "]");
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		
+		sortTask.setStatus(status);
+		
+		if(status.equals(Constants.COMPLETED)){
+			sortTasksDone++;
+		}
+		
+		// make sure everything makes sense
+		if(sortTasksDone > 1){
+			try {
+				throw new Throwable("More sort tasks done than 1 for job [id #" + jobID + "]");
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if(sortTasksDone == 1){
+			return true;
+		} else {
+			return false;
+		}
+		
+		
+	}
+	
+	/**
+	 * updateReduceTask - set the redice task represented by id to a certain status. If all reduce tasks are
+	 * complete, this method will return true (so you know you're done, etc...), otherwise it will
+	 * return false.
+	 * @param id - reduce task's id
+	 * @param status - new task status
+	 * @return boolean - true if all reduce tasks are complete, false otherwise
+	 */
+	public boolean updateReduceTask(int id, String status){
+		Task task = reduceTasks.get(id); // get reduce task
+		
+		if(task == null){
+			return false;
+		}
+		
+		task.setStatus(status); // update task status
+		reduceTasks.put(id, task); // put reduce task back into table
+		
+		if(status.equals(Constants.COMPLETED)){
+			reduceTasksDone++;
+		}
+		
+		
+		// make sure everything makes sense
+		if(reduceTasksDone > reducers){
+			try {
+				throw new Throwable("More reduce tasks done than reducers for job [id #" + jobID + "]");
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if(reduceTasksDone == reducers){
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	// TODO: for debugging, remove at the end
@@ -184,5 +323,5 @@ public class Job {
 			entry.getValue().printTask();
 		}
 	}
-		
+	
 }

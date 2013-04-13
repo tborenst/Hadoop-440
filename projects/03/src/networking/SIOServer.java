@@ -218,6 +218,7 @@ public class SIOServer extends SIOSocket{
 				SIOCommand command = bindings.get("disconnect");
 				if(command != null){
 					command.passObject(id); //pass this socket's id to command
+					command.passSocket(this);
 					try{
 						command.run();
 					} catch (Exception exn){
