@@ -1,5 +1,6 @@
 package util;
 
+import java.io.File;
 import java.util.Random;
 
 public class Util {
@@ -52,5 +53,14 @@ public class Util {
 	public static String generateRandomPath(String dir, String prefix, String format) {
 		Random r = new Random();
 		return dir + prefix + r.nextInt(100000000) + "." + format;
+	}
+
+	public static boolean isValidDirectory(String workingDir) {
+		if(workingDir != null) {
+			char lastChar = workingDir.charAt(workingDir.length() - 1);
+			return lastChar != '/' && lastChar != '\\' && (new File(workingDir).exists());
+		}
+		
+		return false;
 	}
 }

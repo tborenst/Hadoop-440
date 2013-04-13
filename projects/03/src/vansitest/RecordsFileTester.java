@@ -5,6 +5,7 @@ import api.IntWritable;
 import api.StringWritable;
 import api.ByteArrayWritable;
 import api.Writable;
+import fileio.DirectoryNotFoundException;
 import fileio.Record;
 import fileio.RecordsFileIO;
 
@@ -194,7 +195,7 @@ public class RecordsFileTester {
 		System.out.println("5: <" + readRec5Key + ", " + readRec5ValueStr + ">");
 	}
 	
-	private static void testPartitioningRecords(String workingDir, String originalPath, String[] newPaths, String mergePath) {
+	private static void testPartitioningRecords(String workingDir, String originalPath, String[] newPaths, String mergePath) throws DirectoryNotFoundException {
 		System.out.println("***Testing with records***");
 		System.out.println("Writing records...");
 		RecordsFileIO recRecords = new RecordsFileIO(originalPath, true, false);
@@ -302,7 +303,7 @@ public class RecordsFileTester {
 	}
 	
 	
-	public static void testParititionAndMerge(String workingDir, String originalPath, String[] partitionPaths, String mergePath) {
+	public static void testParititionAndMerge(String workingDir, String originalPath, String[] partitionPaths, String mergePath) throws DirectoryNotFoundException {
 		RecordsFileIO recRecords = new RecordsFileIO(originalPath, true, false);
 		
 		StringWritable rec1Key = new StringWritable("doom");
@@ -357,44 +358,44 @@ public class RecordsFileTester {
 		mergedRecs.close();
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws DirectoryNotFoundException {
 		// write test
-		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO/";
-		int test = 4;
+		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO";
+		int test = 7;
 
 		switch(test) {
 		
 		case 1:
-			RecordsFileTester.testRecords(dir + "recordsTest.txt");
+			RecordsFileTester.testRecords(dir + "/recordsTest.txt");
 			break;
 		
 		case 2:
-			RecordsFileTester.testStrings(dir + "stringsTest.txt");
+			RecordsFileTester.testStrings(dir + "/stringsTest.txt");
 			break;
 			
 		case 3:
-			RecordsFileTester.testReadStrings(dir + "readStringsTest.txt");
+			RecordsFileTester.testReadStrings(dir + "/readStringsTest.txt");
 			break;
 			
 		case 4:
-			RecordsFileTester.testBytes(dir + "bytesTest.txt");
+			RecordsFileTester.testBytes(dir + "/bytesTest.txt");
 			break;
 		
 		case 5: 
-			RecordsFileTester.testPartitioningRecords(dir, dir + "recordPartitionTest.txt",
-						new String[] {dir + "recordPartitionTestA.txt", dir + "recordPartitionTestB.txt", 
-										dir + "recordPartitionTestC.txt"},
-						dir + "recordPartitionTestMerged.txt");
+			RecordsFileTester.testPartitioningRecords(dir, dir + "/recordPartitionTest.txt",
+						new String[] {dir + "/recordPartitionTestA.txt", dir + "/recordPartitionTestB.txt", 
+										dir + "/recordPartitionTestC.txt"},
+						dir + "/recordPartitionTestMerged.txt");
 			break;
 			
 		case 6: 
-			RecordsFileTester.testPartitioningStrings(dir + "stringPartitionTest.txt",
-						new String[] {dir + "stringPartitionTestA.txt", dir + "stringPartitionTestB.txt", dir + "stringPartitionTestC.txt"});
+			RecordsFileTester.testPartitioningStrings(dir + "/stringPartitionTest.txt",
+						new String[] {dir + "/stringPartitionTestA.txt", dir + "/stringPartitionTestB.txt", dir + "/stringPartitionTestC.txt"});
 			break;
 		case 7:
-			RecordsFileTester.testParititionAndMerge(dir, dir + "recordPartitionTest.txt",
-					new String[] {dir + "recordPartitionTestA.txt", dir + "recordPartitionTestB.txt"},
-					dir + "recordPartitionTestMerged.txt");
+			RecordsFileTester.testParititionAndMerge(dir, dir + "/recordPartitionTest.txt",
+					new String[] {dir + "/recordPartitionTestA.txt", dir + "/recordPartitionTestB.txt"},
+					dir + "/recordPartitionTestMerged.txt");
 		}
 	}
 }
