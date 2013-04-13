@@ -47,7 +47,12 @@ public class MasterRoutine {
 	 */
 	private void handleSockets(){
 		// TODO: receive request object and interpret it
-//		sio.on()
+		sio.on(Constants.JOB_REQUEST, new SIOCommand(){
+			public void run(){
+				Request req = (Request)object;
+//				int mappers = req.
+			}
+		});
 		
 		// add socket to idle pool when first connected
 		sio.on("connection", new SIOCommand(){
