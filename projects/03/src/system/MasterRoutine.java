@@ -47,6 +47,7 @@ public class MasterRoutine {
 	 */
 	private void handleSockets(){
 		// TODO: receive request object and interpret it
+//		sio.on()
 		
 		// add socket to idle pool when first connected
 		sio.on("connection", new SIOCommand(){
