@@ -10,6 +10,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import system.InValidConfigFileException;
+import util.Util;
 
 public class Request {
 	public class Mapper {
@@ -36,7 +37,7 @@ public class Request {
 
 		public boolean isValid() {
 			return numMappers > 0
-					&& directory != null && (new File(directory)).exists()
+					&& directory != null && Util.isValidDirectory(directory)
 					&& fileName != null && (new File(directory + "/" + fileName)).exists()
 					&& binaryName != null;
 		}
@@ -60,7 +61,7 @@ public class Request {
 		}
 
 		public boolean isValid() {
-			return directory != null && (new File(directory)).exists()
+			return directory != null && Util.isValidDirectory(directory)
 					&& fileName != null && (new File(directory + "/" + fileName)).exists()
 					&& binaryName != null;
 		}
@@ -90,17 +91,17 @@ public class Request {
 
 		public boolean isValid() {
 			return numReducers > 0
-					&& directory != null && (new File(directory)).exists()
+					&& directory != null && Util.isValidDirectory(directory)
 					&& fileName != null && (new File(directory + "/" + fileName)).exists()
 					&& binaryName != null;
 		}
 	}
 	
-	private Mapper Map;
-	private Combiner Combine;
-	private Reducer Reduce;	
-	private String[] dataPaths;	
-	private String[] resultPaths;
+	public Mapper Map;
+	public Combiner Combine;
+	public Reducer Reduce;	
+	public String[] dataPaths;	
+	public String resultsDirectory;
 	
 	public Request() {}
 	
@@ -152,8 +153,7 @@ public class Request {
 				&& Combine != null && Combine.isValid()
 				&& Reduce != null && Reduce.isValid() 
 				&& dataPaths != null && dataPaths.length > 0
-				&& resultPaths != null &&  resultPaths.length > 0
-				&& Reduce.getNumReducers() == resultPaths.length;
+				&& Util.isValidDirectory(resultsDirectory);
 	}
 
 	// Map Data Getters
@@ -207,7 +207,7 @@ public class Request {
 		return dataPaths;
 	}
 	
-	public String[] getResultPaths() {
-		return resultPaths;
+	public String getResultsDirectory() {
+		return resultsDirectory;
 	}
 }
