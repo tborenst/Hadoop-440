@@ -13,6 +13,7 @@ import fileio.RecordsFileIO;
 import api.Collector;
 import api.Writable;
 import util.Executer;
+import util.Util;
 import networking.SIOClient;
 import networking.SIOCommand;
 
@@ -24,11 +25,11 @@ public class SlaveRoutine {
 	public SlaveRoutine(String hostname, int port, String workDir){
 		this.sio = new SIOClient(hostname, port);
 		this.executer = new Executer();
-		// check that working directory exists
-		if(!(new File(workDir).exists())){
-			try {
-				throw new Throwable("Working Directory Doesn't Exist");
-			} catch (Throwable e) {
+		// check that working directory is valid
+		if(!Util.isValidDirectory(workDir)){
+			try{
+				throw new Throwable("Working directory invalid");
+			} catch (Throwable e){
 				e.printStackTrace();
 			}
 		}
@@ -51,7 +52,7 @@ public class SlaveRoutine {
 				} else if(task.getTaskType().equals(Constants.REDUCE)){
 					performReduceTask(task);
 				} else {
-					sio.emit(Constants.TASK_ERROR, "Unrecognized Task type");
+					sio.emit(Constants.TASK_ERROR, "Unrecognized task type");
 				}
 			}
 		});

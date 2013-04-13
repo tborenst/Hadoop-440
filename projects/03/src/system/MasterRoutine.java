@@ -50,7 +50,20 @@ public class MasterRoutine {
 		sio.on(Constants.JOB_REQUEST, new SIOCommand(){
 			public void run(){
 				Request req = (Request)object;
-//				int mappers = req.
+				int mappers = req.getNumMappers();
+				int reducers = req.getNumReducers();
+				String mapperDir = req.getMapperDirectory();
+				String mapperFile = req.getMapperFileName();
+				String mapperName = req.getMapperBinaryName();
+				String reducerDir = req.getReducerDirectory();
+				String reducerFile = req.getReducerFileName();
+				String reducerName = req.getReducerBinaryName();
+				String combinerDir = req.getCombinerDirectory();
+				String combinerFile = req.getCombinerFileName();
+				String combinerName = req.getCombinerBinaryName();
+				
+				String[] from = req.getDataPaths();
+//				String resultsDir = 
 			}
 		});
 		
