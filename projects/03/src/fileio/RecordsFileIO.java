@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class RecordsFileIO {
 	private RandomAccessFile raf;
 	private ObjectInputStream readObjectStream;
 	private ObjectOutputStream writeObjectStream;
+	private String path;
 	
 	/**
 	 * Constructor for RecordsFileIO.
@@ -47,7 +49,8 @@ public class RecordsFileIO {
 	 * 		Set to true if RecordsFileIO reads only and writes only if false.
 	 */
 	public RecordsFileIO(String path, boolean createIfDoesntExist, boolean isReadFile) {
-		initialize(path, createIfDoesntExist, isReadFile);
+		this.path = path;
+		initialize(createIfDoesntExist, isReadFile);
 	}
 	
 	/**
@@ -56,7 +59,7 @@ public class RecordsFileIO {
 	 * @param createIfDoesntExist
 	 * @param isReadFile
 	 */
-	private void initialize(String path, boolean createIfDoesntExist, boolean isReadFile) {
+	private void initialize(boolean createIfDoesntExist, boolean isReadFile) {
 		file = new File(path);
 		
 		if(!file.exists() && createIfDoesntExist) {
@@ -697,12 +700,11 @@ public class RecordsFileIO {
 		LinkedList<RecordsFileIO> recsQueue = new LinkedList<RecordsFileIO>();
 		for(int p = 0; p < srcPaths.length; p++) {
 			RecordsFileIO recs = new RecordsFileIO(srcPaths[p], true, true);
-			recs.sortRecords(readDelimiter);
+			recs.sortRecords(workingDir, readDelimiter);
 			recsQueue.add(recs);
 		}
 		
 		int numPathsMerged = srcPaths.length;
-		RecordsFileIO mergedRecs = null;
 		while(recsQueue.size() >= 2) {
 			String destPath = Util.generateRandomPath(workingDir, "/mergeSortIntermediary_", "txt");
 			RecordsFileIO recs1 =  recsQueue.remove();
@@ -710,7 +712,7 @@ public class RecordsFileIO {
 			RecordsFileIO recs2 = recsQueue.remove();
 			recs2.setIsReadFile(true);
 			
-			mergedRecs = new RecordsFileIO(destPath, true, false);
+			RecordsFileIO mergedRecs = new RecordsFileIO(destPath, true, false);
 			mergeRecordsTo(recs1, recs2, mergedRecs, readDelimiter, readDelimiter);
 			
 			numPathsMerged--;
@@ -734,13 +736,15 @@ public class RecordsFileIO {
 			recsQueue.add(mergedRecs);
 		}
 		
-		mergedRecs = recsQueue.remove();
-		
-		if(mergedRecs != null) {
+
+		if(recsQueue.size() > 0) {
+			RecordsFileIO mergedRecs = recsQueue.remove();
 			mergedRecs.setIsReadFile(true);
 			
 			mergedRecs.splitRecords(destPaths, mergedRecs.getNumRecordsWritten(), readDelimiter, writeDelimiter);
 			mergedRecs.delete();
+		} else {
+			System.out.println("Merged Sort fucked up some how!");
 		}
 	}
 
@@ -785,49 +789,75 @@ public class RecordsFileIO {
 		}
 	}
 	
-	/**
-	 * Destructively sort the records.
-	 * RecordsFileIO must be in read mode.
-	 * @param readDelimiter
-	 * @warning Loads whole record into memory.
-	 */
-	public void sortRecords(String readDelimiter) {
-		// TODO: load only keys into memory file ptrs??
-		// TODO: merge records
+	public void sortRecords(String workingDir, String readDelimiter) throws DirectoryNotFoundException {
+		if(!Util.isValidDirectory(workingDir)) {
+			throw new DirectoryNotFoundException();
+		}
+		
 		if(isReadFile) {
-			HashMap<Writable, Record> recs = new HashMap<Writable, Record>();
-			Record rec;
-			while((rec = readNextRecord(readDelimiter)) != null) {
-				Record hashRec = recs.get(rec.getKey());
-				if(hashRec != null) {
-//					hashRec.addValues(rec.getValues());
-					rec.addValues(hashRec.getValues());
-				} 
-				recs.put(rec.getKey(), rec);
-			}
-			
-			Collection<Record> valuesCollection = (Collection<Record>) recs.values();
-			ArrayList<Record> values = new ArrayList<Record>();
-			values.addAll(valuesCollection);
-			
-			Collections.sort(values, new Comparator<Record>() {
-	
-				@Override
-				public int compare(Record o1, Record o2) {
-					return o1.compare(o2);
-				}
+			LinkedList<RecordsFileIO> mergeFiles = new LinkedList<RecordsFileIO>();
+			Record recA;
+			while((recA = readNextRecord(readDelimiter)) != null) {
+				String destPath = Util.generateRandomPath(workingDir, "/sortRecordsIntermediary_", "txt");
+				RecordsFileIO mergeFile = new RecordsFileIO(destPath, true, false);
+				//TODO: sort these 2 records
 				
-			});
+				Record recB = readNextRecord(readDelimiter);
+				
+				if(recB != null) {
+					int diff = recA.compare(recB);
+					
+					if(diff == 0) {
+						recA.addValues(recB.getValues());
+						mergeFile.writeNextRecord(recA, readDelimiter);
+					} else if(diff < 0) {
+						// write recA first
+						mergeFile.writeNextRecord(recA, readDelimiter);
+						mergeFile.writeNextRecord(recB, readDelimiter);
+					} else {
+						// write recB first
+						mergeFile.writeNextRecord(recB, readDelimiter);
+						mergeFile.writeNextRecord(recA, readDelimiter);
+					}
+				} else {
+					mergeFile.writeNextRecord(recA, readDelimiter);
+				}
+								
+				mergeFiles.add(mergeFile);
 			
-			String path = getPath();
-			delete();
-			initialize(path, true, false);
-			
-			for(int r = 0; r < values.size(); r++) {
-				writeNextRecord(values.get(r), readDelimiter);
 			}
 			
-			setIsReadFile(true);
+			while(mergeFiles.size() > 2) {
+				RecordsFileIO recs1 =  mergeFiles.remove();
+				recs1.setIsReadFile(true);
+				RecordsFileIO recs2 = mergeFiles.remove();
+				recs2.setIsReadFile(true);
+				
+				String destPath = Util.generateRandomPath(workingDir, "/sortRecordsIntermediary_", "txt");
+				RecordsFileIO mergedRec = new RecordsFileIO(destPath, true, false);
+				mergeRecordsTo(recs1, recs2, mergedRec, readDelimiter, readDelimiter);
+				mergeFiles.add(mergedRec);
+				recs1.close();
+				recs2.close();
+			}
+			
+			if(mergeFiles.size() > 0) {
+				RecordsFileIO recs1 =  mergeFiles.remove();
+				recs1.setIsReadFile(true);
+				RecordsFileIO recs2 = mergeFiles.remove();
+				recs2.setIsReadFile(true);
+				
+				delete();
+				initialize(true, false);
+				
+				mergeRecordsTo(recs1, recs2, this, readDelimiter, readDelimiter);
+				recs1.delete();
+				recs2.delete();
+				setIsReadFile(true);
+				
+			} else {
+				System.out.println("Merged Sort fucked up some how!");
+			}
 		}
 	}
 	
@@ -849,13 +879,8 @@ public class RecordsFileIO {
 	
 	/**
 	 * Returns the path to the file.
-	 * Returns null if file doesn't exist.
 	 */
 	public String getPath() {
-		String path = null;
-		if(file != null) {
-			path = file.getPath();
-		}
 		return path;
 	}
 	

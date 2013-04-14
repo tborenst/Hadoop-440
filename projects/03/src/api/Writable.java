@@ -22,4 +22,6 @@ public interface Writable<T> extends Serializable{
 	
 	@Override
 	public int hashCode();
+	
+	public boolean equals(Writable<T> w);
 }

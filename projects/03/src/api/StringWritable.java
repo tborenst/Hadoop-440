@@ -24,9 +24,14 @@ public class StringWritable implements Writable<String>{
 		return myVal.compareTo(wVal);
 	}
 	
-	// TODO:remove this
-	@Override
-	public int hashCode(){
+	// TODO : remove this
+	
+	public int hashCode() {
 		return value.hashCode();
 	}
+	
+	public boolean equals(Writable<String> w) {
+		return value.equals(w.getValue());
+	}
+
 }
