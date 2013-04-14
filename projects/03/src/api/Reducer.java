@@ -7,5 +7,5 @@ package api;
 import java.util.Iterator;
 
 public interface Reducer <KeyWritable, ValueWritable>{
-	public void reduce(KeyWritable key, Iterator<ValueWritable> values, Collector output);
+	public void reduce(StringWritable key, Writable[] values, Collector output);
 }

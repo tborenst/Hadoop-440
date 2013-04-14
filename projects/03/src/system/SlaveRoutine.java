@@ -5,6 +5,9 @@
 
 package system;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import fileio.Partitioner;
 import fileio.Record;
 import fileio.RecordsFileIO;
@@ -144,14 +147,9 @@ public class SlaveRoutine {
 			while((record = reader.readNextRecord("\n")) != null){
 				Writable key = record.getKey();
 				Writable[] values = record.getValues();
-				
-//				IntWritable[] newVals = new IntWritable[values.length];
-//				for(int i = 0; i < newVals.length; i++){
-//					newVals[i] = (IntWritable)values[i];
-//				}
-				
-//				Object[] args = {key, values, output};
-//				Object[] args = {key, newVals, output};
+
+
+				Object[] args = {key, values, output};
 				executer.execute(reducerObject, "reduce", args);
 			}
 			

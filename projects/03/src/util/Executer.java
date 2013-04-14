@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
 
 
 public class Executer extends ClassLoader{
@@ -68,7 +69,9 @@ public class Executer extends ClassLoader{
 				Class<?>[] argtypes = new Class<?>[args.length];
 				for(int i = 0; i < argtypes.length; i++){
 					argtypes[i] = args[i].getClass();
+					System.out.print("TYPE: " + argtypes[i].getSimpleName() + ", ");
 				}
+				System.out.println();
 				Class<?> myClass = obj.getClass();
 				Method myMethod = myClass.getMethod(methodName, argtypes);
 				return myMethod.invoke(obj, args);
@@ -80,6 +83,31 @@ public class Executer extends ClassLoader{
 			return null;
 		}
 	}
+	
+//	public Method findMethod(Object obj, String methodName, Object[] args) throws Exception{
+//		Class<?> myClass = obj.getClass();
+//		
+//		if(args == null){
+//			return myClass.getMethod(methodName, null);
+//		}
+//		
+//		Method[] methods = myClass.getMethods();
+//		for(int m = 0; m < methods.length; m++){
+//			Method method = methods[m];
+//			if(method.getName().equals(methodName) &&
+//			   method.getParameterTypes().length == args.length){
+//				Class<?>[] paramTypes = method.getParameterTypes();
+//				
+//				// TODO: clean this up, this is horrible and makes me want to die
+//				if(methodName.equals("reduce")){
+//					
+//				}
+//				
+//			}
+//		}
+//		
+//		return null; //TODO remove this
+//	}
 	
 //	public Object execute(Object obj, String methodName, Object[] args){
 //		try{
