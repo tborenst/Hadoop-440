@@ -14,9 +14,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import util.Util;
 
@@ -62,6 +67,8 @@ public class RecordsFileIO {
 				System.out.println("RecordsFileIO.RecordsFile(): failed to create file: " + path);
 				e.printStackTrace();
 			}
+		} else {
+			
 		}
 		
 		raf = open();
@@ -786,14 +793,24 @@ public class RecordsFileIO {
 	 */
 	public void sortRecords(String readDelimiter) {
 		// TODO: load only keys into memory file ptrs??
+		// TODO: merge records
 		if(isReadFile) {
-			ArrayList<Record> recs = new ArrayList<Record>();
+			HashMap<Writable, Record> recs = new HashMap<Writable, Record>();
 			Record rec;
 			while((rec = readNextRecord(readDelimiter)) != null) {
-				recs.add(rec);
+				Record hashRec = recs.get(rec.getKey());
+				if(hashRec != null) {
+					hashRec.addValues(rec.getValues());
+				} else {
+					recs.put(rec.getKey(), rec);
+				}
 			}
 			
-			Collections.sort(recs, new Comparator<Record>() {
+			Collection<Record> valuesCollection = (Collection<Record>) recs.values();
+			ArrayList<Record> values = new ArrayList<Record>();
+			values.addAll(valuesCollection);
+			
+			Collections.sort(values, new Comparator<Record>() {
 	
 				@Override
 				public int compare(Record o1, Record o2) {
@@ -806,8 +823,8 @@ public class RecordsFileIO {
 			delete();
 			initialize(path, true, false);
 			
-			for(int r = 0; r < recs.size(); r++) {
-				writeNextRecord(recs.get(r), readDelimiter);
+			for(int r = 0; r < values.size(); r++) {
+				writeNextRecord(values.get(r), readDelimiter);
 			}
 			
 			setIsReadFile(true);
