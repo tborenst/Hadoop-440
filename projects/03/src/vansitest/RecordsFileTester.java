@@ -361,8 +361,28 @@ public class RecordsFileTester {
 		IntWritable rec5Value = new IntWritable(21);
 		Record rec5 = new Record(rec5Key, new Writable[] {rec5Value});
 		recRecords.writeNextRecord(rec5, "\n");
+		recRecords.close();
+		
+		recRecords = new RecordsFileIO(originalPath, true, true);
+		System.out.println("Sorting Records...");
+		recRecords.sortRecords("\n");
+				
+		Record readRec1S = recRecords.readNextRecord("\n");
+		System.out.println("1: " + readRec1S.toString());
+		
+		Record readRec2S = recRecords.readNextRecord("\n");
+		System.out.println("2: " + readRec2S.toString());
+		
+		Record readRec3S = recRecords.readNextRecord("\n");
+		System.out.println("3: " + readRec3S.toString());
+				
+		Record readRec4S = recRecords.readNextRecord("\n");
+		System.out.println("4: " + readRec4S.toString());
 		
 		recRecords.close();
+		
+		System.exit(0);
+		
 		System.out.println("Partitioning Records...");
 		RecordsFileIO.dealRecordsTo(new String[] {originalPath}, partitionPaths, "\n", "\n");
 		System.out.println("Partitioning Complete");
