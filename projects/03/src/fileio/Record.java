@@ -44,10 +44,14 @@ public class Record implements Serializable{
 	
 	/**
 	 * Compares two records based off keys.
+	 * this - rec
 	 * @param rec
 	 * @return int
 	 */
 	public int compare(Record rec) {
+		if(rec == null) {
+			return -1;
+		}
 		return key.compare(rec.getKey());
 	}
 	
@@ -79,5 +83,9 @@ public class Record implements Serializable{
 		}
 		result += "]>";
 		return result;
+	}
+	
+	public boolean equals(Record r) {
+		return key.equals(r.getKey());
 	}
 }

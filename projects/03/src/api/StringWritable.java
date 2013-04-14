@@ -21,4 +21,12 @@ public class StringWritable implements Writable<String>{
 		String wVal  = w.getValue();
 		return myVal.compareTo(wVal);
 	}
+	
+	public int hashCode() {
+		return value.hashCode();
+	}
+	
+	public boolean equals(Writable<String> w) {
+		return value.equals(w.getValue());
+	}
 }

@@ -357,7 +357,7 @@ public class RecordsFileTester {
 		Record rec4 = new Record(rec4Key, new Writable[] {rec4Value});
 		recRecords.writeNextRecord(rec4, "\n");
 		
-		StringWritable rec5Key = new StringWritable("foopanda");
+		StringWritable rec5Key = new StringWritable("Vansi");
 		IntWritable rec5Value = new IntWritable(21);
 		Record rec5 = new Record(rec5Key, new Writable[] {rec5Value});
 		recRecords.writeNextRecord(rec5, "\n");
@@ -365,7 +365,7 @@ public class RecordsFileTester {
 		
 		recRecords = new RecordsFileIO(originalPath, true, true);
 		System.out.println("Sorting Records...");
-		recRecords.sortRecords("\n");
+		recRecords.sortRecords(workingDir, "\n");
 				
 		Record readRec1S = recRecords.readNextRecord("\n");
 		System.out.println("1: " + readRec1S.toString());
@@ -411,6 +411,20 @@ public class RecordsFileTester {
 	
 	public static void main(String[] args) throws DirectoryNotFoundException {
 		// write test
+		System.out.println("asdf".hashCode());
+		System.out.println("asdf".hashCode());
+		
+		StringWritable rec4Key = new StringWritable("tomer");
+		IntWritable rec4Value = new IntWritable(42);
+		Record rec4 = new Record(rec4Key, new Writable[] {rec4Value});
+		
+		StringWritable rec3Key = new StringWritable("tomer");
+		IntWritable rec3Value = new IntWritable(42);
+		Record rec3 = new Record(rec3Key, new Writable[] {rec4Value});
+		
+		System.out.println(rec4.equals(rec3));
+		
+		
 		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO";
 		int test = 7;
 
