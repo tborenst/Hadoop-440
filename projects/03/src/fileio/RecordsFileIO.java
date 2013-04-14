@@ -677,9 +677,11 @@ public class RecordsFileIO {
 	 * @param workingDir - temporary holding area for intermediary files
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @param deleteSrcFiles
 	 * @throws DirectoryNotFoundException 
 	 */
-	public static void mergeSortRecords(String[] srcPaths, String[] destPaths, String workingDir, String readDelimiter, String writeDelimiter) throws DirectoryNotFoundException {
+	public static void mergeSortRecords(String[] srcPaths, String[] destPaths, String workingDir,
+			String readDelimiter, String writeDelimiter, boolean deleteSrcFiles) throws DirectoryNotFoundException {
 		if(!Util.isValidDirectory(workingDir)) {
 			throw new DirectoryNotFoundException();
 		}
@@ -703,20 +705,16 @@ public class RecordsFileIO {
 			mergeRecordsTo(recs1, recs2, mergedRecs, readDelimiter, readDelimiter);
 			
 			numPathsMerged--;
-			if(numPathsMerged < 0) {
-				//System.out.println("deleting 1 " + recs1.getPath());
+			if(deleteSrcFiles || numPathsMerged < 0) {
 				recs1.delete();
 			} else {
-				//System.out.println("closing 1 " + recs1.getPath());
 				recs1.close();
 			}
 			
 			numPathsMerged--;
-			if(numPathsMerged < 0) {
-				//System.out.println("deleting 2 " + recs2.getPath());
+			if(deleteSrcFiles || numPathsMerged < 0) {
 				recs2.delete();
 			} else {
-				//System.out.println("closing 2 " + recs2.getPath());
 				recs2.close();
 			}
 			

@@ -294,7 +294,7 @@ public class RecordsFileTester {
 		
 		
 		System.out.println("Merging files...");
-		RecordsFileIO.mergeSortRecords(newPaths, new String[] {mergePath}, workingDir, "\n",  "\n");
+		RecordsFileIO.mergeSortRecords(newPaths, new String[] {mergePath}, workingDir, "\n",  "\n", false);
 		RecordsFileIO recMerged = new RecordsFileIO(mergePath, true, true);
 		
 
@@ -388,7 +388,7 @@ public class RecordsFileTester {
 		System.out.println("Partitioning Complete");
 		
 		System.out.println("Merge Sorting Records...");
-		RecordsFileIO.mergeSortRecords(partitionPaths, new String[] {mergePath, originalPath}, workingDir, "\n", "\n");
+		RecordsFileIO.mergeSortRecords(partitionPaths, new String[] {mergePath, originalPath}, workingDir, "\n", "\n", false);
 		System.out.println("Merged & Sorted Records");
 		
 		RecordsFileIO mergedRecs = new RecordsFileIO(mergePath, true, true);
