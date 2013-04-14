@@ -132,7 +132,7 @@ public class Tests {
 		Thread.sleep(500);
 		System.out.println("2 Slaves...");
 		SlaveRoutine slave1 = new SlaveRoutine("localhost", 15237, "/Users/tomer/Desktop/WorkDir");
-//		SlaveRoutine slave2 = new SlaveRoutine("localhost", 15237, "/Users/tomer/Desktop/WorkDir");
+		SlaveRoutine slave2 = new SlaveRoutine("localhost", 15237, "/Users/tomer/Desktop/WorkDir");
 		Thread.sleep(500);
 		System.out.println("1 Client...");
 		ClientRoutine client = new ClientRoutine("localhost", 15337);

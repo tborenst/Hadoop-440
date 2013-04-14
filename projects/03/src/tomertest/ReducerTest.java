@@ -8,16 +8,18 @@ import api.Reducer;
 import api.StringWritable;
 import api.Writable;
 
-public class ReducerTest implements Reducer<StringWritable, IntWritable>{
+public class ReducerTest implements Reducer{
 
-	public void reduce(StringWritable key, Writable[] values, Collector output) {
+	public void reduce(Writable key, Writable[] values, Collector output) {
 		int sum = 0;
+		
+		StringWritable k = (StringWritable)key;
 		
 		for(int i = 0; i < values.length; i++){
 			sum += ((IntWritable)values[i]).getValue();
 		}
 		
-		output.emitString(key.getValue() + ": " + sum);
+		output.emitString(k.getValue() + ": " + sum);
 	}
 
 }
