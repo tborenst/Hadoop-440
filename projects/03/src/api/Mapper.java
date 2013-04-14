@@ -4,6 +4,6 @@
  */
 package api;
 
-public interface Mapper <KeyType, ValueType>{
-	public void map(KeyType key, ValueType value, Collector output);
+public interface Mapper {
+	public void map(Writable key, Writable value, Collector output);
 }

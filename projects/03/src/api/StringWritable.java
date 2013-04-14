@@ -23,4 +23,10 @@ public class StringWritable implements Writable<String>{
 		String wVal  = w.getValue();
 		return myVal.compareTo(wVal);
 	}
+	
+	// TODO:remove this
+	@Override
+	public int hashCode(){
+		return value.hashCode();
+	}
 }

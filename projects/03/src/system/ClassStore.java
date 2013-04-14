@@ -1,5 +1,6 @@
 /**
- * Keeps track of the classes that has been loaded on this machine for the current session so they can be
+ * The ClassStore class keeps track of the classes that has been loaded on this machine for the current session so 
+ * they don't have to be loaded more than once.
  */
 package system;
 

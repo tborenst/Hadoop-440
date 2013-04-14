@@ -15,4 +15,6 @@ public class Constants {
 	public static String TASK_ERROR = "TASK_ERROR";
 	public static String JOB_REQUEST = "JOB_REQUEST";
 	public static String JOB_STATUS = "JOB_STATUS";
+	public static String JOB_ID = "JOB_ID";
+	public static String JOB_COMPLETE = "JOB_COMPLETE";
 }

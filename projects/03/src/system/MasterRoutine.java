@@ -16,9 +16,9 @@ import networking.SIOServer;
 import networking.SIOSocket;
 
 public class MasterRoutine {
-	private SIOServer slaveSIO;                    // socket for slaves
-	private SIOServer clientSIO;          		   // socket for clients
-	private String workDirPath;                    // working directory
+	private SIOServer slaveSIO;               // socket for slaves
+	private SIOServer clientSIO;          	  // socket for clients
+	private String workDirPath;               // working directory
 	
 	private LinkedList<Task> failedQueue;     // #1 priority (tasks that came back and failed)
 	private LinkedList<Task> reduceQueue;     // #2 priority (reduce tasks)
@@ -31,6 +31,7 @@ public class MasterRoutine {
 	
 	private HashMap<SIOSocket, Task> pendingSockets; // mapping slave sockets to tasks
 	private LinkedList<SIOSocket> idleSockets;       // idle slave sockets available for work
+	private HashMap<Integer, SIOSocket> clientJobs;  // mapping job ids to their respective client socket
 	
 	public MasterRoutine(int slavePort, int clientPort, String workDirPath){
 		this.slaveSIO = new SIOServer(slavePort);
@@ -45,6 +46,7 @@ public class MasterRoutine {
 		this.jobs = new HashMap<Integer, Job>();
 		this.pendingSockets = new HashMap<SIOSocket, Task>();
 		this.idleSockets = new LinkedList<SIOSocket>();
+		this.clientJobs = new HashMap<Integer, SIOSocket>();
 		handleSockets();
 	}
 	
@@ -52,6 +54,7 @@ public class MasterRoutine {
 	 * handleSockets - all socket manipulation goes in here
 	 */
 	private void handleSockets(){
+		// CLIENT CONNECTIONS
 		clientSIO.on(Constants.JOB_REQUEST, new SIOCommand(){
 			@Override
 			public void run(){
@@ -81,13 +84,22 @@ public class MasterRoutine {
 				RecordsFileIO.dealStringsAsRecordsTo(from, initialMapFiles, "\n", "\n");
 				
 				// create new job
-				createJob(mappers, reducers, 
-						  mapperDir, mapperFile, mapperName, 
-						  reducerDir, reducerFile, reducerName,
-						  combinerDir, combinerFile, combinerName,
-						  initialMapFiles, resultsDir);
+				int jobID = createJob(mappers, reducers, 
+						  			  mapperDir, mapperFile, mapperName, 
+						  			  reducerDir, reducerFile, reducerName,
+						  			  combinerDir, combinerFile, combinerName,
+						  			  initialMapFiles, resultsDir);
+				
+				synchronized(clientJobs){
+					clientJobs.put(jobID, socket);
+				}
+				
+				// TODO: add client side to handle it
+				socket.emit(Constants.JOB_ID, jobID);
 			}
 		});
+		
+		// SLAVE CONNECTIONS
 		
 		// add socket to idle pool when first connected
 		slaveSIO.on("connection", new SIOCommand(){
@@ -262,13 +274,14 @@ public class MasterRoutine {
 	 * @param fromPaths - paths to already-partitioned data for this map-reduce process
 	 * @param resultsDir - directory to put the result of this map-reduce process
 	 */
-	public void createJob(int mappers, int reducers,
+	public int createJob(int mappers, int reducers,
 						  String mapperDir, String mapperFile, String mapperName,
 						  String reducerDir, String reducerFile, String reducerName,
 						  String combinerDir, String combinerFile, String combinerName,
 						  String[] fromPaths, String resultsDir){
 		// create job
-		Job job = new Job(jobCount, mappers, reducers, workDirPath, fromPaths, resultsDir);
+		int jobID = jobCount;
+		Job job = new Job(jobID, mappers, reducers, workDirPath, fromPaths, resultsDir);
 		job.setMapper(mapperDir, mapperFile, mapperName);
 		job.setReducer(reducerDir, reducerFile, reducerName);
 		
@@ -298,6 +311,7 @@ public class MasterRoutine {
 		
 		// new job
 		spendResources();
+		return jobID;
 	}
 	
 	

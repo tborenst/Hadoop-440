@@ -411,7 +411,7 @@ public class RecordsFileTester {
 	
 	public static void main(String[] args) throws DirectoryNotFoundException {
 		// write test
-		String dir = "C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/RecordsFileIO";
+		String dir = "/Users/tomer/Desktop/box/school/15440/projects/03/src/vansitest/RecordsFileIO";
 		int test = 7;
 
 		switch(test) {

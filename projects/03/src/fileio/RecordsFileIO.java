@@ -800,10 +800,10 @@ public class RecordsFileIO {
 			while((rec = readNextRecord(readDelimiter)) != null) {
 				Record hashRec = recs.get(rec.getKey());
 				if(hashRec != null) {
-					hashRec.addValues(rec.getValues());
-				} else {
-					recs.put(rec.getKey(), rec);
-				}
+//					hashRec.addValues(rec.getValues());
+					rec.addValues(hashRec.getValues());
+				} 
+				recs.put(rec.getKey(), rec);
 			}
 			
 			Collection<Record> valuesCollection = (Collection<Record>) recs.values();
