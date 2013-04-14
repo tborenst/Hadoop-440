@@ -32,11 +32,19 @@ public class Collector implements Serializable{
 	}
 	
 	/**
-	 * collect - add a key-value pair to the collector.
+	 * emit - add a key-value pair to the collector.
 	 */
-	public void collect(Writable key, Writable value){
+	public void emit(Writable key, Writable value){
 		Record pair = new Record(key, new Writable[]{value});
 		pairs.add(pair);
+	}
+	
+	/**
+	 * emitString - write a string to file, instead of a record, so output will be human readable.
+	 * Note: strings will be separated by newlines.
+	 */
+	public void emitString(String str){
+		io.writeNextString(str, "\n");
 	}
 	
 	/**

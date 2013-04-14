@@ -6,11 +6,9 @@
 package util;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
@@ -82,5 +80,53 @@ public class Executer extends ClassLoader{
 			return null;
 		}
 	}
+	
+//	public Object execute(Object obj, String methodName, Object[] args){
+//		try{
+//			Class<?> myClass = obj.getClass();
+//			
+//			if(args == null){
+//				Method myMethod = myClass.getMethod(methodName, null);
+//				return myMethod.invoke(obj, null);
+//			} else {
+//				Method[] methods = myClass.getMethods();
+//				for(int i = 0; i < methods.length; i++){
+//					Method method = methods[i];
+//					if(method.getName().equals(methodName)){
+//						Class<?>[] paramtypes = method.getParameterTypes();
+//						if(paramtypes.length == args.length){
+//							Class<?>[] argtypes = new Class<?>[args.length];
+//							boolean wrongMethod = false;
+//							for(int j = 0; (j < args.length && !wrongMethod); j++){
+//								if(!(paramtypes[i].isInstance(args[i]))){
+//									wrongMethod = true;
+//								}
+//							}
+//							if(!wrongMethod){
+//								for(int k = 0; k < args.length; k++){
+//									if(paramtypes[k].isArray()){
+//										Object[] a = (Object[])args[k];
+//										Class<?> simp = paramtypes[k].getComponentType();
+//										for(int m = 0; m < a.length; m++){
+//											a[m] = simp.cast(a[m]);
+//										}
+//										args[k] = a;
+//									} else {
+//										args[k] = paramtypes[k].cast(args[k]);
+//									}
+//								}
+//								return method.invoke(obj, args);
+//							}
+//						}
+//					}
+//					throw new Exception("shit fuck!");
+//				}
+//			}
+//		} catch (Exception e){
+//			e.printStackTrace();
+//			return null;
+//		}
+//		return null;
+//	}
 	
 }

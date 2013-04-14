@@ -7,11 +7,12 @@ import api.StringWritable;
 
 public class MapperTest implements Mapper<StringWritable, StringWritable>{
 
+	@Override
 	public void map(StringWritable key, StringWritable value, Collector output) {
 		String sentence = value.getValue();
 		String[] words  = sentence.split(" ");
 		for(int i = 0; i < words.length; i++){
-			output.collect(new StringWritable(words[i]), new IntWritable(1));
+			output.emit(new StringWritable(words[i]), new IntWritable(1));
 		}
 	}
 	

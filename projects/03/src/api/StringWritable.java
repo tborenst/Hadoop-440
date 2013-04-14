@@ -12,10 +12,12 @@ public class StringWritable implements Writable<String>{
 		this.value = value;
 	}
 	
+	@Override
 	public String getValue(){
 		return value;
 	}
 
+	@Override
 	public int compare(Writable<String> w) {
 		String myVal = value;
 		String wVal  = w.getValue();

@@ -8,10 +8,12 @@ public class ByteArrayWritable implements Writable<Byte[]> {
 		this.value = value;
 	}
 	
+	@Override
 	public Byte[] getValue(){
 		return value;
 	}
 
+	@Override
 	public int compare(Writable<Byte[]> w) {
 		Byte[] myValArr = value;
 		Byte[] wValArr  = w.getValue();

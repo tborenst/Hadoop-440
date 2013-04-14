@@ -242,7 +242,12 @@ public class RecordsFileIO {
 		Record r = null;
 		if(isReadFile) {
 			if(readObjectStream == null) {
-				readObjectStream = openReadStream();
+				try{
+					readObjectStream = openReadStream();
+				} catch (Exception e){
+					System.out.println("FUCKAYOUWAHEL");
+					e.printStackTrace();
+				}
 			}
 			
 			try {
@@ -320,7 +325,7 @@ public class RecordsFileIO {
 		if(isReadFile && raf != null) {
 			
 			ArrayList<Byte> s = new ArrayList<Byte>();
-			byte[] delimiterBArr = (byte[]) delimiter.getBytes();
+			byte[] delimiterBArr = delimiter.getBytes();
 			
 			boolean moreToRead = true;
 			
@@ -704,16 +709,16 @@ public class RecordsFileIO {
 			numPathsMerged--;
 			if(numPathsMerged < 0) {
 				//System.out.println("deleting 1 " + recs1.getPath());
-				recs1.delete();
+				recs1.close();
 			} else {
 				//System.out.println("closing 1 " + recs1.getPath());
 				recs1.close();
 			}
-			
+			//TODO: make it delete()
 			numPathsMerged--;
 			if(numPathsMerged < 0) {
 				//System.out.println("deleting 2 " + recs2.getPath());
-				recs2.delete();
+				recs2.close();
 			} else {
 				//System.out.println("closing 2 " + recs2.getPath());
 				recs2.close();
@@ -722,10 +727,11 @@ public class RecordsFileIO {
 			recsQueue.add(mergedRecs);
 		}
 		
+		mergedRecs = recsQueue.remove();
+		
 		if(mergedRecs != null) {
 			mergedRecs.setIsReadFile(true);
 			
-			System.out.println("Splitting Records...");
 			mergedRecs.splitRecords(destPaths, mergedRecs.getNumRecordsWritten(), readDelimiter, writeDelimiter);
 			mergedRecs.delete();
 		}

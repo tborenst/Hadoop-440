@@ -9,13 +9,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
+import fileio.RecordsFileIO;
+
 import networking.SIOCommand;
 import networking.SIOServer;
 import networking.SIOSocket;
 
 public class MasterRoutine {
-	private SIOServer sio;                    // socket
-	private String workDirPath;               // working directory
+	private SIOServer slaveSIO;                    // socket for slaves
+	private SIOServer clientSIO;          		   // socket for clients
+	private String workDirPath;                    // working directory
 	
 	private LinkedList<Task> failedQueue;     // #1 priority (tasks that came back and failed)
 	private LinkedList<Task> reduceQueue;     // #2 priority (reduce tasks)
@@ -23,19 +26,22 @@ public class MasterRoutine {
 	private LinkedList<Task> mapQueue;        // #4 priority (map tasks)
 	
 	int jobCount;                             // how many jobs have been started, also used as job ids
+	Integer fileCount;                        // how many files we've used as temp files for partitioning
 	private HashMap<Integer, Job> jobs;       // mapping job id's to job object
 	
 	private HashMap<SIOSocket, Task> pendingSockets; // mapping slave sockets to tasks
 	private LinkedList<SIOSocket> idleSockets;       // idle slave sockets available for work
 	
-	public MasterRoutine(int port, String workDirPath){
-		this.sio = new SIOServer(port);
+	public MasterRoutine(int slavePort, int clientPort, String workDirPath){
+		this.slaveSIO = new SIOServer(slavePort);
+		this.clientSIO = new SIOServer(clientPort);
 		this.workDirPath = workDirPath;
 		this.failedQueue = new LinkedList<Task>();
 		this.reduceQueue = new LinkedList<Task>();
 		this.sortQueue = new LinkedList<Task>();
 		this.mapQueue = new LinkedList<Task>();
 		this.jobCount = 0;
+		this.fileCount = 0;
 		this.jobs = new HashMap<Integer, Job>();
 		this.pendingSockets = new HashMap<SIOSocket, Task>();
 		this.idleSockets = new LinkedList<SIOSocket>();
@@ -46,8 +52,8 @@ public class MasterRoutine {
 	 * handleSockets - all socket manipulation goes in here
 	 */
 	private void handleSockets(){
-		// TODO: receive request object and interpret it
-		sio.on(Constants.JOB_REQUEST, new SIOCommand(){
+		clientSIO.on(Constants.JOB_REQUEST, new SIOCommand(){
+			@Override
 			public void run(){
 				Request req = (Request)object;
 				int mappers = req.getNumMappers();
@@ -61,14 +67,31 @@ public class MasterRoutine {
 				String combinerDir = req.getCombinerDirectory();
 				String combinerFile = req.getCombinerFileName();
 				String combinerName = req.getCombinerBinaryName();
-				
 				String[] from = req.getDataPaths();
-//				String resultsDir = 
+				String resultsDir = req.getResultsDirectory();
+				
+				// partition data
+				String[] initialMapFiles = new String[mappers];
+				synchronized(fileCount){
+					for(int i = 0; i < initialMapFiles.length; i++){
+						initialMapFiles[i] = workDirPath + "/partitiontempfile" + fileCount;
+						fileCount++;
+					}
+				}
+				RecordsFileIO.dealStringsAsRecordsTo(from, initialMapFiles, "\n", "\n");
+				
+				// create new job
+				createJob(mappers, reducers, 
+						  mapperDir, mapperFile, mapperName, 
+						  reducerDir, reducerFile, reducerName,
+						  combinerDir, combinerFile, combinerName,
+						  initialMapFiles, resultsDir);
 			}
 		});
 		
 		// add socket to idle pool when first connected
-		sio.on("connection", new SIOCommand(){
+		slaveSIO.on("connection", new SIOCommand(){
+			@Override
 			public void run(){
 				synchronized(idleSockets){
 					idleSockets.add(socket);
@@ -79,7 +102,8 @@ public class MasterRoutine {
 			}
 		});
 		
-		sio.on(Constants.TASK_COMPLETE, new SIOCommand(){
+		slaveSIO.on(Constants.TASK_COMPLETE, new SIOCommand(){
+			@Override
 			public void run(){
 				Task task = (Task)object;
 				String type = task.getTaskType();
@@ -143,7 +167,8 @@ public class MasterRoutine {
 		});
 		
 		// get socket's task and requeue it if disconnected while working
-		sio.on("disconnect", new SIOCommand(){
+		slaveSIO.on("disconnect", new SIOCommand(){
+			@Override
 			public void run(){
 				synchronized(pendingSockets){
 					// get failed task, delete socket

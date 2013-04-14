@@ -40,12 +40,14 @@ public class ClientRoutine {
 		
 		
 		cmd.on("help", new SIOCommand() {
+			@Override
 			public void run() {
 				cmd.emit("Not to worry where here to help. Just try these steps out.\n" + helpString);
 			}
 		});
 		
 		cmd.on("status", new SIOCommand() {
+			@Override
 			public void run() {
 				String[] args = (String[]) object;
 				if(args.length > 0) {
@@ -70,6 +72,7 @@ public class ClientRoutine {
 		 * Callback from server for jobStatus request.
 		 */
 		socket.on("jobStatus", new SIOCommand() {
+			@Override
 			public void run() {
 				JobStatus jobStatus = (JobStatus) object;
 				synchronized(jobStatuses) {
@@ -90,6 +93,7 @@ public class ClientRoutine {
 		});
 		
 		cmd.on("run", new SIOCommand() {
+			@Override
 			public void run() {
 				String[] args = (String[]) object;
 				if(args.length > 0) {
@@ -117,6 +121,7 @@ public class ClientRoutine {
 		 * Callback from server to confirm that a job was created.
 		 */
 		socket.on("jobCreated", new SIOCommand() {
+			@Override
 			public void run() {
 				JobStatus jobStatus = (JobStatus) object;
 				jobStatuses.put(jobStatus.jobId, jobStatus.status);
@@ -125,6 +130,7 @@ public class ClientRoutine {
 		});
 		
 		cmd.on("quit", new SIOCommand() {
+			@Override
 			public void run() {
 				System.exit(0);
 			}

@@ -100,6 +100,7 @@ public class SIOClient extends SIOSocket{
 	/**
 	 * Send a String 'message' with an Object 'object' as a non-blocking call to the server.
 	 */
+	@Override
 	public void emit(String message, Object object){
 		SIOPacket packet = new SIOPacket(message, object);
 		sendPacket(packet);
@@ -190,6 +191,7 @@ public class SIOClient extends SIOSocket{
 		}
 	}
 	
+	@Override
 	public Boolean isAlive(){
 		synchronized(alive){
 			return alive;

@@ -5,12 +5,11 @@
 
 package system;
 
-import java.io.File;
-
 import fileio.Partitioner;
 import fileio.Record;
 import fileio.RecordsFileIO;
 import api.Collector;
+import api.IntWritable;
 import api.Writable;
 import util.Executer;
 import util.Util;
@@ -43,6 +42,7 @@ public class SlaveRoutine {
 	private void handleRequests(){
 		
 		sio.on(Constants.TASK_REQUEST, new SIOCommand(){
+			@Override
 			public void run(){
 				Task task = (Task)object;
 				if(task.getTaskType().equals(Constants.MAP)){
@@ -76,14 +76,13 @@ public class SlaveRoutine {
 		//try to execute the task, send back an error if failed
 		try{
 			Collector output = new Collector(to[0]);
-			Partitioner partitioner = new Partitioner();
-			
+			RecordsFileIO reader = new RecordsFileIO(from[0], true, true);
 			Class<?> mapperClass = executer.getClass(mapperDir, mapperFile, mapperName);
 			Object mapObject = executer.instantaite(mapperClass, null);
 			
 			Record record;
 			// execute mapper over and over until you've exhausted all records
-			while((record = partitioner.readNextRecord(from[0], "\n")) != null){
+			while((record = reader.readNextRecord("\n")) != null){
 				Writable key = record.getKey();
 				Writable[] values = record.getValues();
 				for(int i = 0; i < values.length; i++){
@@ -91,7 +90,7 @@ public class SlaveRoutine {
 					executer.execute(mapObject, "map", args);
 				}
 			}
-			
+			output.dumpBuffer();
 			// done executing map, let the master know
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
@@ -135,20 +134,25 @@ public class SlaveRoutine {
 		//try to execute the task, send back an error if failed
 		try{
 			Collector output = new Collector(to[0]);
-			Partitioner partitioner = new Partitioner();
+			RecordsFileIO reader = new RecordsFileIO(from[0], true, true);
 			
 			Class<?> reducerClass = executer.getClass(reducerDir, reducerFile, reducerName);
 			Object reducerObject = executer.instantaite(reducerClass, null);
 			
 			Record record;
 			// execute reducer over and over until you've exhausted all records
-			while((record = partitioner.readNextRecord(from[0], "\n")) != null){
+			while((record = reader.readNextRecord("\n")) != null){
 				Writable key = record.getKey();
 				Writable[] values = record.getValues();
-				for(int i = 0; i < values.length; i++){
-					Object[] args = {key, values[i], output};
-					executer.execute(reducerObject, "map", args);
-				}
+				
+//				IntWritable[] newVals = new IntWritable[values.length];
+//				for(int i = 0; i < newVals.length; i++){
+//					newVals[i] = (IntWritable)values[i];
+//				}
+				
+//				Object[] args = {key, values, output};
+//				Object[] args = {key, newVals, output};
+				executer.execute(reducerObject, "reduce", args);
 			}
 			
 			// done executing reducer, let the master know
