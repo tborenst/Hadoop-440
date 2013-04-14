@@ -717,19 +717,14 @@ public class RecordsFileIO {
 			
 			numPathsMerged--;
 			if(numPathsMerged < 0) {
-				//System.out.println("deleting 1 " + recs1.getPath());
-				recs1.close();
+				recs1.delete();
 			} else {
-				//System.out.println("closing 1 " + recs1.getPath());
 				recs1.close();
 			}
-			//TODO: make it delete()
 			numPathsMerged--;
 			if(numPathsMerged < 0) {
-				//System.out.println("deleting 2 " + recs2.getPath());
-				recs2.close();
+				recs2.delete();
 			} else {
-				//System.out.println("closing 2 " + recs2.getPath());
 				recs2.close();
 			}
 			

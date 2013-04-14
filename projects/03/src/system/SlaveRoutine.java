@@ -97,6 +97,8 @@ public class SlaveRoutine {
 			// done executing map, let the master know
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
+			
+			reader.delete(); // delete input files once we're done
 		} catch(Exception e){
 			// error, let the server know
 			sio.emit(Constants.TASK_ERROR, "Failed to run Mapper");
@@ -156,6 +158,7 @@ public class SlaveRoutine {
 			// done executing reducer, let the master know
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
+			reader.delete(); // delete input files once you're done
 		} catch(Exception e){
 			// error, let the server know
 			sio.emit(Constants.TASK_ERROR, "Failed to run Reducer");

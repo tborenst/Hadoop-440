@@ -11,12 +11,10 @@ public class IntWritable implements Writable<Integer>{
 		this.value = value;
 	}
 	
-	@Override
 	public Integer getValue(){
 		return value;
 	}
 
-	@Override
 	public int compare(Writable<Integer> w) {
 		Integer myVal = value;
 		Integer wVal  = w.getValue();

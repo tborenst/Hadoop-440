@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 public class Job {
 	
 	// IMPORTANT DATA //
+	private String jobStatus;                   // job status - map phase, 
 	private int jobID;                          // job id
 	private int taskCount;                      // how many tasks for this job, also used as task ids
 	
@@ -62,6 +63,7 @@ public class Job {
 			}
 		}
 		
+		this.jobStatus = Constants.MAPPING;
 		this.jobID = id;
 		this.taskCount = 0;
 		
@@ -300,6 +302,18 @@ public class Job {
 		} else {
 			return false;
 		}
+	}
+	
+	public void updateJobStatus(String status){
+		jobStatus = status;
+	}
+	
+	public String getJobStatus(){
+		return jobStatus;
+	}
+	
+	public int getJobID(){
+		return jobID;
 	}
 	
 	// TODO: for debugging, remove at the end

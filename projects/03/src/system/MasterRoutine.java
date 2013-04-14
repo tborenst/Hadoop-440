@@ -130,6 +130,7 @@ public class MasterRoutine {
 						boolean done = job.updateMapTask(taskID, Constants.COMPLETED);
 						if(done){
 							//start sort phase
+							job.updateJobStatus(Constants.SORTING);
 							Task sortTask = job.generateSortTask();
 							synchronized(sortQueue){
 								sortQueue.add(sortTask);
@@ -140,6 +141,7 @@ public class MasterRoutine {
 						boolean done = job.updateSortTask(taskID, Constants.COMPLETED);
 						if(done){
 							//start reduce phase
+							job.updateJobStatus(Constants.REDUCING);
 							HashMap<Integer, Task> reduceTasks = job.generateReduceTasks();
 							Iterator<Entry<Integer, Task>> it = reduceTasks.entrySet().iterator();
 							while(it.hasNext()){
@@ -154,8 +156,13 @@ public class MasterRoutine {
 							}
 						}
 					} else if(type.equals(Constants.REDUCE)){
-						// TODO: figure out what to do here
-						System.out.println("Job " + jobID + "is done.");
+						boolean done = job.updateReduceTask(taskID, Constants.COMPLETED);
+						if(done){
+							// let the client know
+							// TODO: handle this on the other side
+							SIOSocket client = clientJobs.get(job.getJobID());
+							client.emit(Constants.JOB_COMPLETE, job.getJobID());
+						}
 					} else{
 						try {
 							throw new Throwable("Unrecognized task type: " + type);
