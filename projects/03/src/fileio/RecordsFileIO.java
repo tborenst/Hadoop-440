@@ -14,15 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 import util.Util;
 
@@ -795,7 +787,6 @@ public class RecordsFileIO {
 			while((recA = readNextRecord(readDelimiter)) != null) {
 				String destPath = Util.generateRandomPath(workingDir, "/sortRecordsIntermediary_", "txt");
 				RecordsFileIO mergeFile = new RecordsFileIO(destPath, true, false);
-				//TODO: sort these 2 records
 				
 				Record recB = readNextRecord(readDelimiter);
 				
