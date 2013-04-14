@@ -832,8 +832,8 @@ public class RecordsFileIO {
 				RecordsFileIO mergedRec = new RecordsFileIO(destPath, true, false);
 				mergeRecordsTo(recs1, recs2, mergedRec, readDelimiter, readDelimiter);
 				mergeFiles.add(mergedRec);
-				recs1.close();
-				recs2.close();
+				recs1.delete();
+				recs2.delete();
 			}
 			
 			if(mergeFiles.size() > 0) {
