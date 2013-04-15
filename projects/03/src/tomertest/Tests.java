@@ -127,12 +127,13 @@ public class Tests {
 //		job.printSortTask();
 //		job.printRedcueTasks();
 		
+		String workDir = "/Users/tomer/Desktop/WorkDir";
 		System.out.println("1 Master...");
-		MasterRoutine master = new MasterRoutine(15237, 15337, "/Users/tomer/Desktop/WorkDir");
+		MasterRoutine master = new MasterRoutine(15237, 15337, workDir);
 		Thread.sleep(500);
 		System.out.println("2 Slaves...");
-		SlaveRoutine slave1 = new SlaveRoutine("localhost", 15237, "/Users/tomer/Desktop/WorkDir");
-		SlaveRoutine slave2 = new SlaveRoutine("localhost", 15237, "/Users/tomer/Desktop/WorkDir");
+		SlaveRoutine slave1 = new SlaveRoutine("localhost", 15237, workDir);
+		SlaveRoutine slave2 = new SlaveRoutine("localhost", 15237, workDir);
 		Thread.sleep(500);
 		System.out.println("1 Client...");
 		ClientRoutine client = new ClientRoutine("localhost", 15337);
