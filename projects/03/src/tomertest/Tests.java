@@ -112,12 +112,12 @@ public class Tests {
 //		// - print tasks
 //		//=============================
 //		
-//		String[] from = {"Users/MapReduce/Data/text1.txt", "Users/MapReduce/Data/text2.txt",
-//						 "Users/MapReduce/Data/text3.txt", "Users/MapReduce/Data/text4.txt"};
+//		String[] from = {"Users/Main/Data/text1.txt", "Users/Main/Data/text2.txt",
+//						 "Users/Main/Data/text3.txt", "Users/Main/Data/text4.txt"};
 //		
-//		Job job = new Job(1, 4, 2, "Users/MapReduce/WorkDir", from, "Users/MapReduce/Results");
-//		job.setMapper("Users/MapReduce/maps", "WordCountM.class", "maps.WordCount");
-//		job.setReducer("/Users/MapReduce/reducers", "WordCountR.class", "reudcers.WordCount");
+//		Job job = new Job(1, 4, 2, "Users/Main/WorkDir", from, "Users/Main/Results");
+//		job.setMapper("Users/Main/maps", "WordCountM.class", "maps.WordCount");
+//		job.setReducer("/Users/Main/reducers", "WordCountR.class", "reudcers.WordCount");
 //		
 //		HashMap<Integer, Task> mapTasks = job.generateMapTasks();
 //		Task sortTask = job.generateSortTask();

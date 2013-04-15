@@ -2,7 +2,7 @@
  * Represents all data required for a new map reduce request.
  * Reads and writes JSON.
  * Requires Jackson JSON parser (http://jackson.codehaus.org/)
- * The library is included in MapReduce/libs/jackson-all-1.9.11.jar, please make sure to add it to you build path.
+ * The library is included in Main/libs/jackson-all-1.9.11.jar, please make sure to add it to you build path.
  */
 package system;
 

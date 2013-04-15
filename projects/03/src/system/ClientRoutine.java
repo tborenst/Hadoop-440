@@ -1,10 +1,6 @@
 package system;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import networking.SIOClient;
 import networking.SIOCommand;
@@ -13,10 +9,9 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 
-import client.SocketFailureException;
+import system.SocketFailureException;
 import fileio.UnableToAccessFileException;
 
-import api.JobNotFoundException;
 import api.JobStatus;
 
 public class ClientRoutine {
@@ -31,10 +26,17 @@ public class ClientRoutine {
 	
 	public ClientRoutine(String hostname, int port) {
 		this.cmd = new CommandPrompt();
-		this.cmd.emit("Welcome to Vansi & Tomer's Map Reducer, step right up and run some tasks!\n" + helpString
+		System.out.println("Welcome to Vansi & Tomer's Map Reducer, step right up and run some tasks!\n" + helpString
 					+ "Connecting to: " + hostname + ":" + port + "...");
-
-		this.socket = new SIOClient(hostname, port);
+		
+		this.socket = null;
+		try {
+			this.socket = new SIOClient(hostname, port);
+		} catch(Exception e) {
+			cmd.emit("Unable to connect to server at: " + hostname + ":" + port +".");
+			return;
+		}
+		cmd.emit("Connected to server at: " + hostname + ":" + port +".");
 		
 		initializeCommandPrompt();
 		initializeSocket();
@@ -241,6 +243,6 @@ public class ClientRoutine {
 	
 	// ClientRoutine testing method
 	public static void main(String[] args) {
-		ClientRoutine c = new ClientRoutine("sdf.com", 23);
+		ClientRoutine c = new ClientRoutine("google.com", 8080);
 	}
 }
