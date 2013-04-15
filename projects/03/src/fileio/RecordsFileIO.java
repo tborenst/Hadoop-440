@@ -39,8 +39,9 @@ public class RecordsFileIO {
 	 * @param createIfDoesntExist
 	 * @param isReadFile - The RecordsFileIO can only read or write. 
 	 * 		Set to true if RecordsFileIO reads only and writes only if false.
+	 * @throws FileNotFoundException 
 	 */
-	public RecordsFileIO(String path, boolean createIfDoesntExist, boolean isReadFile) {
+	public RecordsFileIO(String path, boolean createIfDoesntExist, boolean isReadFile) throws FileNotFoundException {
 		this.path = path;
 		initialize(createIfDoesntExist, isReadFile);
 	}
@@ -50,8 +51,9 @@ public class RecordsFileIO {
 	 * @param path
 	 * @param createIfDoesntExist
 	 * @param isReadFile
+	 * @throws FileNotFoundException 
 	 */
-	private void initialize(boolean createIfDoesntExist, boolean isReadFile) {
+	private void initialize(boolean createIfDoesntExist, boolean isReadFile) throws FileNotFoundException {
 		file = new File(path);
 		
 		if(!file.exists() && createIfDoesntExist) {
@@ -63,7 +65,7 @@ public class RecordsFileIO {
 				e.printStackTrace();
 			}
 		} else {
-			
+			throw new FileNotFoundException();
 		}
 		
 		raf = open();
@@ -444,9 +446,15 @@ public class RecordsFileIO {
 	 * @param newPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws FileNotFoundException 
+	 * @throws InvalidArrayOfPathsException 
 	 * @returns int - The index of the last path written to, -1 if partitionData fails.
 	 */
-	public int dealData(String[] newPaths, String readDelimiter, String writeDelimiter) {
+	public int dealData(String[] newPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+		if(newPaths.length <= 0) {
+			throw new InvalidArrayOfPathsException();
+		}
+		
 		int currPathIdx = -1;
 		if(isReadFile) {
 			RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newPaths.length];
@@ -476,9 +484,15 @@ public class RecordsFileIO {
 	 * @param newDataFilesPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws FileNotFoundException 
+	 * @throws InvalidArrayOfPathsException 
 	 * @returns int - The index of the last record written to, -1 if partitionData fails.
 	 */
-	public static int dealDataTo(String[] dataPaths, String[] newDataFilesPaths, String readDelimiter, String writeDelimiter) {
+	public static int dealDataTo(String[] dataPaths, String[] newDataFilesPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+		if(dataPaths.length <= 0 || newDataFilesPaths.length <= 0) {
+			throw new InvalidArrayOfPathsException();
+		}
+		
 		int currRecordPathIdx = -1;
 		
 		RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newDataFilesPaths.length];
@@ -515,9 +529,15 @@ public class RecordsFileIO {
 	 * @param newPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws FileNotFoundException 
+	 * @throws InvalidArrayOfPathsException 
 	 * @returns int - The index of the last path written to, -1 if partitionData fails.
 	 */
-	public int dealStringsAsRecords(String[] newPaths, String readDelimiter, String writeDelimiter) {
+	public int dealStringsAsRecords(String[] newPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+		if(newPaths.length <= 0) {
+			throw new InvalidArrayOfPathsException();
+		}
+		
 		int currPathIdx = -1;
 		if(isReadFile) {
 			RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newPaths.length];
@@ -548,9 +568,15 @@ public class RecordsFileIO {
 	 * @param newDataFilesPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws FileNotFoundException 
+	 * @throws InvalidArrayOfPathsException 
 	 * @returns int - The index of the last record written to, -1 if partitionData fails.
 	 */
-	public static int dealStringsAsRecordsTo(String[] dataPaths, String[] newDataFilesPaths, String readDelimiter, String writeDelimiter) {
+	public static int dealStringsAsRecordsTo(String[] dataPaths, String[] newDataFilesPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+		if(dataPaths.length <= 0 || newDataFilesPaths.length <= 0) {
+			throw new InvalidArrayOfPathsException();
+		}
+		
 		int currRecordPathIdx = -1;
 		
 		RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newDataFilesPaths.length];
@@ -586,8 +612,14 @@ public class RecordsFileIO {
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 * @return - The index of the last path written to, -1 if partitionData fails.
+	 * @throws FileNotFoundException 
+	 * @throws InvalidArrayOfPathsException 
 	 */
-	public int dealRecords(String[] newPaths, String readDelimiter, String writeDelimiter) {
+	public int dealRecords(String[] newPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+		if(newPaths.length <= 0) {
+			throw new InvalidArrayOfPathsException();
+		}
+		
 		int currPathIdx = -1;
 		if(isReadFile) {
 			RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newPaths.length];
@@ -618,9 +650,15 @@ public class RecordsFileIO {
 	 * @param newRecordFilesPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws FileNotFoundException 
+	 * @throws InvalidArrayOfPathsException 
 	 * @returns int - The index of the last record written to, -1 if partitionData fails.
 	 */
-	public static int dealRecordsTo(String[] recordsPath, String[] newRecordFilesPaths, String readDelimiter, String writeDelimiter) {
+	public static int dealRecordsTo(String[] recordsPath, String[] newRecordFilesPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+		if(recordsPath.length <= 0 || newRecordFilesPaths.length <= 0) {
+			throw new InvalidArrayOfPathsException();
+		}
+		
 		int currRecordPathIdx = -1;
 		
 		RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newRecordFilesPaths.length];
@@ -653,8 +691,14 @@ public class RecordsFileIO {
 	 * @param numRecords
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws FileNotFoundException 
+	 * @throws InvalidArrayOfPathsException 
 	 */
-	public void splitRecords(String[] destPaths, int numRecords, String readDelimiter, String writeDelimiter) {
+	public void splitRecords(String[] destPaths, int numRecords, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+		if(destPaths.length <= 0) {
+			throw new InvalidArrayOfPathsException();
+		}
+		
 		if(isReadFile) {
 			int recordsPerPartition = (numRecords + destPaths.length - 1) / destPaths.length;
 			
@@ -679,11 +723,18 @@ public class RecordsFileIO {
 	 * @param writeDelimiter
 	 * @param deleteSrcFiles
 	 * @throws DirectoryNotFoundException 
+	 * @throws RecordsFileIOException 
+	 * @throws FileNotFoundException 
+	 * @throws InvalidArrayOfPathsException 
 	 */
 	public static void mergeSortRecords(String[] srcPaths, String[] destPaths, String workingDir,
-			String readDelimiter, String writeDelimiter, boolean deleteSrcFiles) throws DirectoryNotFoundException {
+			String readDelimiter, String writeDelimiter, boolean deleteSrcFiles) throws DirectoryNotFoundException, RecordsFileIOException, FileNotFoundException, InvalidArrayOfPathsException {
 		if(!Util.isValidDirectory(workingDir)) {
 			throw new DirectoryNotFoundException();
+		}
+		
+		if(srcPaths.length <= 0 || destPaths.length <= 0) {
+			throw new InvalidArrayOfPathsException();
 		}
 		
 		LinkedList<RecordsFileIO> recsQueue = new LinkedList<RecordsFileIO>();
@@ -729,7 +780,9 @@ public class RecordsFileIO {
 			mergedRecs.splitRecords(destPaths, mergedRecs.getNumRecordsWritten(), readDelimiter, writeDelimiter);
 			mergedRecs.delete();
 		} else {
-			System.out.println("Merged Sort fucked up some how!");
+			// TODO: remove debugging
+			System.out.println("RecordsFileIO.mergeSortRecords: Last element in recsQueue not found.");
+			throw new RecordsFileIOException();
 		}
 	}
 
@@ -774,7 +827,7 @@ public class RecordsFileIO {
 		}
 	}
 	
-	public void sortRecords(String workingDir, String readDelimiter) throws DirectoryNotFoundException {
+	public void sortRecords(String workingDir, String readDelimiter) throws DirectoryNotFoundException, FileNotFoundException {
 		if(!Util.isValidDirectory(workingDir)) {
 			throw new DirectoryNotFoundException();
 		}

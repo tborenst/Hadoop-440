@@ -94,7 +94,9 @@ public class CommandPrompt {
 					cmd.run();
 				} catch (Exception e) {
 					emit("Failed to execute '" + input + "'.\n"
-							+ "Due to excetion:" + e);
+							+ "Due to excetion:" + e + "\nStack Trace:\n");
+					e.printStackTrace();
+					
 				}
 			} else if(arg1.equals("")) {
 				emit("");

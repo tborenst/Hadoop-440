@@ -15,10 +15,13 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import fileio.UnableToAccessFileException;
+
 import system.InValidConfigFileException;
 import util.Util;
 
 public class Request {
+	private static String nullConstant = "null"; //the user can do this to choose not to specify an optional field
 	public class Mapper {
 		private int numMappers;
 		private String directory;
@@ -55,20 +58,32 @@ public class Request {
 		private String binaryName;
 		
 		public String getDirectory() {
+			if(directory.toLowerCase().equals(nullConstant)) {
+				return null;
+			}
+			
 			return directory;
 		}
 
 		public String getFileName() {
+			if(fileName.toLowerCase().equals(nullConstant)) {
+				return null;
+			}
+			
 			return fileName;
 		}
 
 		public String getBinaryName() {
+			if(binaryName.toLowerCase().equals(nullConstant)) {
+				return null;
+			}
+			
 			return binaryName;
 		}
 
 		public boolean isValid() {
-			return directory != null && Util.isValidDirectory(directory)
-					&& fileName != null && (new File(directory + "/" + fileName)).exists()
+			return directory != null && (directory.toLowerCase().equals(nullConstant) || Util.isValidDirectory(directory))
+					&& fileName != null && (fileName.toLowerCase().equals(nullConstant) || (new File(directory + "/" + fileName)).exists())
 					&& binaryName != null;
 		}
 	}
@@ -113,7 +128,7 @@ public class Request {
 	
 	public Request() {}
 	
-	public static Request constructFromFile(String configFilePath) throws JsonParseException, JsonMappingException, InValidConfigFileException, FileNotFoundException {
+	public static Request constructFromFile(String configFilePath) throws JsonParseException, JsonMappingException, InValidConfigFileException, FileNotFoundException, UnableToAccessFileException {
 		ObjectMapper m = new ObjectMapper();
 		File f = new File(configFilePath);
 		Request req = null;
@@ -121,7 +136,8 @@ public class Request {
 				try {
 					req = m.readValue(f, Request.class);
 				} catch (IOException e) {
-					throw new FileNotFoundException();
+					e.printStackTrace();
+					throw new UnableToAccessFileException();
 				}
 			if(!req.isValid()) {
 				throw new InValidConfigFileException();

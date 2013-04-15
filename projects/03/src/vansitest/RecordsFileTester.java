@@ -8,6 +8,7 @@ import api.Writable;
 import fileio.DirectoryNotFoundException;
 import fileio.Record;
 import fileio.RecordsFileIO;
+import fileio.RecordsFileIOException;
 
 public class RecordsFileTester {
 	private static void testRecords(String recordsPath) {
@@ -226,7 +227,7 @@ public class RecordsFileTester {
 		System.out.println("5: <" + readRec5Key + ", " + readRec5ValueStr + ">");
 	}
 	
-	private static void testPartitioningRecords(String workingDir, String originalPath, String[] newPaths, String mergePath) throws DirectoryNotFoundException {
+	private static void testPartitioningRecords(String workingDir, String originalPath, String[] newPaths, String mergePath) throws DirectoryNotFoundException, RecordsFileIOException {
 		System.out.println("***Testing with records***");
 		System.out.println("Writing records...");
 		RecordsFileIO recRecords = new RecordsFileIO(originalPath, true, false);
@@ -334,7 +335,7 @@ public class RecordsFileTester {
 	}
 	
 	
-	public static void testParititionAndMerge(String workingDir, String originalPath, String[] partitionPaths, String mergePath) throws DirectoryNotFoundException {
+	public static void testParititionAndMerge(String workingDir, String originalPath, String[] partitionPaths, String mergePath) throws DirectoryNotFoundException, RecordsFileIOException {
 		RecordsFileIO recRecords = new RecordsFileIO(originalPath, true, false);
 		
 		StringWritable rec1Key = new StringWritable("doom");
@@ -409,7 +410,7 @@ public class RecordsFileTester {
 		mergedRecs.close();
 	}
 	
-	public static void main(String[] args) throws DirectoryNotFoundException {
+	public static void main(String[] args) throws DirectoryNotFoundException, RecordsFileIOException {
 		// write test
 		System.out.println("asdf".hashCode());
 		System.out.println("asdf".hashCode());

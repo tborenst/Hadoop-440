@@ -1,1 +1,16 @@
-{"Map":{"numMappers":34,"directory":"asdf","fileName":"d","binaryName":"42e"},"Combine":{"directory":"asdf","fileName":"d","binaryName":"42e"},"Reduce":{"numReducers":2,"directory":"asdf","fileName":"d","binaryName":"42e"},"dataPaths":["sad","2"],"resultsDirectory":"acslkjsd/asdfsd"}
+{"Map":
+  {"numMappers":34,
+  "directory":"C:/Users/vansi/Documents/School/15440/projects/03/bin/vansitest",
+  "fileName":"ClientTest.class",
+  "binaryName":"s"},
+"Combine":
+  {"directory":"null",
+  "fileName":"null",
+  "binaryName":"null"},
+"Reduce":
+  {"numReducers":2,
+  "directory":"C:/Users/vansi/Documents/School/15440/projects/03/bin/vansitest",
+  "fileName":"Person.class",
+  "binaryName":"h"},
+"dataPaths":["C:/Users/vansi/Documents/School/15440/projects/03/bin/vansitest/RecordsFileIO/bytesTest.txt"],
+"resultsDirectory":"C:/Users/vansi/Documents/School/15440/projects/03/bin/vansitest/RecordsFileIO"}

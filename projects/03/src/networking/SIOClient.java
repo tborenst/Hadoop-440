@@ -25,6 +25,7 @@ public class SIOClient extends SIOSocket{
 		this.bindings = new HashMap<String, SIOCommand>();
 		this.requests = new HashMap<Integer, SIOResponse>();
 		this.requestCount = 0;
+		this.alive = false;
 		try {
 			this.socket = new Socket(hostname, port);
 			this.objOut = new ObjectOutputStream(socket.getOutputStream());
