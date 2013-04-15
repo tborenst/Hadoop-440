@@ -1,4 +1,21 @@
 {"Map":
+<<<<<<< HEAD
+  {"numMappers":34,
+  "directory":"C:/Users/vansi/Documents/School/15440/projects/03/bin/vansitest",
+  "fileName":"ClientTest.class",
+  "binaryName":"s"},
+"Combine":
+  {"directory":"null",
+  "fileName":"null",
+  "binaryName":"null"},
+"Reduce":
+  {"numReducers":2,
+  "directory":"C:/Users/vansi/Documents/School/15440/projects/03/bin/vansitest",
+  "fileName":"Person.class",
+  "binaryName":"h"},
+"dataPaths":["C:/Users/vansi/Documents/School/15440/projects/03/bin/vansitest/RecordsFileIO/bytesTest.txt"],
+"resultsDirectory":"C:/Users/vansi/Documents/School/15440/projects/03/bin/vansitest/RecordsFileIO"}
+=======
 	{"numMappers":2,"directory":"/Users/tomer/Desktop/box/school/15440/projects/03/bin/tomertest","fileName":"MapperTest.class","binaryName":"tomertest.MapperTest"},
 "Combine":
 	{"directory":"/Users/tomer/Desktop/box/school/15440/projects/03/bin/tomertest","fileName":"ReducerTest.class","binaryName":"tomertest.ReducerTest"},
@@ -6,3 +23,4 @@
 	{"directory":"/Users/tomer/Desktop/box/school/15440/projects/03/bin/tomertest","fileName":"ReducerTest.class","binaryName":"tomertest.ReducerTest"},
 "dataPaths":["/Users/tomer/Desktop/story1.txt","/Users/tomer/Desktop/story2.txt"],
 "resultsDirectory":"/Users/tomer/Desktop/Results"}
+>>>>>>> 21fccb29e465473b20f3c006651b4cd056e32dbc

@@ -14,6 +14,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 
 import client.SocketFailureException;
+import fileio.UnableToAccessFileException;
 
 import api.JobNotFoundException;
 import api.JobStatus;
@@ -102,12 +103,14 @@ public class ClientRoutine {
 						runMapReduce(path);
 					} catch (JsonParseException | JsonMappingException e) {
 						cmd.emit("ERROR: Invalid JSON formatting in config file at: " + path + ".");
-					} catch (FileNotFoundException e) {
-						cmd.emit("ERROR: Config file not found or unable to access file at: " + path + ".");
 					} catch (InValidConfigFileException e) {
 						cmd.emit("ERROR: Config file did not contain the correct or all the nessesary data at: " + path + ".");
 					} catch (SocketFailureException e) {
 						cmd.emit("ERROR: Unable to connect to server.");
+					} catch (UnableToAccessFileException e) {
+						cmd.emit("ERROR: Unable to access config file at: " + path + ".");
+					} catch (FileNotFoundException e) {
+						cmd.emit("ERROR: Config file not found or unable to access file at: " + path + ".");
 					}
 					
 					return;
@@ -226,8 +229,9 @@ public class ClientRoutine {
 	 * @throws FileNotFoundException
 	 * @throws InValidConfigFileException
 	 * @throws SocketFailureException
+	 * @throws UnableToAccessFileException 
 	 */
-	private void runMapReduce(String configFilePath) throws JsonParseException, JsonMappingException, FileNotFoundException, InValidConfigFileException, SocketFailureException {
+	private void runMapReduce(String configFilePath) throws JsonParseException, JsonMappingException, FileNotFoundException, InValidConfigFileException, SocketFailureException, UnableToAccessFileException {
 		Request req = Request.constructFromFile(configFilePath);
 		if(socket != null && socket.isAlive()) {
 			socket.emit(Constants.JOB_REQUEST, req);
