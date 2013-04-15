@@ -32,10 +32,10 @@ public class ClientRoutine {
 		helpString = "To send a new job do 'run <path to config file>'.\n" +
 					 "Check the status of jobs with 'status all'.\n" +
 					 "Exit or quit with 'quit'.\n" +
-					 "And if you want to see this message again do 'help'.";
-		cmd.emit("Welcome to Vansi & Tomer's Map Reducer, step right up and run some tasks!\n" + helpString);
+					 "And if you want to see this message again do 'help'.\n";
+		cmd.emit("Welcome to Vansi & Tomer's Map Reducer, step right up and run some tasks!\n" + helpString
+					+ "Connecting to: " + hostname + ":" + port + "...");
 
-		cmd.emit("Connecting to: " + hostname + ":" + port + ".");
 		socket = new SIOClient(hostname, port);
 		
 		
@@ -177,8 +177,6 @@ public class ClientRoutine {
 		
 		if(status == null) {
 			throw new JobNotFoundException();
-		
-		// TODO: change status != "COMPLETE" to use constants && change message obj (jobId) if needed
 		} else if(status != "COMPLETE") {
 			if(socket != null && socket.isAlive()) {
 				socket.emit(Constants.JOB_STATUS, jobId);
@@ -240,6 +238,6 @@ public class ClientRoutine {
 	
 	// ClientRoutine testing method
 	public static void main(String[] args) {
-		ClientRoutine c = new ClientRoutine("vansivallab.com", 23);
+		ClientRoutine c = new ClientRoutine("sdf.com", 23);
 	}
 }

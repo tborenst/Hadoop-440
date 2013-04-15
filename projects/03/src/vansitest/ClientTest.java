@@ -1,5 +1,6 @@
 package vansitest;
 
+import java.io.Console;
 import java.io.FileNotFoundException;
 
 import org.codehaus.jackson.JsonGenerationException;
@@ -10,10 +11,21 @@ import system.Request;
 import system.InValidConfigFileException;
 
 public class ClientTest {
-	public static void main(String[] args) throws JsonParseException, JsonMappingException, FileNotFoundException, InValidConfigFileException, JsonGenerationException {
-		Request r = Request.constructFromFile("C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/config.json");
-		System.out.println(r.getMapperDirectory());
-		r.exportTo("C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/configExp.json");
+
+	public static void main(String[] args) throws JsonParseException, JsonMappingException, FileNotFoundException, InValidConfigFileException {
+		 Console c = System.console();
+	    if (c != null) {
+	        // printf-like arguments
+	        c.format("asdf >");
+	        c.format("\nPress ENTER to proceed.\n");
+	        c.readLine();
+	    }
+		
+		
+		//Request r = Request.constructFromFile("C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/config.json");
+		//System.out.println(r.getMapperDirectory());
+		//r.exportTo("C:/Users/vansi/Documents/School/15440/projects/03/src/vansitest/configExp.json");
+
 		
 		
 		/*final CommandPrompt c = new CommandPrompt();

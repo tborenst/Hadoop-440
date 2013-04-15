@@ -44,7 +44,7 @@ public class CommandPrompt {
 	public void emit(String message) {
 		synchronized(printLock) {
 			System.out.print("\n");
-			System.out.print(message);
+			System.out.println(message);
 			givePrompt();
 			System.out.print("> ");
 		}
