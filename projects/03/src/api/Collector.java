@@ -5,6 +5,7 @@
  */
 package api;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,8 +26,9 @@ public class Collector implements Serializable{
 	 * Collector - constructor
 	 * @param path - path of file to write key-value pairs to (will create if not exist).
 	 * @param read - should the collector be initially set to read? If false, it will override the file given by its path.
+	 * @throws IOException 
 	 */
-	public Collector(String path){
+	public Collector(String path) throws IOException{
 		this.pairs = new ArrayList<Record>();
 		this.pairCount = 0;
 		this.path = path;
