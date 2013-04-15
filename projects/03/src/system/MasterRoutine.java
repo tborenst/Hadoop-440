@@ -103,7 +103,6 @@ public class MasterRoutine {
 		
 		// add socket to idle pool when first connected
 		slaveSIO.on("connection", new SIOCommand(){
-			@Override
 			public void run(){
 				synchronized(idleSockets){
 					idleSockets.add(socket);
@@ -114,8 +113,19 @@ public class MasterRoutine {
 			}
 		});
 		
+		// send errors back to the client
+		slaveSIO.on(Constants.TASK_ERROR, new SIOCommand(){
+			public void run(){
+				Task task = (Task)object;
+				int jobID = task.getJobID();
+				synchronized(clientJobs){
+					SIOSocket client = clientJobs.get(jobID);
+					client.emit(Constants.JOB_FAILED, jobID);
+				}
+			}
+		});
+		
 		slaveSIO.on(Constants.TASK_COMPLETE, new SIOCommand(){
-			@Override
 			public void run(){
 				Task task = (Task)object;
 				String type = task.getTaskType();
@@ -187,7 +197,6 @@ public class MasterRoutine {
 		
 		// get socket's task and requeue it if disconnected while working
 		slaveSIO.on("disconnect", new SIOCommand(){
-			@Override
 			public void run(){
 				synchronized(pendingSockets){
 					// get failed task, delete socket

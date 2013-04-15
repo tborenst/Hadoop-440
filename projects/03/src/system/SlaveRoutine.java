@@ -135,7 +135,7 @@ public class SlaveRoutine {
 			reader.delete(); // delete input files once we're done
 		} catch(Exception e){
 			// error, let the server know
-			sio.emit(Constants.TASK_ERROR, "Failed to run Mapper");
+			sio.emit(Constants.TASK_ERROR, task);
 		}
 	}
 	
@@ -150,7 +150,7 @@ public class SlaveRoutine {
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
 		} catch (Exception e){
-			sio.emit(Constants.TASK_ERROR, "Failed to run Sort");
+			sio.emit(Constants.TASK_ERROR, task);
 		}
 	}
 	
@@ -162,7 +162,7 @@ public class SlaveRoutine {
 		String[] to   = task.getPathTo();
 		
 		if(from.length != 1 || to.length != 1){
-			sio.emit(Constants.TASK_ERROR, "Reduce task has more than 1 'from' or 'to' path");
+			sio.emit(Constants.TASK_ERROR, task);
 		}
 		
 		String reducerDir  = task.getClassDir();
@@ -194,7 +194,7 @@ public class SlaveRoutine {
 			reader.delete(); // delete input files once you're done
 		} catch(Exception e){
 			// error, let the server know
-			sio.emit(Constants.TASK_ERROR, "Failed to run Reducer");
+			sio.emit(Constants.TASK_ERROR, task);
 		}
 	}
 }

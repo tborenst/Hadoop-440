@@ -37,8 +37,9 @@ public class Executer extends ClassLoader{
 	 * instantiate - given a class and a set of arguments (an object array or null), returns an instantiated copy of the class.
 	 * If an error occurs, this method will return null.
 	 * WARNING: cannot handle constructors that take in primitives as arguments (use analogous classes instead).
+	 * @throws Exception 
 	 */
-	public Object instantaite(Class<?> classObject, Object[] args) {
+	public Object instantaite(Class<?> classObject, Object[] args) throws Exception {
 		try{
 			if(args == null){
 				Constructor<?> constructor = classObject.getConstructor();
@@ -55,8 +56,7 @@ public class Executer extends ClassLoader{
 		} catch (Exception e){
 			//TODO: remove debugging line
 			System.out.println("Failed in: Executer.instantiate()");
-			e.printStackTrace();
-			return null;
+			throw e;
 		}
 	}
 	
