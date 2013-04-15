@@ -5,30 +5,32 @@
 
 package system;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import fileio.Partitioner;
 import fileio.Record;
 import fileio.RecordsFileIO;
 import api.Collector;
+import api.IntWritable;
 import api.Writable;
 import util.Executer;
+import util.Util;
 import networking.SIOClient;
 import networking.SIOCommand;
 
 public class SlaveRoutine {
-	private SIOClient sio;
-	private Executer executer;
-	private String workDir;
+	private SIOClient sio;     // socket
+	private Executer executer; // loads .class files
+	private String workDir;    // working directory
 	
 	public SlaveRoutine(String hostname, int port, String workDir){
 		this.sio = new SIOClient(hostname, port);
 		this.executer = new Executer();
-		// check that working directory exists
-		if(!(new File(workDir).exists())){
-			try {
-				throw new Throwable("Working Directory Doesn't Exist");
-			} catch (Throwable e) {
+		// check that working directory is valid
+		if(!Util.isValidDirectory(workDir)){
+			try{
+				throw new Throwable("Working directory invalid");
+			} catch (Throwable e){
 				e.printStackTrace();
 			}
 		}
@@ -42,6 +44,7 @@ public class SlaveRoutine {
 	private void handleRequests(){
 		
 		sio.on(Constants.TASK_REQUEST, new SIOCommand(){
+			@Override
 			public void run(){
 				Task task = (Task)object;
 				if(task.getTaskType().equals(Constants.MAP)){
@@ -51,7 +54,7 @@ public class SlaveRoutine {
 				} else if(task.getTaskType().equals(Constants.REDUCE)){
 					performReduceTask(task);
 				} else {
-					sio.emit(Constants.TASK_ERROR, "Unrecognized Task type");
+					sio.emit(Constants.TASK_ERROR, "Unrecognized task type");
 				}
 			}
 		});
@@ -72,17 +75,27 @@ public class SlaveRoutine {
 		String mapperFile = task.getClassFile();
 		String mapperName = task.getClassName();
 		
+		String combinerDir = task.getSecondaryDir();
+		String combinerFile = task.getSecondaryFile();
+		String combinerName = task.getSecondaryName();
+		
+		String mapOutputFile;
+		if(combinerDir == null || combinerFile == null || combinerName == null){
+			mapOutputFile = to[0];
+		} else {
+			mapOutputFile = workDir + "job" + task.getJobID() + "task" + task.getTaskID() + "intermediatefile1";
+		}
+		
 		//try to execute the task, send back an error if failed
 		try{
-			Collector output = new Collector(to[0]);
-			Partitioner partitioner = new Partitioner();
-			
+			// MAPPER
+			Collector output = new Collector(mapOutputFile);
+			RecordsFileIO reader = new RecordsFileIO(from[0], true, true);
 			Class<?> mapperClass = executer.getClass(mapperDir, mapperFile, mapperName);
 			Object mapObject = executer.instantaite(mapperClass, null);
-			
 			Record record;
 			// execute mapper over and over until you've exhausted all records
-			while((record = partitioner.readNextRecord(from[0], "\n")) != null){
+			while((record = reader.readNextRecord("\n")) != null){
 				Writable key = record.getKey();
 				Writable[] values = record.getValues();
 				for(int i = 0; i < values.length; i++){
@@ -90,10 +103,36 @@ public class SlaveRoutine {
 					executer.execute(mapObject, "map", args);
 				}
 			}
+			output.dumpBuffer();
+			output.close();
+			
+			// COMBINER
+			if(combinerDir != null && combinerFile != null && combinerName != null){
+				// sort and merge records from map
+				RecordsFileIO combinerReader = new RecordsFileIO(mapOutputFile, true, true);
+				combinerReader.sortRecords(workDir, "\n");;
+				
+				Collector combinerOutput = new Collector(to[0]);
+				Class<?> combinerClass = executer.getClass(combinerDir, combinerFile, combinerName);
+				Object combinerObject = executer.instantaite(combinerClass, null);
+				
+				Record combinerRecord;
+				// executer combiner over and over until you've exhausted all records
+				while((combinerRecord = combinerReader.readNextRecord("\n")) != null){
+					Writable key = combinerRecord.getKey();
+					Writable[] values = combinerRecord.getValues();
+					Object[] args = {key, values, combinerOutput};
+					executer.execute(combinerObject, "combine", args);
+				}
+				combinerReader.delete();
+				combinerOutput.dumpBuffer();
+			}
 			
 			// done executing map, let the master know
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
+			
+			reader.delete(); // delete input files once we're done
 		} catch(Exception e){
 			// error, let the server know
 			sio.emit(Constants.TASK_ERROR, "Failed to run Mapper");
@@ -106,9 +145,8 @@ public class SlaveRoutine {
 	public void performSortTask(Task task){
 		String[] from = task.getPathFrom();
 		String[] to = task.getPathTo();
-		
 		try{
-			RecordsFileIO.mergeSortRecords(from, to, workDir, "\n", "\n");
+			RecordsFileIO.mergeSortRecords(from, to, workDir, "\n", "\n", true); // true - delete source files
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
 		} catch (Exception e){
@@ -134,25 +172,26 @@ public class SlaveRoutine {
 		//try to execute the task, send back an error if failed
 		try{
 			Collector output = new Collector(to[0]);
-			Partitioner partitioner = new Partitioner();
+			RecordsFileIO reader = new RecordsFileIO(from[0], true, true);
 			
 			Class<?> reducerClass = executer.getClass(reducerDir, reducerFile, reducerName);
 			Object reducerObject = executer.instantaite(reducerClass, null);
 			
 			Record record;
 			// execute reducer over and over until you've exhausted all records
-			while((record = partitioner.readNextRecord(from[0], "\n")) != null){
+			while((record = reader.readNextRecord("\n")) != null){
 				Writable key = record.getKey();
 				Writable[] values = record.getValues();
-				for(int i = 0; i < values.length; i++){
-					Object[] args = {key, values[i], output};
-					executer.execute(reducerObject, "map", args);
-				}
+
+				Object[] args = {key, values, output};
+				executer.execute(reducerObject, "reduce", args);
 			}
 			
 			// done executing reducer, let the master know
+			output.dumpBuffer();
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
+			reader.delete(); // delete input files once you're done
 		} catch(Exception e){
 			// error, let the server know
 			sio.emit(Constants.TASK_ERROR, "Failed to run Reducer");

@@ -1,17 +1,20 @@
 package vansitest;
 
+import java.io.IOException;
+
 import util.Util;
 import api.IntWritable;
 import api.StringWritable;
 import api.ByteArrayWritable;
 import api.Writable;
 import fileio.DirectoryNotFoundException;
+import fileio.InvalidArrayOfPathsException;
 import fileio.Record;
 import fileio.RecordsFileIO;
 import fileio.RecordsFileIOException;
 
 public class RecordsFileTester {
-	private static void testRecords(String recordsPath) {
+	private static void testRecords(String recordsPath) throws IOException, ClassNotFoundException {
 		System.out.println("***Testing with records***");
 		System.out.println("Writing records...");
 		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, false);
@@ -72,7 +75,7 @@ public class RecordsFileTester {
 		System.out.println("5: <" + readRec5Key + ", " + readRec5Value + ">");
 	}
 	
-	private static void testStrings(String recordsPath) {
+	private static void testStrings(String recordsPath) throws IOException {
 		System.out.println("***Testing with strings***");
 		System.out.println("Writing strings...");
 		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, false);
@@ -118,7 +121,7 @@ public class RecordsFileTester {
 		System.out.println("5: <" + readRec5Key + ", " + readRec5Value + ">");
 	}
 	
-	private static void testDealStringsTo(String originalPath, String[] newPaths) {
+	private static void testDealStringsTo(String originalPath, String[] newPaths) throws InvalidArrayOfPathsException, IOException, ClassNotFoundException {
 		System.out.println("***Testing with strings***");
 		System.out.println("Writing strings...");
 
@@ -149,7 +152,7 @@ public class RecordsFileTester {
 		
 	}
 	
-	private static void testReadStrings(String recordsPath) {
+	private static void testReadStrings(String recordsPath) throws IOException {
 		System.out.println("***Testing with read strings***");
 		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, true);
 		System.out.println("Reading strings...");
@@ -176,7 +179,7 @@ public class RecordsFileTester {
 		System.out.println("4: <" + readRec4Key + ", " + readRec4Value + ">");
 	}
 	
-	private static void testBytes(String recordsPath) {
+	private static void testBytes(String recordsPath) throws IOException {
 		System.out.println("***Testing with strings***");
 		System.out.println("Writing bytes...");
 		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, false);
@@ -227,7 +230,7 @@ public class RecordsFileTester {
 		System.out.println("5: <" + readRec5Key + ", " + readRec5ValueStr + ">");
 	}
 	
-	private static void testPartitioningRecords(String workingDir, String originalPath, String[] newPaths, String mergePath) throws DirectoryNotFoundException, RecordsFileIOException {
+	private static void testPartitioningRecords(String workingDir, String originalPath, String[] newPaths, String mergePath) throws Exception {
 		System.out.println("***Testing with records***");
 		System.out.println("Writing records...");
 		RecordsFileIO recRecords = new RecordsFileIO(originalPath, true, false);
@@ -314,7 +317,7 @@ public class RecordsFileTester {
 		recMerged.close();
 	}
 	
-	private static void testPartitioningStrings(String recordsPath, String[] newPaths) {
+	private static void testPartitioningStrings(String recordsPath, String[] newPaths) throws IOException, InvalidArrayOfPathsException {
 		System.out.println("***Testing with strings***");
 		System.out.println("Writing strings...");
 		RecordsFileIO recRecords = new RecordsFileIO(recordsPath, true, false);
@@ -335,7 +338,7 @@ public class RecordsFileTester {
 	}
 	
 	
-	public static void testParititionAndMerge(String workingDir, String originalPath, String[] partitionPaths, String mergePath) throws DirectoryNotFoundException, RecordsFileIOException {
+	public static void testParititionAndMerge(String workingDir, String originalPath, String[] partitionPaths, String mergePath) throws Exception {
 		RecordsFileIO recRecords = new RecordsFileIO(originalPath, true, false);
 		
 		StringWritable rec1Key = new StringWritable("doom");
@@ -410,7 +413,7 @@ public class RecordsFileTester {
 		mergedRecs.close();
 	}
 	
-	public static void main(String[] args) throws DirectoryNotFoundException, RecordsFileIOException {
+	public static void main(String[] args) throws Exception {
 		// write test
 		System.out.println("asdf".hashCode());
 		System.out.println("asdf".hashCode());

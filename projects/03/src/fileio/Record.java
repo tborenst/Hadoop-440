@@ -6,8 +6,6 @@ package fileio;
 
 import java.io.Serializable;
 
-import api.IntWritable;
-import api.StringWritable;
 import api.Writable;
 
 
@@ -73,6 +71,7 @@ public class Record implements Serializable{
 		values = mergedValues;
 	}
 	
+	@Override
 	public String toString() {
 		String result = "<" + key.getValue() + ", [";
 		for(int v = 0; v < values.length; v++) {

@@ -1,26 +1,9 @@
 package tomertest;
 
-import java.io.IOException;
-import java.util.HashMap;
-
-import networking.SIOClient;
-import networking.SIOCommand;
-import networking.SIOServer;
-
-import fileio.Partitioner;
-import fileio.Record;
-import fileio.RecordsFileIO;
-
-import api.Collector;
-import api.IntWritable;
-import api.StringWritable;
-import api.Writable;
-import system.Job;
+import system.ClientRoutine;
 import system.MasterRoutine;
+import system.SlaveRoutine;
 import util.Executer;
-
-import system.Task;
-import system.Constants;
 
 public class Tests {
 	public static void main(String[] args) throws Throwable{
@@ -144,6 +127,20 @@ public class Tests {
 //		job.printSortTask();
 //		job.printRedcueTasks();
 		
+		System.out.println("1 Master...");
+		MasterRoutine master = new MasterRoutine(15237, 15337, "/Users/tomer/Desktop/WorkDir");
+		Thread.sleep(500);
+		System.out.println("2 Slaves...");
+		SlaveRoutine slave1 = new SlaveRoutine("localhost", 15237, "/Users/tomer/Desktop/WorkDir");
+		SlaveRoutine slave2 = new SlaveRoutine("localhost", 15237, "/Users/tomer/Desktop/WorkDir");
+		Thread.sleep(500);
+		System.out.println("1 Client...");
+		ClientRoutine client = new ClientRoutine("localhost", 15337);
+		
+//		String path = "/Users/tomer/Desktop/Box/school/15440/projects/03/bin/tomertest";
+//		Executer executer = new Executer();
+//		Class <?> testClass = executer.getClass(path, "MapperTest.class", "tomertest.MapperTest");
+
 		
 	}
 }

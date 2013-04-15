@@ -9,12 +9,15 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
+import fileio.RecordsFileIO;
+
 import networking.SIOCommand;
 import networking.SIOServer;
 import networking.SIOSocket;
 
 public class MasterRoutine {
-	private SIOServer sio;                    // socket
+	private SIOServer slaveSIO;               // socket for slaves
+	private SIOServer clientSIO;          	  // socket for clients
 	private String workDirPath;               // working directory
 	
 	private LinkedList<Task> failedQueue;     // #1 priority (tasks that came back and failed)
@@ -23,22 +26,27 @@ public class MasterRoutine {
 	private LinkedList<Task> mapQueue;        // #4 priority (map tasks)
 	
 	int jobCount;                             // how many jobs have been started, also used as job ids
+	Integer fileCount;                        // how many files we've used as temp files for partitioning
 	private HashMap<Integer, Job> jobs;       // mapping job id's to job object
 	
 	private HashMap<SIOSocket, Task> pendingSockets; // mapping slave sockets to tasks
 	private LinkedList<SIOSocket> idleSockets;       // idle slave sockets available for work
+	private HashMap<Integer, SIOSocket> clientJobs;  // mapping job ids to their respective client socket
 	
-	public MasterRoutine(int port, String workDirPath){
-		this.sio = new SIOServer(port);
+	public MasterRoutine(int slavePort, int clientPort, String workDirPath){
+		this.slaveSIO = new SIOServer(slavePort);
+		this.clientSIO = new SIOServer(clientPort);
 		this.workDirPath = workDirPath;
 		this.failedQueue = new LinkedList<Task>();
 		this.reduceQueue = new LinkedList<Task>();
 		this.sortQueue = new LinkedList<Task>();
 		this.mapQueue = new LinkedList<Task>();
 		this.jobCount = 0;
+		this.fileCount = 0;
 		this.jobs = new HashMap<Integer, Job>();
 		this.pendingSockets = new HashMap<SIOSocket, Task>();
 		this.idleSockets = new LinkedList<SIOSocket>();
+		this.clientJobs = new HashMap<Integer, SIOSocket>();
 		handleSockets();
 	}
 	
@@ -46,16 +54,56 @@ public class MasterRoutine {
 	 * handleSockets - all socket manipulation goes in here
 	 */
 	private void handleSockets(){
-		// TODO: receive request object and interpret it
-		sio.on(Constants.JOB_REQUEST, new SIOCommand(){
+		// CLIENT CONNECTIONS
+		clientSIO.on(Constants.JOB_REQUEST, new SIOCommand(){
+			@Override
 			public void run(){
 				Request req = (Request)object;
-//				int mappers = req.
+				int mappers = req.getNumMappers();
+				int reducers = req.getNumReducers();
+				String mapperDir = req.getMapperDirectory();
+				String mapperFile = req.getMapperFileName();
+				String mapperName = req.getMapperBinaryName();
+				String reducerDir = req.getReducerDirectory();
+				String reducerFile = req.getReducerFileName();
+				String reducerName = req.getReducerBinaryName();
+				String combinerDir = req.getCombinerDirectory();
+				String combinerFile = req.getCombinerFileName();
+				String combinerName = req.getCombinerBinaryName();
+				String[] from = req.getDataPaths();
+				String resultsDir = req.getResultsDirectory();
+				
+				// partition data
+				String[] initialMapFiles = new String[mappers];
+				synchronized(fileCount){
+					for(int i = 0; i < initialMapFiles.length; i++){
+						initialMapFiles[i] = workDirPath + "/partitiontempfile" + fileCount;
+						fileCount++;
+					}
+				}
+				RecordsFileIO.dealStringsAsRecordsTo(from, initialMapFiles, "\n", "\n");
+				
+				// create new job
+				int jobID = createJob(mappers, reducers, 
+						  			  mapperDir, mapperFile, mapperName, 
+						  			  reducerDir, reducerFile, reducerName,
+						  			  combinerDir, combinerFile, combinerName,
+						  			  initialMapFiles, resultsDir);
+				
+				synchronized(clientJobs){
+					clientJobs.put(jobID, socket);
+				}
+				
+				// TODO: add client side to handle it
+				socket.emit(Constants.JOB_ID, jobID);
 			}
 		});
 		
+		// SLAVE CONNECTIONS
+		
 		// add socket to idle pool when first connected
-		sio.on("connection", new SIOCommand(){
+		slaveSIO.on("connection", new SIOCommand(){
+			@Override
 			public void run(){
 				synchronized(idleSockets){
 					idleSockets.add(socket);
@@ -66,7 +114,8 @@ public class MasterRoutine {
 			}
 		});
 		
-		sio.on(Constants.TASK_COMPLETE, new SIOCommand(){
+		slaveSIO.on(Constants.TASK_COMPLETE, new SIOCommand(){
+			@Override
 			public void run(){
 				Task task = (Task)object;
 				String type = task.getTaskType();
@@ -81,6 +130,7 @@ public class MasterRoutine {
 						boolean done = job.updateMapTask(taskID, Constants.COMPLETED);
 						if(done){
 							//start sort phase
+							job.updateJobStatus(Constants.SORTING);
 							Task sortTask = job.generateSortTask();
 							synchronized(sortQueue){
 								sortQueue.add(sortTask);
@@ -91,6 +141,7 @@ public class MasterRoutine {
 						boolean done = job.updateSortTask(taskID, Constants.COMPLETED);
 						if(done){
 							//start reduce phase
+							job.updateJobStatus(Constants.REDUCING);
 							HashMap<Integer, Task> reduceTasks = job.generateReduceTasks();
 							Iterator<Entry<Integer, Task>> it = reduceTasks.entrySet().iterator();
 							while(it.hasNext()){
@@ -105,8 +156,13 @@ public class MasterRoutine {
 							}
 						}
 					} else if(type.equals(Constants.REDUCE)){
-						// TODO: figure out what to do here
-						System.out.println("Job " + jobID + "is done.");
+						boolean done = job.updateReduceTask(taskID, Constants.COMPLETED);
+						if(done){
+							// let the client know
+							// TODO: handle this on the other side
+							SIOSocket client = clientJobs.get(job.getJobID());
+							client.emit(Constants.JOB_COMPLETE, job.getJobID());
+						}
 					} else{
 						try {
 							throw new Throwable("Unrecognized task type: " + type);
@@ -130,7 +186,8 @@ public class MasterRoutine {
 		});
 		
 		// get socket's task and requeue it if disconnected while working
-		sio.on("disconnect", new SIOCommand(){
+		slaveSIO.on("disconnect", new SIOCommand(){
+			@Override
 			public void run(){
 				synchronized(pendingSockets){
 					// get failed task, delete socket
@@ -224,14 +281,16 @@ public class MasterRoutine {
 	 * @param fromPaths - paths to already-partitioned data for this map-reduce process
 	 * @param resultsDir - directory to put the result of this map-reduce process
 	 */
-	public void createJob(int mappers, int reducers,
+	public int createJob(int mappers, int reducers,
 						  String mapperDir, String mapperFile, String mapperName,
 						  String reducerDir, String reducerFile, String reducerName,
 						  String combinerDir, String combinerFile, String combinerName,
 						  String[] fromPaths, String resultsDir){
 		// create job
-		Job job = new Job(jobCount, mappers, reducers, workDirPath, fromPaths, resultsDir);
+		int jobID = jobCount;
+		Job job = new Job(jobID, mappers, reducers, workDirPath, fromPaths, resultsDir);
 		job.setMapper(mapperDir, mapperFile, mapperName);
+		job.setCombiner(combinerDir, combinerFile, combinerName);
 		job.setReducer(reducerDir, reducerFile, reducerName);
 		
 		// generate map tasks and add them to queue
@@ -260,6 +319,7 @@ public class MasterRoutine {
 		
 		// new job
 		spendResources();
+		return jobID;
 	}
 	
 	

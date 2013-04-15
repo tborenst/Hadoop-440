@@ -39,9 +39,9 @@ public class RecordsFileIO {
 	 * @param createIfDoesntExist
 	 * @param isReadFile - The RecordsFileIO can only read or write. 
 	 * 		Set to true if RecordsFileIO reads only and writes only if false.
-	 * @throws FileNotFoundException 
+	 * @throws IOException 
 	 */
-	public RecordsFileIO(String path, boolean createIfDoesntExist, boolean isReadFile) throws FileNotFoundException {
+	public RecordsFileIO(String path, boolean createIfDoesntExist, boolean isReadFile) throws IOException {
 		this.path = path;
 		initialize(createIfDoesntExist, isReadFile);
 	}
@@ -51,21 +51,23 @@ public class RecordsFileIO {
 	 * @param path
 	 * @param createIfDoesntExist
 	 * @param isReadFile
-	 * @throws FileNotFoundException 
+	 * @throws IOException 
 	 */
-	private void initialize(boolean createIfDoesntExist, boolean isReadFile) throws FileNotFoundException {
+	private void initialize(boolean createIfDoesntExist, boolean isReadFile) throws IOException {
 		file = new File(path);
 		
-		if(!file.exists() && createIfDoesntExist) {
-			try {
-				file.createNewFile();
-			} catch (IOException e) {
-				// TODO: remove debugging
-				System.out.println("RecordsFileIO.RecordsFile(): failed to create file: " + path);
-				e.printStackTrace();
+		if(!file.exists()) {
+			if(createIfDoesntExist) {
+				try {
+					file.createNewFile();
+				} catch (IOException e) {
+					// TODO: remove debugging
+					System.out.println("RecordsFileIO.RecordsFile(): failed to create file: " + path);
+					throw e;
+				}
+			} else {
+				throw new FileNotFoundException();
 			}
-		} else {
-			throw new FileNotFoundException();
 		}
 		
 		raf = open();
@@ -93,8 +95,10 @@ public class RecordsFileIO {
 	 * And seeks to the front if newIsReadFile is true
 	 * or to the end of newIsReadFile is false.
 	 * @param newIsReadFile
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
 	 */
-	public void setIsReadFile(boolean newIsReadFile) {
+	public void setIsReadFile(boolean newIsReadFile) throws FileNotFoundException, IOException {
 		isReadFile = newIsReadFile;
 		if(isReadFile) {
 			readRecordId = 0;
@@ -105,7 +109,7 @@ public class RecordsFileIO {
 				} catch (IOException e) {
 					// TODO: remove debugging
 					System.out.println("RecordsFileIO.setIsReadFile: unable to set raf file pointer to start at: " + getPath());
-					e.printStackTrace();
+					throw e;
 				}
 			}
 		} else {
@@ -117,7 +121,7 @@ public class RecordsFileIO {
 				} catch (IOException e) { 
 					// TODO: remove debugging
 					System.out.println("RecordsFileIO.setIsReadFile: unable to set raf file pointer to end at: " + getPath());
-					e.printStackTrace();
+					throw e;
 				}
 			}
 			writeObjectStream = openWriteStream();
@@ -127,15 +131,16 @@ public class RecordsFileIO {
 	/**
 	 * Opens a RandomAccessFile of file.
 	 * @return RandomAccessFile
+	 * @throws FileNotFoundException 
 	 */
-	private RandomAccessFile open() {
+	private RandomAccessFile open() throws FileNotFoundException {
 		if(file != null) {
 			try {
 				return new RandomAccessFile(file, "rw");
 			} catch (FileNotFoundException e) {
 				// TODO: remove debugging
 				System.out.println("RecordsFileIO.open: unable to open raf at: " + getPath());
-				e.printStackTrace();
+				throw e;
 			}
 		}
 		
@@ -146,17 +151,19 @@ public class RecordsFileIO {
 	 * ObjectOutputStream openWriteStream(void):
 	 * Creates a ObjectOutputStream from File file.
 	 * @return ObjectOutputStream
+	 * @throws FileNotFoundException
+	 * @throws IOException 
 	 */
-	private ObjectOutputStream openWriteStream() {
+	private ObjectOutputStream openWriteStream() throws FileNotFoundException, IOException {
 		if(file != null) {			
 			try {
 				return new ObjectOutputStream(new FileOutputStream(getPath()));
 			} catch (FileNotFoundException e) {
 				System.out.println("tFile.openWriteStream: unable to create FileOutputStream at: " + getPath());
-				e.printStackTrace();
+				throw e;
 			} catch (IOException e) {
 				System.out.println("tFile.openWriteStream: unable to create ObjectOutputStream at: " + getPath());
-				e.printStackTrace();
+				throw e;
 			}
 		}
 		return null;
@@ -166,19 +173,21 @@ public class RecordsFileIO {
 	 * ObjectInputStream openReadStream(void):
 	 * Creates a ObjectInputStream from File file.
 	 * @return ObjectInputStream
+	 * @throws FileNotFoundException 
+	 * @throws IOException
 	 */
-	private ObjectInputStream openReadStream() {
+	private ObjectInputStream openReadStream() throws FileNotFoundException, IOException {
 		if(file != null) {			
 			try {
 				return new ObjectInputStream(new FileInputStream(getPath()));
 			} catch (FileNotFoundException e) {
 				// TODO remove debugging
 				System.out.println("RecordsFileIO.openReadStream: unable to create FileInputStream: " + getPath());
-				e.printStackTrace();
+				throw e;
 			} catch (IOException e) {
 				// TODO remove debugging
 				System.out.println("RecordsFileIO.openReadStream: unable to create ObjectInputStream: " + getPath());
-				e.printStackTrace();
+				throw e;
 			}
 		}
 		return null;
@@ -186,8 +195,9 @@ public class RecordsFileIO {
 	
 	/**
 	 * Closes the file and raf.
+	 * @throws IOException 
 	 */
-	public void close() {
+	public void close() throws IOException {
 
 		closeStreams();
 		
@@ -197,7 +207,7 @@ public class RecordsFileIO {
 			} catch (IOException e) {
 				// TODO: remove debugging
 				System.out.println("RecordsFileIO.close: unable to close raf at: " + getPath());
-				e.printStackTrace();
+				throw e;
 			}
 			raf = null;
 		}
@@ -209,15 +219,16 @@ public class RecordsFileIO {
 	
 	/**
 	 * Closes the writeStream and readStream.
+	 * @throws IOException 
 	 */
-	private void closeStreams() {
+	private void closeStreams() throws IOException {
 		if(readObjectStream != null) {
 			try {
 				readObjectStream.close();
 			} catch (IOException e) {
 				// TODO: remove debugging
 				System.out.println("RecordsFileIO.closeStreams: unable to close readObjectStream at: " + getPath());
-				e.printStackTrace();
+				throw e;
 			}
 			
 			readObjectStream = null;
@@ -230,7 +241,7 @@ public class RecordsFileIO {
 			} catch (IOException e) {
 				// TODO: remove debugging
 				System.out.println("RecordsFileIO.closeStreams: unable to flush & close writeObjectStream at: " + getPath());
-				e.printStackTrace();
+				throw e;
 			}
 			
 			writeObjectStream = null;
@@ -241,8 +252,11 @@ public class RecordsFileIO {
 	 * Reads and deserializes the next record.
 	 * @param delimiter
 	 * @return Record
+	 * @throws EOFException
+	 * @throws ClassNotFoundException
+	 * @throws IOException
 	 */
-	public Record readNextRecord(String delimiter) {
+	public Record readNextRecord(String delimiter) throws EOFException, ClassNotFoundException, IOException {
 		Record r = null;
 		if(isReadFile) {
 			if(readObjectStream == null) {
@@ -254,14 +268,14 @@ public class RecordsFileIO {
 				readObjectStream.skipBytes(delimiter.length());
 			} catch (EOFException e) {
 				return null;
-			} catch (ClassNotFoundException e1) {
+			} catch (ClassNotFoundException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.readNextRecord: failed to read object at: " + getPath());
-				e1.printStackTrace();
-			} catch (IOException e1) {
+				throw e;
+			} catch (IOException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.readNextRecord: failed to read object or skip bytes at: " + getPath());
-				e1.printStackTrace();
+				throw e;
 			}
 			
 			readRecordId++;
@@ -273,8 +287,9 @@ public class RecordsFileIO {
 	 * Reads the next String.
 	 * @param delimiter
 	 * @return Record - The key is the path + record id.
+	 * @throws IOException 
 	 */
-	public Record readNextString(String delimiter) {
+	public Record readNextString(String delimiter) throws IOException {
 		Record r = null;
 		if(isReadFile && raf != null) {
 			
@@ -295,7 +310,7 @@ public class RecordsFileIO {
 				} catch (IOException e) {
 					//TODO: remove debugging
 					System.out.println("RecordsFileIO.readNextString: failed to read byte at: " + getPath());
-					e.printStackTrace();
+					throw e;
 				}
 				
 				int delimiterIndex = s.indexOf(delimiter);
@@ -318,13 +333,14 @@ public class RecordsFileIO {
 	 * Reads the next record as an array of bytes.
 	 * @param delimiter
 	 * @return Record - The key is the path + record id.
+	 * @throws IOException 
 	 */
-	public Record readNextBytes(String delimiter) {
+	public Record readNextBytes(String delimiter) throws IOException {
 		Record r = null;
 		if(isReadFile && raf != null) {
 			
 			ArrayList<Byte> s = new ArrayList<Byte>();
-			byte[] delimiterBArr = (byte[]) delimiter.getBytes();
+			byte[] delimiterBArr = delimiter.getBytes();
 			
 			boolean moreToRead = true;
 			
@@ -346,7 +362,7 @@ public class RecordsFileIO {
 				} catch (IOException e) {
 					//TODO: remove debugging
 					System.out.println("RecordsFileIO.readNextBytes: failed to read byte at: " + getPath());
-					e.printStackTrace();
+					throw e;
 				}
 				
 				
@@ -374,8 +390,9 @@ public class RecordsFileIO {
 	 * Writes a record as delimiter + record to the end of the file.
 	 * @param record
 	 * @param delimiter
+	 * @throws IOException 
 	 */
-	public void writeNextRecord(Record record, String delimiter) {
+	public void writeNextRecord(Record record, String delimiter) throws IOException {
 		if(!isReadFile) {
 			if(writeObjectStream == null) {
 				writeObjectStream = openWriteStream();
@@ -391,7 +408,7 @@ public class RecordsFileIO {
 			} catch (IOException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.writeNextRecord(): error accessing/writing file at: " + getPath());
-				e.printStackTrace();
+				throw e;
 			}
 		}
 	}
@@ -400,8 +417,9 @@ public class RecordsFileIO {
 	 * Writes a record as delimiter + recordStr to the end of the file.
 	 * @param record
 	 * @param delimiter
+	 * @throws IOException 
 	 */
-	public void writeNextString(String recordStr, String delimiter) {
+	public void writeNextString(String recordStr, String delimiter) throws IOException {
 		if(!isReadFile && raf != null) {
 			try {
 				if(writeRecordId > 0) {
@@ -413,7 +431,7 @@ public class RecordsFileIO {
 			} catch (IOException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.writeNextString(): error accessing/writing file at: " + getPath());
-				e.printStackTrace();
+				throw e;
 			}
 		}
 	}
@@ -422,8 +440,9 @@ public class RecordsFileIO {
 	 * Writes a record as delimiter + recordStr to the end of the file.
 	 * @param record
 	 * @param delimiter
+	 * @throws IOException 
 	 */
-	public void writeNextBytes(Byte[] recordBytes, String delimiter) {
+	public void writeNextBytes(Byte[] recordBytes, String delimiter) throws IOException {
 		if(!isReadFile && raf != null) {
 			try {
 				if(writeRecordId > 0) {
@@ -435,7 +454,7 @@ public class RecordsFileIO {
 			} catch (IOException e) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.writeNextString(): error accessing/writing file at: " + getPath());
-				e.printStackTrace();
+				throw e;
 			}
 		}
 	}
@@ -446,11 +465,11 @@ public class RecordsFileIO {
 	 * @param newPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
-	 * @throws FileNotFoundException 
 	 * @throws InvalidArrayOfPathsException 
+	 * @throws IOException 
 	 * @returns int - The index of the last path written to, -1 if partitionData fails.
 	 */
-	public int dealData(String[] newPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+	public int dealData(String[] newPaths, String readDelimiter, String writeDelimiter) throws InvalidArrayOfPathsException, IOException {
 		if(newPaths.length <= 0) {
 			throw new InvalidArrayOfPathsException();
 		}
@@ -484,11 +503,11 @@ public class RecordsFileIO {
 	 * @param newDataFilesPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
-	 * @throws FileNotFoundException 
 	 * @throws InvalidArrayOfPathsException 
+	 * @throws IOException 
 	 * @returns int - The index of the last record written to, -1 if partitionData fails.
 	 */
-	public static int dealDataTo(String[] dataPaths, String[] newDataFilesPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+	public static int dealDataTo(String[] dataPaths, String[] newDataFilesPaths, String readDelimiter, String writeDelimiter) throws InvalidArrayOfPathsException, IOException {
 		if(dataPaths.length <= 0 || newDataFilesPaths.length <= 0) {
 			throw new InvalidArrayOfPathsException();
 		}
@@ -529,11 +548,11 @@ public class RecordsFileIO {
 	 * @param newPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
-	 * @throws FileNotFoundException 
 	 * @throws InvalidArrayOfPathsException 
+	 * @throws IOException 
 	 * @returns int - The index of the last path written to, -1 if partitionData fails.
 	 */
-	public int dealStringsAsRecords(String[] newPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+	public int dealStringsAsRecords(String[] newPaths, String readDelimiter, String writeDelimiter) throws InvalidArrayOfPathsException, IOException {
 		if(newPaths.length <= 0) {
 			throw new InvalidArrayOfPathsException();
 		}
@@ -568,11 +587,11 @@ public class RecordsFileIO {
 	 * @param newDataFilesPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
-	 * @throws FileNotFoundException 
 	 * @throws InvalidArrayOfPathsException 
+	 * @throws IOException 
 	 * @returns int - The index of the last record written to, -1 if partitionData fails.
 	 */
-	public static int dealStringsAsRecordsTo(String[] dataPaths, String[] newDataFilesPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+	public static int dealStringsAsRecordsTo(String[] dataPaths, String[] newDataFilesPaths, String readDelimiter, String writeDelimiter) throws InvalidArrayOfPathsException, IOException {
 		if(dataPaths.length <= 0 || newDataFilesPaths.length <= 0) {
 			throw new InvalidArrayOfPathsException();
 		}
@@ -612,10 +631,12 @@ public class RecordsFileIO {
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 * @return - The index of the last path written to, -1 if partitionData fails.
-	 * @throws FileNotFoundException 
 	 * @throws InvalidArrayOfPathsException 
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
+	 * @throws EOFException 
 	 */
-	public int dealRecords(String[] newPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+	public int dealRecords(String[] newPaths, String readDelimiter, String writeDelimiter) throws InvalidArrayOfPathsException, EOFException, ClassNotFoundException, IOException {
 		if(newPaths.length <= 0) {
 			throw new InvalidArrayOfPathsException();
 		}
@@ -650,15 +671,16 @@ public class RecordsFileIO {
 	 * @param newRecordFilesPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
-	 * @throws FileNotFoundException 
 	 * @throws InvalidArrayOfPathsException 
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
+	 * @throws EOFException 
 	 * @returns int - The index of the last record written to, -1 if partitionData fails.
 	 */
-	public static int dealRecordsTo(String[] recordsPath, String[] newRecordFilesPaths, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+	public static int dealRecordsTo(String[] recordsPath, String[] newRecordFilesPaths, String readDelimiter, String writeDelimiter) throws InvalidArrayOfPathsException, EOFException, ClassNotFoundException, IOException {
 		if(recordsPath.length <= 0 || newRecordFilesPaths.length <= 0) {
 			throw new InvalidArrayOfPathsException();
 		}
-		
 		int currRecordPathIdx = -1;
 		
 		RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newRecordFilesPaths.length];
@@ -691,10 +713,12 @@ public class RecordsFileIO {
 	 * @param numRecords
 	 * @param readDelimiter
 	 * @param writeDelimiter
-	 * @throws FileNotFoundException 
 	 * @throws InvalidArrayOfPathsException 
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
+	 * @throws EOFException 
 	 */
-	public void splitRecords(String[] destPaths, int numRecords, String readDelimiter, String writeDelimiter) throws FileNotFoundException, InvalidArrayOfPathsException {
+	public void splitRecords(String[] destPaths, int numRecords, String readDelimiter, String writeDelimiter) throws InvalidArrayOfPathsException, EOFException, ClassNotFoundException, IOException {
 		if(destPaths.length <= 0) {
 			throw new InvalidArrayOfPathsException();
 		}
@@ -722,13 +746,10 @@ public class RecordsFileIO {
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 * @param deleteSrcFiles
-	 * @throws DirectoryNotFoundException 
-	 * @throws RecordsFileIOException 
-	 * @throws FileNotFoundException 
-	 * @throws InvalidArrayOfPathsException 
+	 * @throws Exception 
 	 */
 	public static void mergeSortRecords(String[] srcPaths, String[] destPaths, String workingDir,
-			String readDelimiter, String writeDelimiter, boolean deleteSrcFiles) throws DirectoryNotFoundException, RecordsFileIOException, FileNotFoundException, InvalidArrayOfPathsException {
+			String readDelimiter, String writeDelimiter, boolean deleteSrcFiles) throws Exception {
 		if(!Util.isValidDirectory(workingDir)) {
 			throw new DirectoryNotFoundException();
 		}
@@ -761,7 +782,6 @@ public class RecordsFileIO {
 			} else {
 				recs1.close();
 			}
-			
 			numPathsMerged--;
 			if(deleteSrcFiles || numPathsMerged < 0) {
 				recs2.delete();
@@ -772,11 +792,11 @@ public class RecordsFileIO {
 			recsQueue.add(mergedRecs);
 		}
 		
+
 		if(recsQueue.size() > 0) {
 			RecordsFileIO mergedRecs = recsQueue.remove();
 			mergedRecs.setIsReadFile(true);
 			
-			System.out.println("Splitting Records...");
 			mergedRecs.splitRecords(destPaths, mergedRecs.getNumRecordsWritten(), readDelimiter, writeDelimiter);
 			mergedRecs.delete();
 		} else {
@@ -794,8 +814,9 @@ public class RecordsFileIO {
 	 * @param mergedRecs - destination
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws Exception 
 	 */
-	public static void mergeRecordsTo(RecordsFileIO recs1, RecordsFileIO recs2, RecordsFileIO mergedRecs, String readDelimiter, String writeDelimiter) {
+	public static void mergeRecordsTo(RecordsFileIO recs1, RecordsFileIO recs2, RecordsFileIO mergedRecs, String readDelimiter, String writeDelimiter) throws Exception {
 		Record rec1 = recs1.readNextRecord(readDelimiter);
 		Record rec2 = recs2.readNextRecord(readDelimiter); 
 		
@@ -827,7 +848,13 @@ public class RecordsFileIO {
 		}
 	}
 	
-	public void sortRecords(String workingDir, String readDelimiter) throws DirectoryNotFoundException, FileNotFoundException {
+	/**
+	 * Merge sorts records.
+	 * @param workingDir
+	 * @param readDelimiter
+	 * @throws Exception 
+	 */
+	public void sortRecords(String workingDir, String readDelimiter) throws Exception {
 		if(!Util.isValidDirectory(workingDir)) {
 			throw new DirectoryNotFoundException();
 		}
@@ -900,8 +927,9 @@ public class RecordsFileIO {
 	
 	/**
 	 * Closes and deletes the file.
+	 * @throws IOException 
 	 */
-	public void delete() {
+	public void delete() throws IOException {
 		if(file != null) {
 			file.setWritable(true);
 			boolean success = file.delete();

@@ -44,7 +44,7 @@ public class Util {
 	public static Byte[] toByteArray(byte[] primArr) {
 		Byte[] result = new Byte[primArr.length];
 		for(int o = 0; o < primArr.length; o++) {
-			result[o] = (Byte) primArr[o];
+			result[o] = primArr[o];
 		}
 		
 		return result;

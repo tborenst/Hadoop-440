@@ -19,8 +19,4 @@ public interface Writable<T> extends Serializable{
 	 * this - w
 	 */
 	public int compare(Writable<T> w);
-	
-	public int hashCode();
-	
-	public boolean equals(Writable<T> w);
 }

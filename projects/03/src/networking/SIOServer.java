@@ -41,6 +41,7 @@ public class SIOServer extends SIOSocket{
 	//listen for incoming connections
 	private void listen(){
 		new Thread(new Runnable(){
+			@Override
 			public void run() {
 				while(true){
 					//handle incoming connection
@@ -231,6 +232,7 @@ public class SIOServer extends SIOSocket{
 		/**
 		 * Send a String 'message' with the Object 'object' to this socket.
 		 */
+		@Override
 		public void emit(String message, Object object){
 			SIOPacket packet = new SIOPacket(message, object);
 			sendPacket(packet);
@@ -240,6 +242,7 @@ public class SIOServer extends SIOSocket{
 		 * Respond to a blocking request with id 'requestId', with a String 'message' and
 		 * an Object 'object'.
 		 */
+		@Override
 		public void respond(int requestId, Object object){
 			SIOPacket packet = new SIOPacket("", object);
 			packet.setBlocking(true); //this is a response to a blocking request
@@ -265,6 +268,7 @@ public class SIOServer extends SIOSocket{
 		/**
 		 * Returns true if socket is alive, false if dead.
 		 */
+		@Override
 		public Boolean isAlive(){
 			synchronized(alive){
 				return alive;

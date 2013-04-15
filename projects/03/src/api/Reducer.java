@@ -4,6 +4,6 @@
  */
 package api;
 
-public interface Reducer <KeyWritable, ValueWritable>{
-	public void reduce(KeyWritable key, ValueWritable[] values, Collector output);
+public interface Reducer{
+	public void reduce(Writable key, Writable[] values, Collector output);
 }

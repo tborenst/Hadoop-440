@@ -16,6 +16,7 @@ public class Collector implements Serializable{
 	private static final long serialVersionUID = -3698360081977942111L;
 	
 	private ArrayList<Record> pairs;
+	private int pairCount;
 	private String path;
 	private RecordsFileIO io;
 	private String delimiter = "\n";
@@ -27,30 +28,29 @@ public class Collector implements Serializable{
 	 */
 	public Collector(String path){
 		this.pairs = new ArrayList<Record>();
+		this.pairCount = 0;
 		this.path = path;
 		this.io = new RecordsFileIO(path, true, false);
 	}
 	
 	/**
-	 * collect - add a key-value pair to the collector.
+	 * emit - add a key-value pair to the collector.
 	 */
-	public void collect(Writable key, Writable value){
+	public void emit(Writable key, Writable value){
 		Record pair = new Record(key, new Writable[]{value});
 		pairs.add(pair);
+		if(50 < pairCount){
+			dumpBuffer();
+			pairCount = 0;
+		}
 	}
 	
 	/**
-	 * collectAllFromFile - erases the current collection buffer and reads all records
-	 * from the file given by the path of this Collector.
+	 * emitString - write a string to file, instead of a record, so output will be human readable.
+	 * Note: strings will be separated by newlines.
 	 */
-	public void collectAllFromFile(){
-		pairs = new ArrayList<Record>(); //erase current buffer
-		
-		//load all from file into buffer
-		Record rec;
-		while((rec = io.readNextRecord(delimiter)) != null){
-			pairs.add(rec);
-		}
+	public void emitString(String str){
+		io.writeNextString(str, "\n");
 	}
 	
 	public String getPath(){
@@ -67,6 +67,10 @@ public class Collector implements Serializable{
 			io.writeNextRecord(record, delimiter); //write buffer
 		}
 		pairs = new ArrayList<Record>(); //clean buffer
+	}
+	
+	public void close(){
+		io.close();
 	}
 	
 	/**

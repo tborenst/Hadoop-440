@@ -1,19 +1,26 @@
 package tomertest;
 
+import java.util.Iterator;
+
 import api.Collector;
 import api.IntWritable;
 import api.Reducer;
 import api.StringWritable;
+import api.Writable;
 
-public class ReducerTest implements Reducer<StringWritable, IntWritable>{
+public class ReducerTest implements Reducer{
 
-	public void reduce(StringWritable key, IntWritable[] values, Collector output) {
+	public void reduce(Writable key, Writable[] values, Collector output) {
 		int sum = 0;
+		
+		StringWritable k = (StringWritable)key;
+		
 		for(int i = 0; i < values.length; i++){
-			int value = values[i].getValue();
-			sum += value;
+			sum += ((IntWritable)values[i]).getValue();
 		}
-		output.collect(key, new IntWritable(sum));
+		
+//		output.emitString(k.getValue() + ": " + sum);
+		output.emit(key, new IntWritable(sum));
 	}
 
 }

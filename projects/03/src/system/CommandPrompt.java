@@ -64,6 +64,7 @@ public class CommandPrompt {
 			}
 			
 			Runnable prompt = new Runnable() {
+				@Override
 				public void run(){
 					Scanner scanner = new Scanner(System.in);
 					String input = scanner.nextLine();

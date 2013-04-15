@@ -19,6 +19,10 @@ public class Task implements Serializable{
 	private String classFile;    // name of .class file of mapper, reducer, etc...
 	private String className;    // binary name of .class file of mapper, reducer, etc...
 	
+	private String secondaryDir; // for example, the optional combiner method
+	private String secondaryFile;
+	private String secondaryName;
+	
 	// NOTE: map and reduce tasks should only have 1 'from' path and 1 'to' path.
 	// On the other hand, sort tasks may have multiple 'from' and 'to' paths. 
 	// The client should check that invariant when executing tasks.
@@ -34,15 +38,19 @@ public class Task implements Serializable{
 	 * @param from - path of initial records to map
 	 * @param to - path to place results of map
 	 */
-	public Task(int taskID, int jobID, String type, String classDir, String classFile, String className, String[] from, String[] to){
+	public Task(int taskID, int jobID, String type, String[] classDir, String[] classFile, String[] className, String[] from, String[] to){
 		this.taskID = taskID;
 		this.jobID = jobID;
 		this.type = type;
 		this.status = Constants.READY; //initially, always ready
 		
-		this.classDir = classDir;
-		this.classFile = classFile;
-		this.className = className;
+		this.classDir = classDir[0];
+		this.classFile = classFile[0];
+		this.className = className[0];
+		
+		this.secondaryDir = classDir[1];
+		this.secondaryFile = classFile[1];
+		this.secondaryName = className[1];
 		
 		this.pathsFrom = from;
 		this.pathsTo = to;
@@ -80,6 +88,18 @@ public class Task implements Serializable{
 		return className;
 	}
 	
+	public String getSecondaryDir(){
+		return secondaryDir;
+	}
+	
+	public String getSecondaryFile(){
+		return secondaryFile;
+	}
+	
+	public String getSecondaryName(){
+		return secondaryName;
+	}
+	
 	public String[] getPathFrom(){
 		return pathsFrom;
 	}
@@ -87,6 +107,7 @@ public class Task implements Serializable{
 	public String[] getPathTo(){
 		return pathsTo;
 	}
+
 	
 	// TODO: for debugging, remove at the end
 	

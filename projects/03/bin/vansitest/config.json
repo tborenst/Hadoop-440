@@ -1,1 +1,8 @@
-{"Map":{"numMappers":34,"directory":"asdf","fileName":"d","binaryName":"42e"},"Combine":{"directory":"asdf","fileName":"d","binaryName":"42e"},"Reduce":{"numReducers":2,"directory":"asdf","fileName":"d","binaryName":"42e"},"dataPaths":["sad","2"],"resultPaths":["asfd","2"]}
+{"Map":
+	{"numMappers":2,"directory":"/Users/tomer/Desktop/box/school/15440/projects/03/bin/tomertest","fileName":"MapperTest.class","binaryName":"tomertest.MapperTest"},
+"Combine":
+	{"directory":"/Users/tomer/Desktop/box/school/15440/projects/03/bin/tomertest","fileName":"ReducerTest.class","binaryName":"tomertest.ReducerTest"},
+"Reduce":
+	{"directory":"/Users/tomer/Desktop/box/school/15440/projects/03/bin/tomertest","fileName":"ReducerTest.class","binaryName":"tomertest.ReducerTest"},
+"dataPaths":["/Users/tomer/Desktop/story1.txt","/Users/tomer/Desktop/story2.txt"],
+"resultsDirectory":"/Users/tomer/Desktop/Results"}

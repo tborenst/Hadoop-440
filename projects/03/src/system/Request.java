@@ -9,6 +9,7 @@ package system;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
@@ -21,8 +22,11 @@ import system.InValidConfigFileException;
 import util.Util;
 
 public class Request {
+	private static final long serialVersionUID = 891493633097482745L;
 	private static String nullConstant = "null"; //the user can do this to choose not to specify an optional field
-	public class Mapper {
+	
+	public class Mapper implements Serializable{
+		private static final long serialVersionUID = -7393316563049538774L;
 		private int numMappers;
 		private String directory;
 		private String fileName;
@@ -52,7 +56,8 @@ public class Request {
 		}
 	}
 	
-	public class Combiner {
+	public class Combiner implements Serializable{
+		private static final long serialVersionUID = -8988134777487218052L;
 		private String directory;
 		private String fileName;
 		private String binaryName;
@@ -88,7 +93,8 @@ public class Request {
 		}
 	}
 	
-	public class Reducer {
+	public class Reducer implements Serializable{
+		private static final long serialVersionUID = 4776071571078605186L;
 		private int numReducers;
 		private String directory;
 		private String fileName;
