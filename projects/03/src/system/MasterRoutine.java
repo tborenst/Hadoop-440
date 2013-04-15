@@ -81,7 +81,12 @@ public class MasterRoutine {
 						fileCount++;
 					}
 				}
-				RecordsFileIO.dealStringsAsRecordsTo(from, initialMapFiles, "\n", "\n");
+				
+				try{
+					RecordsFileIO.dealStringsAsRecordsTo(from, initialMapFiles, "\n", "\n");
+				} catch (Exception e){
+					socket.emit(Constants.JOB_FAILED, null);
+				}
 				
 				// create new job
 				int jobID = createJob(mappers, reducers, 
@@ -98,6 +103,8 @@ public class MasterRoutine {
 				socket.emit(Constants.JOB_ID, jobID);
 			}
 		});
+		
+		
 		
 		// SLAVE CONNECTIONS
 		
@@ -121,6 +128,10 @@ public class MasterRoutine {
 				synchronized(clientJobs){
 					SIOSocket client = clientJobs.get(jobID);
 					client.emit(Constants.JOB_FAILED, jobID);
+				}
+				synchronized(jobs){
+					Job job = jobs.get(jobID);
+					job.updateJobStatus(Constants.FAILED);
 				}
 			}
 		});
