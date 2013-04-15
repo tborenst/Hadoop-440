@@ -1,11 +1,19 @@
 package api;
 
 public class JobStatus {
-	public int jobId;
-	public String status;
+	private int jobId;
+	private String status;
 	
 	public JobStatus(int jobId, String status) {
 		this.jobId = jobId;
 		this.status = status;
+	}
+
+	public int getJobId() {
+		return jobId;
+	}
+	
+	public String getStatus() {
+		return status;
 	}
 }
