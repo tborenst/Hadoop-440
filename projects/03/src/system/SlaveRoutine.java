@@ -113,7 +113,7 @@ public class SlaveRoutine {
 		String[] to = task.getPathTo();
 		
 		try{
-			RecordsFileIO.mergeSortRecords(from, to, workDir, "\n", "\n");
+			RecordsFileIO.mergeSortRecords(from, to, workDir, "\n", "\n", true); // true - delete source files
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
 		} catch (Exception e){

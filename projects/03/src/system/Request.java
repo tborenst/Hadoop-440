@@ -1,3 +1,9 @@
+/**
+ * Represents all data required for a new map reduce request.
+ * Reads and writes JSON.
+ * Requires Jackson JSON parser (http://jackson.codehaus.org/)
+ * The library is included in MapReduce/libs/jackson-all-1.9.11.jar, please make sure to add it to you build path.
+ */
 package system;
 
 import java.io.File;
@@ -103,6 +109,8 @@ public class Request implements Serializable{
 		}
 	}
 	
+	// These are public as required by the JSON parsing library.
+	// But please do not use them, use the getters instead.
 	public Mapper Map;
 	public Combiner Combine;
 	public Reducer Reduce;	
@@ -116,12 +124,11 @@ public class Request implements Serializable{
 		File f = new File(configFilePath);
 		Request req = null;
 		if(f.exists()) {
-			try {
-				req = m.readValue(f, Request.class);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				try {
+					req = m.readValue(f, Request.class);
+				} catch (IOException e) {
+					throw new FileNotFoundException();
+				}
 			if(!req.isValid()) {
 				throw new InValidConfigFileException();
 			}
@@ -132,26 +139,29 @@ public class Request implements Serializable{
 		return req;
 	}
 	
-	public void exportTo(String exportPath) {
+	/**
+	 * Exports the Request object in to a file in valid JSON.
+	 * @param exportPath
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws FileNotFoundException - if file not found or unable to access file
+	 */
+	public void exportTo(String exportPath) throws JsonGenerationException, JsonMappingException, FileNotFoundException {
 		ObjectMapper m = new ObjectMapper();
 		
+
 		try {
 			File f = new File(exportPath);
 			if(!f.exists()) {
 				f.createNewFile();
 			}
 			m.writeValue(f, this);
-		} catch (JsonGenerationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new FileNotFoundException();
 		}
 	}
+	
 	
 	private boolean isValid() {
 		
@@ -162,7 +172,11 @@ public class Request implements Serializable{
 				&& Util.isValidDirectory(resultsDirectory);
 	}
 
-	// Map Data Getters
+	//--------
+	// Getters
+	// -------
+	
+	// Map
 	public int getNumMappers() {
 		return Map.getNumMappers();
 	}
@@ -179,7 +193,7 @@ public class Request implements Serializable{
 		return Map.getBinaryName();
 	}
 	
-	// Combine Data Getters
+	// Combine
 	public String getCombinerDirectory() {
 		return Combine.getDirectory();
 	}
@@ -192,7 +206,7 @@ public class Request implements Serializable{
 		return Combine.getBinaryName();
 	}
 	
-	// Reduce Data Getter
+	// Reduce
 	public int getNumReducers() {
 		return Reduce.getNumReducers();
 	}

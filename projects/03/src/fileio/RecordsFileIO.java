@@ -14,15 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 import util.Util;
 
@@ -690,9 +682,11 @@ public class RecordsFileIO {
 	 * @param workingDir - temporary holding area for intermediary files
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @param deleteSrcFiles
 	 * @throws DirectoryNotFoundException 
 	 */
-	public static void mergeSortRecords(String[] srcPaths, String[] destPaths, String workingDir, String readDelimiter, String writeDelimiter) throws DirectoryNotFoundException {
+	public static void mergeSortRecords(String[] srcPaths, String[] destPaths, String workingDir,
+			String readDelimiter, String writeDelimiter, boolean deleteSrcFiles) throws DirectoryNotFoundException {
 		if(!Util.isValidDirectory(workingDir)) {
 			throw new DirectoryNotFoundException();
 		}
@@ -716,13 +710,13 @@ public class RecordsFileIO {
 			mergeRecordsTo(recs1, recs2, mergedRecs, readDelimiter, readDelimiter);
 			
 			numPathsMerged--;
-			if(numPathsMerged < 0) {
+			if(deleteSrcFiles || numPathsMerged < 0) {
 				recs1.delete();
 			} else {
 				recs1.close();
 			}
 			numPathsMerged--;
-			if(numPathsMerged < 0) {
+			if(deleteSrcFiles || numPathsMerged < 0) {
 				recs2.delete();
 			} else {
 				recs2.close();
@@ -795,7 +789,6 @@ public class RecordsFileIO {
 			while((recA = readNextRecord(readDelimiter)) != null) {
 				String destPath = Util.generateRandomPath(workingDir, "/sortRecordsIntermediary_", "txt");
 				RecordsFileIO mergeFile = new RecordsFileIO(destPath, true, false);
-				//TODO: sort these 2 records
 				
 				Record recB = readNextRecord(readDelimiter);
 				

@@ -103,7 +103,7 @@ public class ClientRoutine {
 					} catch (JsonParseException | JsonMappingException e) {
 						cmd.emit("ERROR: Invalid JSON formatting in config file at: " + path + ".");
 					} catch (FileNotFoundException e) {
-						cmd.emit("ERROR: Config file not found at: " + path + ".");
+						cmd.emit("ERROR: Config file not found or unable to access file at: " + path + ".");
 					} catch (InValidConfigFileException e) {
 						cmd.emit("ERROR: Config file did not contain the correct or all the nessesary data at: " + path + ".");
 					} catch (SocketFailureException e) {
