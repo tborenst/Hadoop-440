@@ -234,6 +234,7 @@ public class ClientRoutine {
 	 */
 	private void runMapReduce(String configFilePath) throws JsonParseException, JsonMappingException, FileNotFoundException, InValidConfigFileException, SocketFailureException, UnableToAccessFileException {
 		Request req = Request.constructFromFile(configFilePath);
+		System.out.println("REQUEST OBJECT:" + req);
 		if(socket != null && socket.isAlive()) {
 			socket.emit(Constants.JOB_REQUEST, req);
 		} else {

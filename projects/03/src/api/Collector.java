@@ -52,7 +52,11 @@ public class Collector implements Serializable{
 	 * Note: strings will be separated by newlines.
 	 */
 	public void emitString(String str){
-		io.writeNextString(str, "\n");
+		try {
+			io.writeNextString(str, "\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public String getPath(){
@@ -66,13 +70,21 @@ public class Collector implements Serializable{
 		Iterator<Record> itr = pairs.iterator();
 		while(itr.hasNext()){
 			Record record = itr.next();
-			io.writeNextRecord(record, delimiter); //write buffer
+			try {
+				io.writeNextRecord(record, delimiter);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		pairs = new ArrayList<Record>(); //clean buffer
 	}
 	
 	public void close(){
-		io.close();
+		try {
+			io.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

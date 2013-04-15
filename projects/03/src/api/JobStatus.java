@@ -1,6 +1,10 @@
 package api;
 
-public class JobStatus {
+import java.io.Serializable;
+
+public class JobStatus implements Serializable{
+	private static final long serialVersionUID = 616915574120416835L;
+	
 	private int jobId;
 	private String status;
 	

@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
+import api.JobStatus;
+
 import fileio.RecordsFileIO;
 
 import networking.SIOCommand;
@@ -182,7 +184,7 @@ public class MasterRoutine {
 							// let the client know
 							// TODO: handle this on the other side
 							SIOSocket client = clientJobs.get(job.getJobID());
-							client.emit(Constants.JOB_COMPLETE, job.getJobID());
+							client.emit(Constants.JOB_COMPLETE, new JobStatus(job.getJobID(), Constants.COMPLETED));
 						}
 					} else{
 						try {

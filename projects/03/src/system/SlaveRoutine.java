@@ -122,7 +122,7 @@ public class SlaveRoutine {
 					Writable key = combinerRecord.getKey();
 					Writable[] values = combinerRecord.getValues();
 					Object[] args = {key, values, combinerOutput};
-					executer.execute(combinerObject, "combine", args);
+					executer.execute(combinerObject, "reduce", args); //TODO: COMBINE BOMEINE BOMEDNIE
 				}
 				combinerReader.delete();
 				combinerOutput.dumpBuffer();
