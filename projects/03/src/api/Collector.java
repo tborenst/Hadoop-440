@@ -5,6 +5,7 @@
  */
 package api;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,8 +26,9 @@ public class Collector implements Serializable{
 	 * Collector - constructor
 	 * @param path - path of file to write key-value pairs to (will create if not exist).
 	 * @param read - should the collector be initially set to read? If false, it will override the file given by its path.
+	 * @throws IOException 
 	 */
-	public Collector(String path){
+	public Collector(String path) throws IOException{
 		this.pairs = new ArrayList<Record>();
 		this.pairCount = 0;
 		this.path = path;
@@ -50,7 +52,11 @@ public class Collector implements Serializable{
 	 * Note: strings will be separated by newlines.
 	 */
 	public void emitString(String str){
-		io.writeNextString(str, "\n");
+		try {
+			io.writeNextString(str, "\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public String getPath(){
@@ -64,13 +70,21 @@ public class Collector implements Serializable{
 		Iterator<Record> itr = pairs.iterator();
 		while(itr.hasNext()){
 			Record record = itr.next();
-			io.writeNextRecord(record, delimiter); //write buffer
+			try {
+				io.writeNextRecord(record, delimiter);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		pairs = new ArrayList<Record>(); //clean buffer
 	}
 	
 	public void close(){
-		io.close();
+		try {
+			io.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

@@ -21,7 +21,7 @@ import fileio.UnableToAccessFileException;
 import system.InValidConfigFileException;
 import util.Util;
 
-public class Request {
+public class Request implements Serializable{
 	private static final long serialVersionUID = 891493633097482745L;
 	private static String nullConstant = "null"; //the user can do this to choose not to specify an optional field
 	
