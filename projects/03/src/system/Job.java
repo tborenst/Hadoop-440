@@ -33,11 +33,15 @@ public class Job {
 	private String to;                          // path to *directory* of results
 	
 	private String mapperDir;                   // directory containing mapper
-	private String mapperFile;                  // name of .java mapper file
+	private String mapperFile;                  // name of .class mapper file
 	private String mapperName;                  // binary name of mapper file
 	
+	private String combinerDir;                 // directory containing combiner
+	private String combinerFile;                // name of .class combiner file
+	private String combinerName;                // binary name of combiner file
+	
 	private String reducerDir;                  // directory containing reducer
-	private String reducerFile;                 // name of .java reducer file
+	private String reducerFile;                 // name of .class reducer file
 	private String reducerName;                 // binary name of reducer file
 	
 	// INTERNAL USE //
@@ -99,6 +103,18 @@ public class Job {
 	}
 	
 	/**
+	 * setCombiner - tell the job which, if any, Combiner class to use
+	 * @param combinerDir - directory of Combiner .class file
+	 * @param combinerFile - name of Combiner .class file
+	 * @param combinerName - binary name of Combiner .class file
+	 */
+	public void setCombiner(String combinerDir, String combinerFile, String combinerName){
+		this.combinerDir = combinerDir;
+		this.combinerFile = combinerFile;
+		this.combinerName = combinerName;
+	}
+	
+	/**
 	 * setReducer - tell the job which Reducer class to use
 	 * @param reducerDir - the directory of Reducer .class file
 	 * @param reducerFile - name of Reducer .class file
@@ -128,7 +144,10 @@ public class Job {
 		for(int i = 0; i < mappers; i++){
 			String[] fromPath = {from[i]};                                                         // input file for mapper
 			String[] interPath = {workDir + "/job" + jobID + "maptask" + taskCount + "mapresult"}; // intermediary file from mapper
-			Task task = new Task(taskCount, jobID, Constants.MAP, mapperDir, mapperFile, mapperName, fromPath, interPath);
+			String[] dir = {mapperDir, combinerDir};
+			String[] file = {mapperFile, combinerFile};
+			String[] name = {mapperName, combinerName};
+			Task task = new Task(taskCount, jobID, Constants.MAP, dir, file, name, fromPath, interPath);
 			
 			mapTasks.put(taskCount, task);    // add task to job
 			interMapFiles[i] = interPath[0];  // track intermideary file
@@ -149,7 +168,10 @@ public class Job {
 			toPaths[i] = workDir + "/job" + jobID + "sorttask" + i + "sortresult";
 			interSortFiles[i] = toPaths[i];
 		}
-		Task task = new Task(taskCount, jobID, Constants.SORT, null, null, null, fromPaths, toPaths);
+		String[] dir = {null, null};
+		String[] file = {null, null};
+		String[] name = {null, null};
+		Task task = new Task(taskCount, jobID, Constants.SORT, dir, file, name, fromPaths, toPaths);
 		sortTask = task;
 		taskCount++;
 		return task;
@@ -174,7 +196,10 @@ public class Job {
 		for(int i = 0; i < reducers; i++){
 			String[] fromPath = {interSortFiles[i]};
 			String[] finalPath = {to + "/job" + jobID + "reducetask" + taskCount + "finalresult"};
-			Task task = new Task(taskCount, jobID, Constants.REDUCE, reducerDir, reducerFile, reducerName, fromPath, finalPath);
+			String[] dir = {reducerDir, null};
+			String[] file = {reducerFile, null};
+			String[] name = {reducerName, null};
+			Task task = new Task(taskCount, jobID, Constants.REDUCE, dir, file, name, fromPath, finalPath);
 			
 			reduceTasks.put(taskCount, task);
 			taskCount++;

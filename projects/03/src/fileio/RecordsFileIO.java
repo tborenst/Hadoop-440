@@ -239,17 +239,13 @@ public class RecordsFileIO {
 	 * Reads and deserializes the next record.
 	 * @param delimiter
 	 * @return Record
+	 * @throws IOException 
 	 */
-	public Record readNextRecord(String delimiter) {
+	public Record readNextRecord(String delimiter) throws Exception {
 		Record r = null;
 		if(isReadFile) {
 			if(readObjectStream == null) {
-				try{
-					readObjectStream = openReadStream();
-				} catch (Exception e){
-					System.out.println("FUCKAYOUWAHEL");
-					e.printStackTrace();
-				}
+				readObjectStream = openReadStream();
 			}
 			
 			try {
@@ -260,11 +256,11 @@ public class RecordsFileIO {
 			} catch (ClassNotFoundException e1) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.readNextRecord: failed to read object at: " + getPath());
-				e1.printStackTrace();
+				throw e1;
 			} catch (IOException e1) {
 				//TODO: remove debugging
 				System.out.println("RecordsFileIO.readNextRecord: failed to read object or skip bytes at: " + getPath());
-				e1.printStackTrace();
+				throw e1;
 			}
 			
 			readRecordId++;
@@ -591,8 +587,9 @@ public class RecordsFileIO {
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 * @return - The index of the last path written to, -1 if partitionData fails.
+	 * @throws Exception 
 	 */
-	public int dealRecords(String[] newPaths, String readDelimiter, String writeDelimiter) {
+	public int dealRecords(String[] newPaths, String readDelimiter, String writeDelimiter) throws Exception {
 		int currPathIdx = -1;
 		if(isReadFile) {
 			RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newPaths.length];
@@ -623,9 +620,10 @@ public class RecordsFileIO {
 	 * @param newRecordFilesPaths - writes to
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws Exception 
 	 * @returns int - The index of the last record written to, -1 if partitionData fails.
 	 */
-	public static int dealRecordsTo(String[] recordsPath, String[] newRecordFilesPaths, String readDelimiter, String writeDelimiter) {
+	public static int dealRecordsTo(String[] recordsPath, String[] newRecordFilesPaths, String readDelimiter, String writeDelimiter) throws Exception {
 		int currRecordPathIdx = -1;
 		
 		RecordsFileIO[] newRecordsFiles = new RecordsFileIO[newRecordFilesPaths.length];
@@ -658,8 +656,9 @@ public class RecordsFileIO {
 	 * @param numRecords
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws Exception 
 	 */
-	public void splitRecords(String[] destPaths, int numRecords, String readDelimiter, String writeDelimiter) {
+	public void splitRecords(String[] destPaths, int numRecords, String readDelimiter, String writeDelimiter) throws Exception {
 		if(isReadFile) {
 			int recordsPerPartition = (numRecords + destPaths.length - 1) / destPaths.length;
 			
@@ -683,10 +682,10 @@ public class RecordsFileIO {
 	 * @param readDelimiter
 	 * @param writeDelimiter
 	 * @param deleteSrcFiles
-	 * @throws DirectoryNotFoundException 
+	 * @throws Exception 
 	 */
 	public static void mergeSortRecords(String[] srcPaths, String[] destPaths, String workingDir,
-			String readDelimiter, String writeDelimiter, boolean deleteSrcFiles) throws DirectoryNotFoundException {
+			String readDelimiter, String writeDelimiter, boolean deleteSrcFiles) throws Exception {
 		if(!Util.isValidDirectory(workingDir)) {
 			throw new DirectoryNotFoundException();
 		}
@@ -745,8 +744,9 @@ public class RecordsFileIO {
 	 * @param mergedRecs - destination
 	 * @param readDelimiter
 	 * @param writeDelimiter
+	 * @throws Exception 
 	 */
-	public static void mergeRecordsTo(RecordsFileIO recs1, RecordsFileIO recs2, RecordsFileIO mergedRecs, String readDelimiter, String writeDelimiter) {
+	public static void mergeRecordsTo(RecordsFileIO recs1, RecordsFileIO recs2, RecordsFileIO mergedRecs, String readDelimiter, String writeDelimiter) throws Exception {
 		Record rec1 = recs1.readNextRecord(readDelimiter);
 		Record rec2 = recs2.readNextRecord(readDelimiter); 
 		
@@ -778,7 +778,7 @@ public class RecordsFileIO {
 		}
 	}
 	
-	public void sortRecords(String workingDir, String readDelimiter) throws DirectoryNotFoundException {
+	public void sortRecords(String workingDir, String readDelimiter) throws Exception {
 		if(!Util.isValidDirectory(workingDir)) {
 			throw new DirectoryNotFoundException();
 		}

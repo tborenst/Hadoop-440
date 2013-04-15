@@ -290,6 +290,7 @@ public class MasterRoutine {
 		int jobID = jobCount;
 		Job job = new Job(jobID, mappers, reducers, workDirPath, fromPaths, resultsDir);
 		job.setMapper(mapperDir, mapperFile, mapperName);
+		job.setCombiner(combinerDir, combinerFile, combinerName);
 		job.setReducer(reducerDir, reducerFile, reducerName);
 		
 		// generate map tasks and add them to queue

@@ -19,7 +19,8 @@ public class ReducerTest implements Reducer{
 			sum += ((IntWritable)values[i]).getValue();
 		}
 		
-		output.emitString(k.getValue() + ": " + sum);
+//		output.emitString(k.getValue() + ": " + sum);
+		output.emit(key, new IntWritable(sum));
 	}
 
 }

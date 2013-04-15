@@ -8,7 +8,6 @@ package system;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import fileio.Partitioner;
 import fileio.Record;
 import fileio.RecordsFileIO;
 import api.Collector;
@@ -20,9 +19,9 @@ import networking.SIOClient;
 import networking.SIOCommand;
 
 public class SlaveRoutine {
-	private SIOClient sio;
-	private Executer executer;
-	private String workDir;
+	private SIOClient sio;     // socket
+	private Executer executer; // loads .class files
+	private String workDir;    // working directory
 	
 	public SlaveRoutine(String hostname, int port, String workDir){
 		this.sio = new SIOClient(hostname, port);
@@ -76,13 +75,24 @@ public class SlaveRoutine {
 		String mapperFile = task.getClassFile();
 		String mapperName = task.getClassName();
 		
+		String combinerDir = task.getSecondaryDir();
+		String combinerFile = task.getSecondaryFile();
+		String combinerName = task.getSecondaryName();
+		
+		String mapOutputFile;
+		if(combinerDir == null || combinerFile == null || combinerName == null){
+			mapOutputFile = to[0];
+		} else {
+			mapOutputFile = workDir + "job" + task.getJobID() + "task" + task.getTaskID() + "intermediatefile1";
+		}
+		
 		//try to execute the task, send back an error if failed
 		try{
-			Collector output = new Collector(to[0]);
+			// MAPPER
+			Collector output = new Collector(mapOutputFile);
 			RecordsFileIO reader = new RecordsFileIO(from[0], true, true);
 			Class<?> mapperClass = executer.getClass(mapperDir, mapperFile, mapperName);
 			Object mapObject = executer.instantaite(mapperClass, null);
-			
 			Record record;
 			// execute mapper over and over until you've exhausted all records
 			while((record = reader.readNextRecord("\n")) != null){
@@ -94,6 +104,30 @@ public class SlaveRoutine {
 				}
 			}
 			output.dumpBuffer();
+			output.close();
+			
+			// COMBINER
+			if(combinerDir != null && combinerFile != null && combinerName != null){
+				// sort and merge records from map
+				RecordsFileIO combinerReader = new RecordsFileIO(mapOutputFile, true, true);
+				combinerReader.sortRecords(workDir, "\n");;
+				
+				Collector combinerOutput = new Collector(to[0]);
+				Class<?> combinerClass = executer.getClass(combinerDir, combinerFile, combinerName);
+				Object combinerObject = executer.instantaite(combinerClass, null);
+				
+				Record combinerRecord;
+				// executer combiner over and over until you've exhausted all records
+				while((combinerRecord = combinerReader.readNextRecord("\n")) != null){
+					Writable key = combinerRecord.getKey();
+					Writable[] values = combinerRecord.getValues();
+					Object[] args = {key, values, combinerOutput};
+					executer.execute(combinerObject, "combine", args);
+				}
+				combinerReader.delete();
+				combinerOutput.dumpBuffer();
+			}
+			
 			// done executing map, let the master know
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
@@ -111,7 +145,6 @@ public class SlaveRoutine {
 	public void performSortTask(Task task){
 		String[] from = task.getPathFrom();
 		String[] to = task.getPathTo();
-		
 		try{
 			RecordsFileIO.mergeSortRecords(from, to, workDir, "\n", "\n", true); // true - delete source files
 			task.setStatus(Constants.COMPLETED);
@@ -150,12 +183,12 @@ public class SlaveRoutine {
 				Writable key = record.getKey();
 				Writable[] values = record.getValues();
 
-
 				Object[] args = {key, values, output};
 				executer.execute(reducerObject, "reduce", args);
 			}
 			
 			// done executing reducer, let the master know
+			output.dumpBuffer();
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
 			reader.delete(); // delete input files once you're done

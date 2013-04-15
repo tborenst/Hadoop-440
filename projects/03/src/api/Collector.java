@@ -69,6 +69,10 @@ public class Collector implements Serializable{
 		pairs = new ArrayList<Record>(); //clean buffer
 	}
 	
+	public void close(){
+		io.close();
+	}
+	
 	/**
 	 * DEBUGGING FUNCTION - PRINT ALL RECORDS (to stdout)
 	 */
