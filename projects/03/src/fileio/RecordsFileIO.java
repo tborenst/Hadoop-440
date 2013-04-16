@@ -782,6 +782,7 @@ public class RecordsFileIO {
 			} else {
 				recs1.close();
 			}
+			
 			numPathsMerged--;
 			if(deleteSrcFiles || numPathsMerged < 0) {
 				recs2.delete();
@@ -891,36 +892,46 @@ public class RecordsFileIO {
 			
 			}
 			
-			while(mergeFiles.size() > 2) {
-				RecordsFileIO recs1 =  mergeFiles.remove();
-				recs1.setIsReadFile(true);
-				RecordsFileIO recs2 = mergeFiles.remove();
-				recs2.setIsReadFile(true);
-				
-				String destPath = Util.generateRandomPath(workingDir, "/sortRecordsIntermediary_", "txt");
-				RecordsFileIO mergedRec = new RecordsFileIO(destPath, true, false);
-				mergeRecordsTo(recs1, recs2, mergedRec, readDelimiter, readDelimiter);
-				mergeFiles.add(mergedRec);
-				recs1.delete();
-				recs2.delete();
-			}
-			
 			if(mergeFiles.size() > 0) {
-				RecordsFileIO recs1 =  mergeFiles.remove();
-				recs1.setIsReadFile(true);
-				RecordsFileIO recs2 = mergeFiles.remove();
-				recs2.setIsReadFile(true);
+				// Only do this if the file actually has records
+				System.out.println("Initially there were: " + mergeFiles.size());
 				
-				delete();
-				initialize(true, false);
+				while(mergeFiles.size() > 2) {
+					RecordsFileIO recs1 =  mergeFiles.remove();
+					recs1.setIsReadFile(true);
+					RecordsFileIO recs2 = mergeFiles.remove();
+					recs2.setIsReadFile(true);
+					
+					String destPath = Util.generateRandomPath(workingDir, "/sortRecordsIntermediary_", "txt");
+					RecordsFileIO mergedRec = new RecordsFileIO(destPath, true, false);
+					mergeRecordsTo(recs1, recs2, mergedRec, readDelimiter, readDelimiter);
+					mergeFiles.add(mergedRec);
+					recs1.delete();
+					recs2.delete();
+					
+	
+					System.out.println("There are now: " + mergeFiles.size());
+				}
 				
-				mergeRecordsTo(recs1, recs2, this, readDelimiter, readDelimiter);
-				recs1.delete();
-				recs2.delete();
-				setIsReadFile(true);
 				
-			} else {
-				System.out.println("Merged Sort fucked up some how!");
+				if(mergeFiles.size() >= 2) {
+					RecordsFileIO recs1 =  mergeFiles.remove();
+					recs1.setIsReadFile(true);
+					RecordsFileIO recs2 = mergeFiles.remove();
+					recs2.setIsReadFile(true);
+					
+					delete();
+					initialize(true, false);
+					
+					mergeRecordsTo(recs1, recs2, this, readDelimiter, readDelimiter);
+					recs1.delete();
+					recs2.delete();
+					setIsReadFile(true);
+					
+				} else {
+					System.out.println("RecordsFileIO.sortRecords: Last 2 elements in mergeFiles not found.");
+					throw new RecordsFileIOException();
+				}
 			}
 		}
 	}
