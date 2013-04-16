@@ -10,6 +10,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 
+
 import system.SocketFailureException;
 import fileio.UnableToAccessFileException;
 
@@ -17,8 +18,8 @@ import api.JobStatus;
 
 public class ClientRoutine {
 	private CommandPrompt cmd;
-	private SIOClient socket;
 	private ArrayList<Integer> jobIds;
+	private SIOClient sioSocket;
 	private static String helpString = "To send a new job do 'run <path to config file>'.\n" +
 									 "Check the status of a job with 'status <job id>'.\n" +
 									 "Stop a job with 'stop <job id>'." +
@@ -33,9 +34,9 @@ public class ClientRoutine {
 					+ "Connecting to: " + hostname + ":" + port + "...");
 		this.jobIds = new ArrayList<Integer>();
 		
-		this.socket = null;
+		this.sioSocket = null;
 		try {
-			this.socket = new SIOClient(hostname, port);
+			this.sioSocket = new SIOClient(hostname, port);
 		} catch(Exception e) {
 			cmd.emit("Unable to connect to server at: " + hostname + ":" + port +".");
 			return;
@@ -88,7 +89,7 @@ public class ClientRoutine {
 				if(args.length > 0) {
 					try {
 						int jobId = Integer.parseInt(args[0]);
-						socket.emit(Constants.STOP_JOB, jobId);
+						sioSocket.emit(Constants.STOP_JOB, jobId);
 					} catch (NumberFormatException e) {
 						synchronized(cmd) {
 							cmd.emit("ERROR: Malformed expression, to stop your job use 'stop <job id>', job id is an integer.");
@@ -110,7 +111,7 @@ public class ClientRoutine {
 				if(args.length > 0) {
 					try {
 						int jobId = Integer.parseInt(args[0]);
-						socket.emit(Constants.START_JOB, jobId);
+						sioSocket.emit(Constants.START_JOB, jobId);
 					} catch (NumberFormatException e) {
 						synchronized(cmd) {
 							cmd.emit("ERROR: Malformed expression, to stop your job use 'stop <job id>', job id is an integer.");
@@ -167,6 +168,18 @@ public class ClientRoutine {
 		cmd.on("quit", new SIOCommand() {
 			@Override
 			public void run() {
+				sioSocket.on(Constants.JOB_STATUS, new SIOCommand() {});
+				sioSocket.on(Constants.JOB_REQUEST, new SIOCommand() {});
+				sioSocket.on(Constants.JOB_COMPLETE, new SIOCommand() {});
+				synchronized(jobIds) {
+					for(int j = 0; j < jobIds.size(); j++) {
+						try {
+							sioSocket.emit(Constants.STOP_JOB, jobIds.get(j));
+						} catch(Exception e) {
+							// we don't care if there are any exceptions since the user is exiting
+						}
+					}
+				}
 				System.exit(0);
 			}
 		});
@@ -176,7 +189,7 @@ public class ClientRoutine {
 		/**
 		 * Callback from server for job status request.
 		 */
-		socket.on(Constants.JOB_STATUS, new SIOCommand() {
+		sioSocket.on(Constants.JOB_STATUS, new SIOCommand() {
 			@Override
 			public void run() {
 				JobStatus jobStatus = (JobStatus) object;
@@ -185,7 +198,7 @@ public class ClientRoutine {
 					cmd.emit(statusStr);
 				}
 				
-				if(jobStatus.getStatus().equals(Constants.FAILED)) {
+				if(jobStatus.getStatus().equals(Constants.FAILED) || jobStatus.getStatus().equals(Constants.COMPLETED)) {
 					synchronized(jobIds) {
 						int idx = jobIds.indexOf(jobStatus.getJobId());
 						if(idx != -1) {
@@ -199,7 +212,7 @@ public class ClientRoutine {
 		/**
 		 * Callback from server to confirm that a job was created.
 		 */
-		socket.on(Constants.JOB_REQUEST, new SIOCommand() {
+		sioSocket.on(Constants.JOB_REQUEST, new SIOCommand() {
 			@Override
 			public void run() {
 				JobStatus jobStatus = (JobStatus) object;
@@ -216,7 +229,7 @@ public class ClientRoutine {
 			}
 		});
 		
-		socket.on(Constants.JOB_COMPLETE, new SIOCommand() {
+		sioSocket.on(Constants.JOB_COMPLETE, new SIOCommand() {
 			@Override
 			public void run() {
 				JobStatus jobStatus = (JobStatus) object;
@@ -241,8 +254,8 @@ public class ClientRoutine {
 	 * @throws SocketFailureException 
 	 */
 	private void getJobStatus(int jobId) throws SocketFailureException {
-		if(socket != null && socket.isAlive()) {
-			socket.emit(Constants.JOB_STATUS, jobId);
+		if(sioSocket != null && sioSocket.isAlive()) {
+			sioSocket.emit(Constants.JOB_STATUS, jobId);
 		} else {
 			throw new SocketFailureException();
 		}
@@ -260,9 +273,8 @@ public class ClientRoutine {
 	 */
 	private void runMapReduce(String configFilePath) throws JsonParseException, JsonMappingException, FileNotFoundException, InValidConfigFileException, SocketFailureException, UnableToAccessFileException {
 		Request req = Request.constructFromFile(configFilePath);
-		System.out.println("REQUEST OBJECT:" + req);
-		if(socket != null && socket.isAlive()) {
-			socket.emit(Constants.JOB_REQUEST, req);
+		if(sioSocket != null && sioSocket.isAlive()) {
+			sioSocket.emit(Constants.JOB_REQUEST, req);
 		} else {
 			throw new SocketFailureException();
 		}

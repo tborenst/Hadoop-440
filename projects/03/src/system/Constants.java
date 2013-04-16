@@ -15,6 +15,7 @@ public class Constants {
 	public static String REDUCING = "REDUCING";
 	public static String FAILED = "FAILED";
 	public static String STOPPED = "STOPPED";
+	public static String NO_SUCH_JOB = "NO_SUCH_JOB";
 	// SIO event names
 	public static String TASK_COMPLETE = "TASK_COMPLETE";
 	public static String TASK_REQUEST = "TASK_REQUEST";

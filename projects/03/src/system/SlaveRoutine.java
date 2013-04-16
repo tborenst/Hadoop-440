@@ -83,7 +83,7 @@ public class SlaveRoutine {
 		if(combinerDir == null || combinerFile == null || combinerName == null){
 			mapOutputFile = to[0];
 		} else {
-			mapOutputFile = workDir + "job" + task.getJobID() + "task" + task.getTaskID() + "intermediatefile1";
+			mapOutputFile = workDir + "/job" + task.getJobID() + "task" + task.getTaskID() + "intermediatefile1";
 		}
 		
 		//try to execute the task, send back an error if failed
@@ -122,7 +122,7 @@ public class SlaveRoutine {
 					Writable key = combinerRecord.getKey();
 					Writable[] values = combinerRecord.getValues();
 					Object[] args = {key, values, combinerOutput};
-					executer.execute(combinerObject, "reduce", args); //TODO: COMBINE BOMEINE BOMEDNIE
+					executer.execute(combinerObject, "combine", args);
 				}
 				combinerReader.delete();
 				combinerOutput.dumpBuffer();

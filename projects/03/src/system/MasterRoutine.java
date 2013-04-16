@@ -87,7 +87,7 @@ public class MasterRoutine {
 				try{
 					RecordsFileIO.dealStringsAsRecordsTo(from, initialMapFiles, "\n", "\n");
 				} catch (Exception e){
-					socket.emit(Constants.JOB_FAILED, null);
+					socket.emit(Constants.JOB_REQUEST, new JobStatus(-1, Constants.FAILED));
 				}
 				
 				// create new job
@@ -101,11 +101,60 @@ public class MasterRoutine {
 					clientJobs.put(jobID, socket);
 				}
 				
-				// TODO: add client side to handle it
-				socket.emit(Constants.JOB_ID, jobID);
+				socket.emit(Constants.JOB_REQUEST, new JobStatus(jobID, Constants.MAPPING));
 			}
 		});
 		
+		// report job status
+		clientSIO.on(Constants.JOB_STATUS, new SIOCommand(){
+			public void run(){
+				synchronized(jobs){
+					int jobID = (int)object;
+					Job job = jobs.get(jobID);
+					if(job == null){
+						socket.emit(Constants.JOB_STATUS, new JobStatus(jobID, Constants.NO_SUCH_JOB));
+					} else {
+						socket.emit(Constants.JOB_STATUS, new JobStatus(jobID, job.getJobStatus()));
+					}
+				}
+			}
+		});
+		
+		// stop new job if not failed or completed
+		clientSIO.on(Constants.STOP_JOB, new SIOCommand(){
+			public void run(){
+				synchronized(jobs){
+					int jobID = (int)object;
+					Job job = jobs.get(jobID);
+					if(job == null){
+						socket.emit(Constants.JOB_STATUS, new JobStatus(jobID, Constants.NO_SUCH_JOB));
+					} else {
+						if(!(job.getJobStatus().equals(Constants.FAILED) || job.getJobStatus().equals(Constants.COMPLETED))){
+							job.updateJobStatus(Constants.STOPPED);
+						}
+						socket.emit(Constants.JOB_STATUS, new JobStatus(jobID, job.getJobStatus()));
+					}
+				}
+			}
+		});
+		
+		// resume new job if not failed or completed
+		clientSIO.on(Constants.START_JOB, new SIOCommand(){
+			public void run(){
+				synchronized(jobs){
+					int jobID = (int)object;
+					Job job = jobs.get(jobID);
+					if(job == null){
+						socket.emit(Constants.JOB_STATUS, new JobStatus(jobID, Constants.NO_SUCH_JOB));
+					} else {
+						if(!(job.getJobStatus().equals(Constants.FAILED) || job.getJobStatus().equals(Constants.COMPLETED))){
+							job.updateJobStatus(Constants.PENDING);
+						}
+						socket.emit(Constants.JOB_STATUS, new JobStatus(jobID, job.getJobStatus()));
+					}
+				}
+			}
+		});
 		
 		
 		// SLAVE CONNECTIONS
@@ -182,8 +231,8 @@ public class MasterRoutine {
 						boolean done = job.updateReduceTask(taskID, Constants.COMPLETED);
 						if(done){
 							// let the client know
-							// TODO: handle this on the other side
 							SIOSocket client = clientJobs.get(job.getJobID());
+							job.updateJobStatus(Constants.COMPLETED);
 							client.emit(Constants.JOB_COMPLETE, new JobStatus(job.getJobID(), Constants.COMPLETED));
 						}
 					} else{
@@ -240,9 +289,22 @@ public class MasterRoutine {
 				while(!failedQueue.isEmpty() && !idleSockets.isEmpty()){
 					SIOSocket slave = idleSockets.remove();
 					Task failedTask = failedQueue.remove();
-					slave.emit(Constants.TASK_REQUEST, failedTask);
-					synchronized(pendingSockets){
-						pendingSockets.put(slave, failedTask);
+					synchronized(jobs){
+						Job job = jobs.get(failedTask.getJobID());
+						if(job.getJobStatus().equals(Constants.FAILED)){
+							// discard of task, put socket back into idleSockets
+							idleSockets.add(slave);
+						} else if(job.getJobStatus().equals(Constants.STOPPED)){
+							// requeue task for a later time, put socket back into idleSockets
+							idleSockets.add(slave);
+							failedQueue.add(failedTask);
+						} else {
+							// OK to send task
+							slave.emit(Constants.TASK_REQUEST, failedTask);
+							synchronized(pendingSockets){
+								pendingSockets.put(slave, failedTask);
+							}
+						}
 					}
 				}
 				
@@ -251,9 +313,22 @@ public class MasterRoutine {
 					while(!reduceQueue.isEmpty() && !idleSockets.isEmpty()){
 						SIOSocket slave = idleSockets.remove();
 						Task reduceTask = reduceQueue.remove();
-						slave.emit(Constants.TASK_REQUEST, reduceTask);
-						synchronized(pendingSockets){
-							pendingSockets.put(slave, reduceTask);
+						synchronized(jobs){
+							Job job = jobs.get(reduceTask.getJobID());
+							if(job.getJobStatus().equals(Constants.FAILED)){
+								// discard of task, put socket back into idleSockets
+								idleSockets.add(slave);
+							} else if(job.getJobStatus().equals(Constants.STOPPED)){
+								// requeue task for a later time, put socket back into idlesockets
+								idleSockets.add(slave);
+								reduceQueue.add(reduceTask);
+							} else {
+								// OK to send task
+								slave.emit(Constants.TASK_REQUEST, reduceTask);
+								synchronized(pendingSockets){
+									pendingSockets.put(slave, reduceTask);
+								}
+							}
 						}
 					}
 				
@@ -262,9 +337,22 @@ public class MasterRoutine {
 						while(!sortQueue.isEmpty() && !idleSockets.isEmpty()){
 							SIOSocket slave = idleSockets.remove();
 							Task sortTask = sortQueue.remove();
-							slave.emit(Constants.TASK_REQUEST, sortTask);
-							synchronized(pendingSockets){
-								pendingSockets.put(slave, sortTask);
+							synchronized(jobs){
+								Job job = jobs.get(sortTask.getJobID());
+								if(job.getJobStatus().equals(Constants.FAILED)){
+									// discard of task, put socket back into idleSockets
+									idleSockets.add(slave);
+								} else if(job.getJobStatus().equals(Constants.STOPPED)){
+									// requeue task for a later time, put socket back into idleSockets
+									idleSockets.add(slave);
+									sortQueue.add(sortTask);
+								} else {
+									// OK to send task
+									slave.emit(Constants.TASK_REQUEST, sortTask);
+									synchronized(pendingSockets){
+										pendingSockets.put(slave, sortTask);
+									}
+								}
 							}
 						}
 						
@@ -273,9 +361,22 @@ public class MasterRoutine {
 							while(!mapQueue.isEmpty() && !idleSockets.isEmpty()){
 								SIOSocket slave = idleSockets.remove();
 								Task mapTask = mapQueue.remove();
-								slave.emit(Constants.TASK_REQUEST, mapTask);
-								synchronized(pendingSockets){
-									pendingSockets.put(slave, mapTask);
+								synchronized(jobs){
+									Job job = jobs.get(mapTask.getJobID());
+									if(job.getJobStatus().equals(Constants.FAILED)){
+										// discard of task, put socket back into idlesockets
+										idleSockets.add(slave);
+									} else if(job.getJobStatus().equals(Constants.STOPPED)){
+										// requeue task for a later time, put socket back into idleSocket
+										idleSockets.add(slave);
+										sortQueue.add(mapTask);
+									} else {
+										// OK to send task
+										slave.emit(Constants.TASK_REQUEST, mapTask);
+										synchronized(pendingSockets){
+											pendingSockets.put(slave, mapTask);
+										}
+									}
 								}
 							}
 						}
