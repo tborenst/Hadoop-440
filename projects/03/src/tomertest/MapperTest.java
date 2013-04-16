@@ -13,6 +13,12 @@ public class MapperTest implements Mapper{
 		StringWritable k = (StringWritable)key;
 		StringWritable v = (StringWritable)value;
 		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
 		String sentence = v.getValue();
 		String[] words  = sentence.split(" ");
 		for(int i = 0; i < words.length; i++){
