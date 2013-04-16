@@ -127,7 +127,7 @@ public class Tests {
 //		job.printSortTask();
 //		job.printRedcueTasks();
 		
-		String workDir = "/Users/tomer/Desktop/WorkDir";
+		String workDir = "C:/Users/vansi/Documents/School/15440/projects/03/tests";
 		System.out.println("1 Master...");
 		MasterRoutine master = new MasterRoutine(15237, 15337, workDir);
 		Thread.sleep(500);
