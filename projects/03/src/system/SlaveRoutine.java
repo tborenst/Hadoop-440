@@ -58,6 +58,13 @@ public class SlaveRoutine {
 				}
 			}
 		});
+		
+		sio.on("disconnect", new SIOCommand(){
+			public void run(){
+				System.out.println("Connection to Master server lost. Quitting.");
+				System.exit(0);
+			}
+		});
 	}
 	
 	/**
@@ -126,6 +133,7 @@ public class SlaveRoutine {
 				}
 				combinerReader.delete();
 				combinerOutput.dumpBuffer();
+				combinerOutput.close();
 			}
 			
 			// done executing map, let the master know
@@ -182,13 +190,13 @@ public class SlaveRoutine {
 			while((record = reader.readNextRecord("\n")) != null){
 				Writable key = record.getKey();
 				Writable[] values = record.getValues();
-
 				Object[] args = {key, values, output};
 				executer.execute(reducerObject, "reduce", args);
 			}
 			
 			// done executing reducer, let the master know
 			output.dumpBuffer();
+			output.close();
 			task.setStatus(Constants.COMPLETED);
 			sio.emit(Constants.TASK_COMPLETE, task);
 			reader.delete(); // delete input files once you're done

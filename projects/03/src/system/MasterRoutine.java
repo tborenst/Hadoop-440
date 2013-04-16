@@ -176,13 +176,15 @@ public class MasterRoutine {
 			public void run(){
 				Task task = (Task)object;
 				int jobID = task.getJobID();
-				synchronized(clientJobs){
-					SIOSocket client = clientJobs.get(jobID);
-					client.emit(Constants.JOB_FAILED, jobID);
-				}
 				synchronized(jobs){
 					Job job = jobs.get(jobID);
-					job.updateJobStatus(Constants.FAILED);
+					if(!job.getJobStatus().equals(Constants.FAILED)){
+						job.updateJobStatus(Constants.FAILED);
+						synchronized(clientJobs){
+							SIOSocket client = clientJobs.get(jobID);
+							client.emit(Constants.JOB_STATUS, new JobStatus(jobID, Constants.FAILED));
+						}
+					}
 				}
 			}
 		});
