@@ -1,6 +1,7 @@
 package system;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 import networking.SIOClient;
 import networking.SIOCommand;
@@ -17,6 +18,7 @@ import api.JobStatus;
 
 public class ClientRoutine {
 	private CommandPrompt cmd;
+	private ArrayList<Integer> jobIds;
 	private SIOClient sioSocket;
 	private static String helpString = "To send a new job do 'run <path to config file>'.\n" +
 									 "Check the status of a job with 'status <job id>'.\n" +
@@ -25,11 +27,14 @@ public class ClientRoutine {
 									 "Exit or quit with 'quit'.\n" +
 									 "And if you want to see this message again do 'help'.\n";
 	
+	
 	public ClientRoutine(String hostname, int port) {
 		this.cmd = new CommandPrompt();
 		System.out.println("Welcome to Vansi & Tomer's Map Reducer, step right up and run some tasks!\n" + helpString
 					+ "Connecting to: " + hostname + ":" + port + "...");
-
+		this.jobIds = new ArrayList<Integer>();
+		
+		this.sioSocket = null;
 		try {
 			this.sioSocket = new SIOClient(hostname, port);
 		} catch(Exception e) {
@@ -163,6 +168,18 @@ public class ClientRoutine {
 		cmd.on("quit", new SIOCommand() {
 			@Override
 			public void run() {
+				sioSocket.on(Constants.JOB_STATUS, new SIOCommand() {});
+				sioSocket.on(Constants.JOB_REQUEST, new SIOCommand() {});
+				sioSocket.on(Constants.JOB_COMPLETE, new SIOCommand() {});
+				synchronized(jobIds) {
+					for(int j = 0; j < jobIds.size(); j++) {
+						try {
+							sioSocket.emit(Constants.STOP_JOB, jobIds.get(j));
+						} catch(Exception e) {
+							// we don't care if there are any exceptions since the user is exiting
+						}
+					}
+				}
 				System.exit(0);
 			}
 		});
@@ -180,6 +197,15 @@ public class ClientRoutine {
 				synchronized(cmd) {
 					cmd.emit(statusStr);
 				}
+				
+				if(jobStatus.getStatus().equals(Constants.FAILED) || jobStatus.getStatus().equals(Constants.COMPLETED)) {
+					synchronized(jobIds) {
+						int idx = jobIds.indexOf(jobStatus.getJobId());
+						if(idx != -1) {
+							jobIds.remove(idx);
+						}
+					}
+				}
 			}
 		});
 		
@@ -194,6 +220,12 @@ public class ClientRoutine {
 				synchronized(cmd) {
 					cmd.emit(statusStr);
 				}
+				
+				if(!jobStatus.getStatus().equals(Constants.FAILED)) {
+					synchronized(jobIds) {
+						jobIds.add(jobStatus.getJobId());
+					}
+				}
 			}
 		});
 		
@@ -204,6 +236,13 @@ public class ClientRoutine {
 				String statusStr = "Job " + jobStatus.getJobId() + " is " + Constants.COMPLETED + ".";
 				synchronized(cmd) {
 					cmd.emit(statusStr);
+				}
+				
+				synchronized(jobIds) {
+					int idx = jobIds.indexOf(jobStatus.getJobId());
+					if(idx != -1) {
+						jobIds.remove(idx);
+					}
 				}
 			}
 		});
