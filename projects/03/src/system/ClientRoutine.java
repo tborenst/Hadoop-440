@@ -1,6 +1,7 @@
 package system;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 import networking.SIOClient;
 import networking.SIOCommand;
@@ -17,6 +18,7 @@ import api.JobStatus;
 public class ClientRoutine {
 	private CommandPrompt cmd;
 	private SIOClient socket;
+	private ArrayList<Integer> jobIds;
 	private static String helpString = "To send a new job do 'run <path to config file>'.\n" +
 									 "Check the status of a job with 'status <job id>'.\n" +
 									 "Stop a job with 'stop <job id>'." +
@@ -24,10 +26,12 @@ public class ClientRoutine {
 									 "Exit or quit with 'quit'.\n" +
 									 "And if you want to see this message again do 'help'.\n";
 	
+	
 	public ClientRoutine(String hostname, int port) {
 		this.cmd = new CommandPrompt();
 		System.out.println("Welcome to Vansi & Tomer's Map Reducer, step right up and run some tasks!\n" + helpString
 					+ "Connecting to: " + hostname + ":" + port + "...");
+		this.jobIds = new ArrayList<Integer>();
 		
 		this.socket = null;
 		try {
@@ -180,6 +184,15 @@ public class ClientRoutine {
 				synchronized(cmd) {
 					cmd.emit(statusStr);
 				}
+				
+				if(jobStatus.getStatus().equals(Constants.FAILED)) {
+					synchronized(jobIds) {
+						int idx = jobIds.indexOf(jobStatus.getJobId());
+						if(idx != -1) {
+							jobIds.remove(idx);
+						}
+					}
+				}
 			}
 		});
 		
@@ -194,6 +207,12 @@ public class ClientRoutine {
 				synchronized(cmd) {
 					cmd.emit(statusStr);
 				}
+				
+				if(!jobStatus.getStatus().equals(Constants.FAILED)) {
+					synchronized(jobIds) {
+						jobIds.add(jobStatus.getJobId());
+					}
+				}
 			}
 		});
 		
@@ -204,6 +223,13 @@ public class ClientRoutine {
 				String statusStr = "Job " + jobStatus.getJobId() + " is " + Constants.COMPLETED + ".";
 				synchronized(cmd) {
 					cmd.emit(statusStr);
+				}
+				
+				synchronized(jobIds) {
+					int idx = jobIds.indexOf(jobStatus.getJobId());
+					if(idx != -1) {
+						jobIds.remove(idx);
+					}
 				}
 			}
 		});

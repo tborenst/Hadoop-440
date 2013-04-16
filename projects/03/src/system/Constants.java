@@ -7,8 +7,8 @@ public class Constants {
 	public static String REDUCE = "REDUCE";
 	// task statuses
 	public static String READY = "READY";
-	public static String PENDING = "PENDING";
-	public static String COMPLETED = "COMPLETED";
+	public static String PENDING = "PENDING"; // job status
+	public static String COMPLETED = "COMPLETED"; // job status
 	// job status
 	public static String MAPPING = "MAPPING";
 	public static String SORTING = "SORTING";
