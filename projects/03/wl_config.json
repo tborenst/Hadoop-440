@@ -1,0 +1,8 @@
+{"Map":
+	{"numMappers":10,"directory":"../bin/examples","fileName":"WritingLevelMapper.class","binaryName":"examples.WritingLevelMapper"},
+"Combine":
+	{"directory":"../bin/examples","fileName":"WritingLevelCombiner.class","binaryName":"examples.WritingLevelCombiner"},
+"Reduce":
+	{"numReducers":1, "directory":"../bin/examples","fileName":"WritingLevelReducer.class","binaryName":"examples.WritingLevelReducer"},
+"dataPaths":["../story1.txt","../story2.txt"],
+"resultsDirectory":"../Results"}
