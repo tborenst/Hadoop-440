@@ -79,8 +79,8 @@ public class Executer extends ClassLoader{
 		try{
 			if(args == null){
 				Class<?> myClass = obj.getClass();
-				Method myMethod = myClass.getMethod(methodName, null);
-				return myMethod.invoke(obj, null);
+				Method myMethod = myClass.getMethod(methodName);
+				return myMethod.invoke(obj);
 			} else {
 				Class<?> myClass = obj.getClass();
 				Method[] methods = myClass.getMethods();

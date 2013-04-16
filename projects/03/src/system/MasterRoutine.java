@@ -109,7 +109,7 @@ public class MasterRoutine {
 		clientSIO.on(Constants.JOB_STATUS, new SIOCommand(){
 			public void run(){
 				synchronized(jobs){
-					int jobID = (int)object;
+					int jobID = (Integer)object;
 					Job job = jobs.get(jobID);
 					if(job == null){
 						socket.emit(Constants.JOB_STATUS, new JobStatus(jobID, Constants.NO_SUCH_JOB));
@@ -124,7 +124,7 @@ public class MasterRoutine {
 		clientSIO.on(Constants.STOP_JOB, new SIOCommand(){
 			public void run(){
 				synchronized(jobs){
-					int jobID = (int)object;
+					int jobID = (Integer)object;
 					Job job = jobs.get(jobID);
 					if(job == null){
 						socket.emit(Constants.JOB_STATUS, new JobStatus(jobID, Constants.NO_SUCH_JOB));
@@ -142,7 +142,7 @@ public class MasterRoutine {
 		clientSIO.on(Constants.START_JOB, new SIOCommand(){
 			public void run(){
 				synchronized(jobs){
-					int jobID = (int)object;
+					int jobID = (Integer)object;
 					Job job = jobs.get(jobID);
 					if(job == null){
 						socket.emit(Constants.JOB_STATUS, new JobStatus(jobID, Constants.NO_SUCH_JOB));
