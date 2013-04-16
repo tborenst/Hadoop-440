@@ -22,8 +22,8 @@ public class CommandPrompt {
 		this.bindings = new HashMap<String, SIOCommand>();
 		this.printLock = new Object();
 		this.promptGiven = false;
-		givePrompt();
-		System.out.print("> ");
+		//givePrompt();
+		//System.out.print("> ");
 	}
 	
 	/**
