@@ -5,12 +5,15 @@
 
 package util;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Iterator;
+import java.io.RandomAccessFile;
+//import java.nio.file.Files;
+//import java.nio.file.Paths;
 
 import system.ClassStore;
 
@@ -21,9 +24,16 @@ public class Executer extends ClassLoader{
 	 * @param dir - absolute path to dir containing .class file (e.g. "User/Desktop/projects/bin/tests/")
 	 * @param fileName - name of .class file (e.g. "Test.class")
 	 * @param className - binary name of the class (e.g. for a Test class in package tests: "tests.Test")
+	 * @throws IOException 
 	 */
 	public Class<?> getClass(String dir, String fileName, String className) throws IOException {
-		byte[] code = Files.readAllBytes(Paths.get(dir, fileName));
+		//byte[] code = Files.readAllBytes(Paths.get(dir, fileName));
+		
+		File f = new File(dir + "/" + fileName);
+		RandomAccessFile raf = new RandomAccessFile(f, "rw");
+		byte[] code = new byte[(int) raf.length()];
+		raf.read(code);
+		
 		Class<?> classObject;
 		classObject = ClassStore.getClass(dir, fileName, className);
 		if(classObject == null){

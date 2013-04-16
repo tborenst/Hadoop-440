@@ -1,12 +1,12 @@
 {"Map":
-	{"numMappers":2,
+	{"numMappers":10,
   "directory":"C:/Users/vansi/Documents/School/15440/projects/03/bin/tomertest",
   "fileName":"MapperTest.class","binaryName":"tomertest.MapperTest"},
 
 "Combine":
-	{"directory":"C:/Users/vansi/Documents/School/15440/projects/03/bin/tomertest",
-  "fileName":"ReducerTest.class",
-  "binaryName":"tomertest.ReducerTest"},
+	{"directory":"null",
+  "fileName":"null",
+  "binaryName":"null"},
   
 "Reduce":
 	{"numReducers":2,
