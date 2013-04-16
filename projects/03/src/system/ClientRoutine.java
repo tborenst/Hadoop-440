@@ -134,7 +134,11 @@ public class ClientRoutine {
 					String path = args[0];
 					try {
 						runMapReduce(path);
-					} catch (JsonParseException | JsonMappingException e) {
+					} catch (JsonParseException jpe) {
+						synchronized(cmd) {
+							cmd.emit("ERROR: Invalid JSON formatting in config file at: " + path + ".");
+						}
+					} catch (JsonMappingException jme) {
 						synchronized(cmd) {
 							cmd.emit("ERROR: Invalid JSON formatting in config file at: " + path + ".");
 						}
