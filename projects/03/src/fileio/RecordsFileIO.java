@@ -894,7 +894,7 @@ public class RecordsFileIO {
 			
 			if(mergeFiles.size() > 0) {
 				// Only do this if the file actually has records
-				System.out.println("Initially there were: " + mergeFiles.size());
+				//System.out.println("Initially there were: " + mergeFiles.size());
 				
 				while(mergeFiles.size() > 2) {
 					RecordsFileIO recs1 =  mergeFiles.remove();
@@ -908,9 +908,7 @@ public class RecordsFileIO {
 					mergeFiles.add(mergedRec);
 					recs1.delete();
 					recs2.delete();
-					
-	
-					System.out.println("There are now: " + mergeFiles.size());
+					//System.out.println("There are now: " + mergeFiles.size());
 				}
 				
 				
