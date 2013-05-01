@@ -9,6 +9,11 @@ public class KCluster<T> implements Serializable {
 	private ArrayList<T> data;
 	private T centroid;
 	
+	public KCluster(T centroid) {
+		this.centroid = centroid;
+		this.data = new ArrayList<T>();
+	}
+	
 	public KCluster(T centroid, ArrayList<T> data) {
 		this.centroid = centroid;
 		this.data = data;
@@ -18,8 +23,20 @@ public class KCluster<T> implements Serializable {
 		return data;
 	}
 	
+	public void setData(ArrayList<T> newData) {
+		data = newData;
+	}
+	
+	public void addDataPt(T dataPt) {
+		data.add(dataPt);
+	}
+	
 	public T getCentroid() {
 		return centroid;
+	}
+	
+	public void setCentroid(T newCentroid) {
+		centroid = newCentroid;
 	}
 	
 	public static void main(String[] args) {
@@ -29,7 +46,8 @@ public class KCluster<T> implements Serializable {
 		d.add(3);
 		d.add(4);
 		
-		KCluster<Integer> c = new KCluster<Integer>(2, d);
+		KCluster<Integer> c = new KCluster<Integer>(2);
+		c.addDataPt(1);
 		
 	}
 }
