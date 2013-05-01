@@ -1,0 +1,8 @@
+{"Map":
+	{"numMappers":12,"directory":"../bin/examples","fileName":"WordCountMapper.class","binaryName":"examples.WordCountMapper"},
+"Combine":
+	{"directory":"null","fileName":"null","binaryName":"null"},
+"Reduce":
+	{"numReducers":2, "directory":"../bin/examples","fileName":"WordCountReducer.class","binaryName":"examples.WordCountReducer"},
+"dataPaths":["../story1.txt","../story2.txt"],
+"resultsDirectory":"../Results"}
