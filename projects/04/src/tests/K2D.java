@@ -25,5 +25,9 @@ public class K2D implements KData {
 		return (double) Math.sqrt(Math.pow(x - ((K2D) d).getX(), 2) + Math.pow(y - ((K2D) d).getY(), 2));
 	}
 	
+	@Override
+	public String toString() {
+		return x + ", " + y;
+	}
 	
 }

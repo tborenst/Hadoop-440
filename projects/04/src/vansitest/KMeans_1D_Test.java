@@ -16,7 +16,7 @@ public class KMeans_1D_Test {
 		data.add(new KInt(23212));
 		data.add(new KInt(31111111));
 		
-		KMeans k = new KMeans(data, KIntAvg.class, 5, 10);
+		KMeans k = new KMeans(data, KIntAvg.class, 5, 0.001);
 		
 		System.out.println(k.toString());
 	}

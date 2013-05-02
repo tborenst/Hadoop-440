@@ -68,10 +68,15 @@ public class KCluster implements Serializable {
 	
 	public String toString() {
 		String result = "Centered around: " + centroid.toString() + "\n";
-		result += "Avg: " + runningAvg.getAverage().toString() + "\n";
+		
+		KData avg = runningAvg.getAverage();
+		String avgString = "null";
+		if(avg != null) {avgString = avg.toString();}
+		
+		result += "Avg: " + avgString + "\n";
 		
 		for(int d = 0; d < data.size(); d++) {
-			result += "1: " + data.get(d).toString() + "\n";
+			result += d + ": " + data.get(d).toString() + "\n";
 		}
 		
 		return result;
