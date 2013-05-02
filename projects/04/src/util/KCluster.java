@@ -3,51 +3,67 @@ package util;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class KCluster<T> implements Serializable {
+public class KCluster implements Serializable {
 	private static final long serialVersionUID = 3950930551187321015L;
 	
-	private ArrayList<T> data;
-	private T centroid;
+	private ArrayList<KData> data;
+	private KData centroid;
+	private int maxDistance;
+	private KAvg runningAvg;
 	
-	public KCluster(T centroid) {
+	public KCluster(KData centroid, KAvg runningAvg) {
 		this.centroid = centroid;
-		this.data = new ArrayList<T>();
+		this.data = new ArrayList<KData>();
+		this.runningAvg = runningAvg;
+		this.maxDistance = -1;
 	}
 	
-	public KCluster(T centroid, ArrayList<T> data) {
+	public KCluster(KData centroid, ArrayList<KData> data, KAvg runningAvg) {
 		this.centroid = centroid;
-		this.data = data;
+		this.runningAvg = runningAvg;
+		setData(data);
 	}
 	
-	public ArrayList<T> getData() {
+	public KData getAverage() {
+		return runningAvg.getAverage();
+	}
+	
+	public boolean distancesWithin(int targetDistance) {
+		return maxDistance <= targetDistance;
+	}
+	
+	public ArrayList<KData> getData() {
 		return data;
 	}
 	
-	public void setData(ArrayList<T> newData) {
-		data = newData;
+	public void setData(ArrayList<KData> newData) {
+		data = new ArrayList<KData>();
+		runningAvg.clear();
+		maxDistance = -1;
+		
+		
+		for(int d = 0; d < newData.size(); d++) {
+			addDataPt(newData.get(d));
+		}
+		
 	}
 	
-	public void addDataPt(T dataPt) {
+	public void addDataPt(KData dataPt) {
 		data.add(dataPt);
+		runningAvg.addDataPt(dataPt);
+		
+		int distance = centroid.distanceTo(dataPt);
+		if(maxDistance == -1 || maxDistance < distance) {
+			maxDistance = distance;
+		}
 	}
 	
-	public T getCentroid() {
+	public KData getCentroid() {
 		return centroid;
 	}
 	
-	public void setCentroid(T newCentroid) {
+	public void setCentroid(KData newCentroid) {
 		centroid = newCentroid;
 	}
 	
-	public static void main(String[] args) {
-		ArrayList<Integer> d = new ArrayList<Integer>();
-		d.add(1);
-		d.add(2);
-		d.add(3);
-		d.add(4);
-		
-		KCluster<Integer> c = new KCluster<Integer>(2);
-		c.addDataPt(1);
-		
-	}
 }

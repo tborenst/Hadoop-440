@@ -63,4 +63,16 @@ public class Util {
 		
 		return false;
 	}
+	
+	public static boolean classImplements(Class<?> c, Class<?> inter) {
+		Class<?>[] interfaces = c.getInterfaces();
+		
+		for(int i = 0; i < interfaces.length; i++) {
+			if(interfaces[i].equals(inter)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }
