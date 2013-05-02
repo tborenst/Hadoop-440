@@ -16,7 +16,7 @@ public class KMeans {
 	private Class<?> KAvgClass;
 	private int ctr;
 	
-	public KMeans(ArrayList<KData> dataset, Class<?> KAvgClass, int k, int minDistance) throws Throwable {
+	public KMeans(ArrayList<KData> dataset, Class<?> KAvgClass, int k, double minDistance) throws Throwable {
 		// TODO: throw error if k <= 0
 		if(k <= 0) {
 			throw new Throwable("KMeans: k must be greater than 0.");
@@ -50,7 +50,7 @@ public class KMeans {
 		}
 	}
 	
-	private boolean withinRange(int minDistance) {
+	private boolean withinRange(double minDistance) {
 		for(int c = 0; c < clusters.size(); c++) {
 			KCluster cluster = clusters.get(c);
 			if(!cluster.distancesWithin(minDistance)) {
@@ -87,10 +87,10 @@ public class KMeans {
 	
 	private KCluster findClosestCluster(KData dataPt) {
 		KCluster closestCluster = clusters.get(0);
-		int minDist = dataPt.distanceTo(closestCluster.getCentroid());
+		double minDist = dataPt.distanceTo(closestCluster.getCentroid());
 		for(int c = 0; c < clusters.size(); c++) {
 			KCluster cluster = clusters.get(c);
-			int distance = dataPt.distanceTo(cluster.getCentroid());
+			double distance = dataPt.distanceTo(cluster.getCentroid());
 			if(minDist > distance) {
 				minDist = distance;
 				closestCluster = cluster;

@@ -15,7 +15,7 @@ public class KInt implements KData {
 	}
 
 	@Override
-	public int distanceTo(KData d) {
+	public double distanceTo(KData d) {
 		return Math.abs(value - ((KInt) d).getValue());
 	}
 	

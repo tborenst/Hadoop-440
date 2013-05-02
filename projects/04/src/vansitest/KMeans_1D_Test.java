@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import serial.KMeans;
 import util.KData;
 
-public class kmeanstest {
+public class KMeans_1D_Test {
 	public static void test1() throws Throwable {
 		ArrayList<KData> data = new ArrayList<KData>();
 		data.add(new KInt(1));
@@ -15,8 +15,6 @@ public class kmeanstest {
 		data.add(new KInt(1242));
 		data.add(new KInt(23212));
 		data.add(new KInt(31111111));
-		
-		KIntAvg kavg = new KIntAvg();
 		
 		KMeans k = new KMeans(data, KIntAvg.class, 5, 10);
 		

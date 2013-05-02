@@ -8,7 +8,7 @@ public class KCluster implements Serializable {
 	
 	private ArrayList<KData> data;
 	private KData centroid;
-	private int maxDistance;
+	private double maxDistance;
 	private KAvg runningAvg;
 	
 	public KCluster(KData centroid, KAvg runningAvg) {
@@ -28,7 +28,7 @@ public class KCluster implements Serializable {
 		return runningAvg.getAverage();
 	}
 	
-	public boolean distancesWithin(int targetDistance) {
+	public boolean distancesWithin(double targetDistance) {
 		return maxDistance <= targetDistance;
 	}
 	
@@ -52,7 +52,7 @@ public class KCluster implements Serializable {
 		data.add(dataPt);
 		runningAvg.addDataPt(dataPt);
 		
-		int distance = centroid.distanceTo(dataPt);
+		double distance = centroid.distanceTo(dataPt);
 		if(maxDistance == -1 || maxDistance < distance) {
 			maxDistance = distance;
 		}
