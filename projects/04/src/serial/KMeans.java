@@ -14,15 +14,21 @@ public class KMeans {
 	private ArrayList<KData> dataset;
 	private ArrayList<KCluster> clusters;
 	private Class<?> KAvgClass;
+	private int ctr;
 	
-	public KMeans(ArrayList<KData> dataset, int k, Class<?> KAvgClass) throws Throwable {
+	public KMeans(ArrayList<KData> dataset, Class<?> KAvgClass, int k, int minDistance) throws Throwable {
 		// TODO: throw error if k <= 0
-		
-		if(!Util.classImplements(KAvgClass, KAvg.class)) {
-			throw new Throwable("KAvgClass must implement util.KAvg.");
+		if(k <= 0) {
+			throw new Throwable("KMeans: k must be greater than 0.");
 		}
 		
 		this.dataset = dataset;
+
+		if(!Util.classImplements(KAvgClass, KAvg.class)) {
+			throw new Throwable("KMeans: KAvgClass must implement util.KAvg.");
+		}
+		
+		this.KAvgClass = KAvgClass;
 		
 		//empty clusters
 		this.clusters = new ArrayList<KCluster>();
@@ -36,16 +42,18 @@ public class KMeans {
 		
 		this.clusterDataset();
 		
-		while(this.withinRange()) {
+		this.ctr = 0;
+		while(!this.withinRange(minDistance)) {
+			ctr++;
 			this.findNewClusters();
 			this.clusterDataset();
 		}
 	}
 	
-	private boolean withinRange() {
+	private boolean withinRange(int minDistance) {
 		for(int c = 0; c < clusters.size(); c++) {
 			KCluster cluster = clusters.get(c);
-			if(!cluster.distancesWithin(10)) {
+			if(!cluster.distancesWithin(minDistance)) {
 				return false;
 			}
 		}
@@ -57,7 +65,14 @@ public class KMeans {
 		ArrayList<KCluster> newClusters = new ArrayList<KCluster>();
 		for(int c = 0; c < clusters.size(); c++) {
 			// TODO: catch reflections errors and throw a better exception
-			newClusters.add(new KCluster(clusters.get(c).getAverage(), (KAvg) KAvgClass.getConstructor().newInstance()));
+			KData avg = clusters.get(c).getAverage();
+			
+			// empty sets will have a null avg
+			
+			if(avg != null) {
+				KAvg newAverager = (KAvg) KAvgClass.getConstructor().newInstance();
+				newClusters.add(new KCluster(avg, newAverager));
+			}
 		}
 		clusters = newClusters;
 	}
@@ -84,7 +99,16 @@ public class KMeans {
 		
 		return closestCluster;
 	}
-	
+
+	// for debugging
+	public String toString() {
+		String result = "Created " + clusters.size() + " clusters in " + ctr + " iterations...\n";
+		for(int c = 0; c < clusters.size(); c++) {
+			result += "Cluster: " + c + "\n" + clusters.get(c).toString();
+			result += "------------------\n";
+		}
 		
+		return result;
+	}
 	
 }

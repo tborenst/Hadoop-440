@@ -66,4 +66,15 @@ public class KCluster implements Serializable {
 		centroid = newCentroid;
 	}
 	
+	public String toString() {
+		String result = "Centered around: " + centroid.toString() + "\n";
+		result += "Avg: " + runningAvg.getAverage().toString() + "\n";
+		
+		for(int d = 0; d < data.size(); d++) {
+			result += "1: " + data.get(d).toString() + "\n";
+		}
+		
+		return result;
+	}
+	
 }
