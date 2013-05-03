@@ -1,16 +1,14 @@
 package parallel;
 
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-
-
-import java.util.Random;
 
 import util.KAvg;
 import util.KCluster;
 import util.KData;
 import util.Util;
+
+import java.util.Random;
 
 public class KMeansMaster {
 	private ArrayList<KData> dataset;
