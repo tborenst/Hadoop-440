@@ -1,4 +1,4 @@
-package default;
+package vansitest;
 
 import mpi.*;
 
