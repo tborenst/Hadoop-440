@@ -1,22 +1,21 @@
 
-import mpi.*;
 import java.util.ArrayList;
 import java.util.Random;
 
 import parallel.KMeansMaster;
-
 
 import serial.KMeans;
 import tests.K2D;
 import tests.K2DAvg;
 import util.KData;
 
+
 public class Main {
 
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) throws Throwable{
+	public static void main(String[] args) {
 		try {
 			MPI.Init(args);
 			int rank = MPI.COMM_WORLD.Rank();
@@ -35,19 +34,13 @@ public class Main {
 				}
 				
 				
-				if(procs > 1) {
-					KMeansMaster k = new KMeansMaster(data, K2DAvg.class, 2, 0.5);
-          System.out.println(k.toString());
-				} else {
-					KMeans k = new KMeans(data, K2DAvg.class, 2, 0.5);
-          System.out.println(k.toString());
-				}
+				KMeansMaster k = new KMeansMaster(data, K2DAvg.class, 2, 0.5);
 
 			} else {
 				System.out.println("Started slave " + rank);
 			}
 
-      MPI.Finalize();
+			MPI.Finalize();
 		} catch(MPIException e) {
 			System.out.println("MPI Exception");
 			e.printStackTrace();
