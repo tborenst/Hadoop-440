@@ -3,8 +3,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import parallel.KMeansMaster;
+import parallel.KMeansSlave;
 
-import serial.KMeans;
 import tests.K2D;
 import tests.K2DAvg;
 import util.KData;
@@ -20,8 +20,9 @@ public class Main {
 			MPI.Init(args);
 			int rank = MPI.COMM_WORLD.Rank();
 			int procs = MPI.COMM_WORLD.Size();
+			int masterRank = 0;
 
-			if(rank == 0) {
+			if(rank == masterRank) {
 				System.out.println("Master started");
 				ArrayList<KData> data = new ArrayList<KData>();
 				
@@ -34,10 +35,12 @@ public class Main {
 				}
 				
 				
-				KMeansMaster k = new KMeansMaster(data, K2DAvg.class, 2, 0.5);
+				KMeansMaster k = new KMeansMaster(data, K2DAvg.class, 2, 0.5, masterRank, procs);
 
 			} else {
 				System.out.println("Started slave " + rank);
+				KMeansSlave k = new KMeansSlave(rank, masterRank, procs);
+				k.startListening();
 			}
 
 			MPI.Finalize();

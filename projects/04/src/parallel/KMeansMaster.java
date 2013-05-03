@@ -1,5 +1,6 @@
 package parallel;
 
+import mpi.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
@@ -49,20 +50,43 @@ public class KMeansMaster {
 		this.ctr = 0;
 		this.numProcs = numProcs;
 		this.masterRank = masterRank;
+		this.masterSlave = new KMeansSlave(this.masterRank, this.masterRank, this.numProcs);
 		
 		while(!this.withinRange(centroidEpsilon)) {
 			this.findNewClusters();
 			this.clusterDataset();
 			this.ctr++;
 		}
+		
+		killSlaves();
+	}
+	
+	private void killSlaves() {
+		KMessage[] messages = new KMessage[numProcs];
+		sendMessages(messages);
+	}
+	
+	/**
+	 * Send messages to the slaves using gather and scatter.
+	 * @param messages
+	 */
+	private void sendMessages(KMessage[] messages) {
+		MPI.COMM_WORLD.Scatter(messages, 0, 1, MPI.OBJECT, messages, 0, 1, MPI.OBJECT, masterRank);
+		masterSlave.handleMessage(messages[0]);
+		MPI.COMM_WORLD.Gather(messages, 0, 1, MPI.OBJECT, messages, 0, 1, MPI.OBJECT, masterRank);
 	}
 	
 	/**
 	 * Check to see if KMeansMaster is complete based off the distance between the old centroids and the current centroids.
 	 * @param centroidEpsilon
 	 * @return
+	 * @throws Throwable 
 	 */
-	private boolean withinRange(double centroidEpsilon) {
+	private boolean withinRange(double centroidEpsilon) throws Throwable {
+		if(clusters.size() <= 0) {
+			throw new Throwable("KMeansMaster: there was a fatal error, for somereason all the clusters died.");
+		}
+		
 		//System.out.print("[");
 		for(int i = 0; i < centroidEpsilons.size(); i++) {
 			//System.out.print(centroidEpsilons.get(i) + ", ");
@@ -109,9 +133,18 @@ public class KMeansMaster {
 	 */
 	private void clusterDataset() {
 		KMessage[] clusterWork = generateClusterWork();
+		sendMessages(clusterWork);
 		
+		// merge clusters
+		ArrayList<KCluster> baseClusters = clusterWork[0].getClusters();
 		
-		
+		for(int m = 1; m < clusterWork.length; m++) {
+			ArrayList<KCluster> toMergeClusters = clusterWork[m].getClusters();
+			for(int c = 0; c < baseClusters.size(); c++) {
+				KCluster baseCluster = baseClusters.get(c);
+				baseCluster.mergeWith(toMergeClusters.get(c));
+			}
+		}
 	}
 	
 	private KMessage[] generateClusterWork() {
