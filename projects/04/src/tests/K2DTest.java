@@ -39,7 +39,7 @@ public class K2DTest {
 		
 		Date date1 = new Date();
 		long start = date1.getTime();
-		KMeans k = new KMeans(data, K2DAvg.class, 10, 0);
+		KMeans k = new KMeans(data, K2DAvg.class, 50, 0);
 		Date date2 = new Date();
 		long end   = date2.getTime();
 		
