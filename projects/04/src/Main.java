@@ -16,7 +16,7 @@ public class Main {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Throwable{
 		try {
 			MPI.Init(args);
 			int rank = MPI.COMM_WORLD.Rank();
@@ -35,13 +35,19 @@ public class Main {
 				}
 				
 				
-				KMeansMaster k = new KMeansMaster(data, K2DAvg.class, 2, 0.5);
+				if(procs > 1) {
+					KMeansMaster k = new KMeansMaster(data, K2DAvg.class, 2, 0.5);
+          System.out.println(k.toString());
+				} else {
+					KMeans k = new KMeans(data, K2DAvg.class, 2, 0.5);
+          System.out.println(k.toString());
+				}
 
 			} else {
 				System.out.println("Started slave " + rank);
 			}
 
-			MPI.Finalize();
+      MPI.Finalize();
 		} catch(MPIException e) {
 			System.out.println("MPI Exception");
 			e.printStackTrace();
