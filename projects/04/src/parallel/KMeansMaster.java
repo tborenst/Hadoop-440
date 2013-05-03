@@ -38,6 +38,12 @@ public class KMeansMaster {
 		this.clusters = new ArrayList<KCluster>();
 		this.centroidEpsilons = new ArrayList<Double>();
 		
+
+		this.ctr = 0;
+		this.numProcs = numProcs;
+		this.masterRank = masterRank;
+		this.masterSlave = new KMeansSlave(this.masterRank, this.masterRank, this.numProcs);
+		
 		Random rgenerator = new Random();
 		for(int i = 0; i < k; i++) {
 			KData centroid = dataset.get(rgenerator.nextInt(dataset.size()));
@@ -46,12 +52,7 @@ public class KMeansMaster {
 		}
 		
 		this.clusterDataset();
-		
-		this.ctr = 0;
-		this.numProcs = numProcs;
-		this.masterRank = masterRank;
-		this.masterSlave = new KMeansSlave(this.masterRank, this.masterRank, this.numProcs);
-		
+				
 		while(!this.withinRange(centroidEpsilon)) {
 			this.findNewClusters();
 			this.clusterDataset();
