@@ -90,4 +90,29 @@ public class KDNAAvg implements KAvg{
 		TCount = new int[datasize];
 	}
 	
+	public int[] getCount(String base){
+		if(base.equals("A")){
+			return ACount;
+		} else if(base.equals("C")){
+			return CCount;
+		} else if(base.equals("G")){
+			return GCount;
+		} else if(base.equals("T")){
+			return TCount; 
+		} else {
+			return null;
+		}
+	}
+	
+	public void mergeWidth(KAvg ka){
+		KDNAAvg kda = (KDNAAvg)ka;
+		
+		for(int i = 0; i < datasize; i++){
+			ACount[i] += kda.getCount("A")[i];
+			CCount[i] += kda.getCount("C")[i];
+			GCount[i] += kda.getCount("G")[i];
+			TCount[i] += kda.getCount("T")[i];
+		}
+	}
+	
 }

@@ -37,4 +37,23 @@ public class K2DAvg implements KAvg {
 		yTotal = 0;
 		size = 0;
 	}
+	
+	public int getSize(){
+		return size;
+	}
+	
+	public int getTotalX(){
+		return xTotal;
+	}
+	
+	public int getTotalY(){
+		return yTotal;
+	}
+
+	public void mergeWidth(KAvg ka) {
+		K2DAvg k2da = (K2DAvg)ka;
+		this.size += k2da.getSize();
+		this.xTotal += k2da.getTotalX();
+		this.yTotal += k2da.getTotalY();
+	}
 }

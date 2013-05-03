@@ -24,4 +24,9 @@ public interface KAvg extends Serializable {
 	 * Clears your running average.
 	 */
 	public void clear();
+	
+	/**
+	 * Merges this averager with antoher.
+	 */
+	public void mergeWidth(KAvg ka);
 }
