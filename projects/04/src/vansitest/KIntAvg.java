@@ -33,4 +33,19 @@ public class KIntAvg implements KAvg {
 		total = 0;
 		size = 0;
 	}
+	
+	public int getTotal(){
+		return total;
+	}
+	
+	public int getSize(){
+		return size;
+	}
+	
+	public void mergeWith(KAvg ka){
+		KIntAvg kia = (KIntAvg)ka;
+		
+		this.total += kia.getTotal();
+		this.size += kia.getSize();
+	}
 }
