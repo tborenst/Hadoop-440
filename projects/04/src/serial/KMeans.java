@@ -1,12 +1,13 @@
 package serial;
 
+import KAvg;
+import KCluster;
+import KData;
+import Util;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import util.KAvg;
-import util.KCluster;
-import util.KData;
-import util.Util;
 
 import java.util.Random;
 

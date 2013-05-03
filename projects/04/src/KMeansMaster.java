@@ -1,12 +1,8 @@
-package parallel;
+
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import util.KAvg;
-import util.KCluster;
-import util.KData;
-import util.Util;
 
 import java.util.Random;
 
