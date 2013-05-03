@@ -106,7 +106,7 @@ public class KDNAAvg implements KAvg{
 		}
 	}
 	
-	public void mergeWidth(KAvg ka){
+	public void mergeWith(KAvg ka){
 		KDNAAvg kda = (KDNAAvg)ka;
 		
 		for(int i = 0; i < datasize; i++){

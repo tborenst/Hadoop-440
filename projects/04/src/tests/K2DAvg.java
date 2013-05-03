@@ -52,7 +52,7 @@ public class K2DAvg implements KAvg {
 		return yTotal;
 	}
 
-	public void mergeWidth(KAvg ka) {
+	public void mergeWith(KAvg ka) {
 		K2DAvg k2da = (K2DAvg)ka;
 		this.size += k2da.getSize();
 		this.xTotal += k2da.getTotalX();

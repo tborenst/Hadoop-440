@@ -29,5 +29,5 @@ public interface KAvg extends Serializable {
 	/**
 	 * Merges this averager with antoher.
 	 */
-	public void mergeWidth(KAvg ka);
+	public void mergeWith(KAvg ka);
 }
