@@ -1,9 +1,20 @@
-package default;
+package vansitest;
 
 import mpi.*;
+import java.io.*;
 
 public class MPITest {	
-	public static int main(String[] args) {
+
+public static class Task implements Serializable {
+	private static final long serialVersionUID = 8088351904681221275L;
+	public int id;
+
+	public Task(){
+		this.id = 0;
+	}
+}	
+
+public static void main(String[] args) {
     System.out.println("here");
     
     try {
@@ -14,20 +25,19 @@ public class MPITest {
     if(rank == 0) {
       System.out.println("Master started");
       
-      int id = 0;
-      int[] ids = new int[]{id};
-      MPI.COMM_WORLD.Send(ids, 0, 1, MPI.INT, 1, 99);
-      MPI.COMM_WORLD.Recv(ids, 0, 1, MPI.INT, MPI.ANY_SOURCE, 99);
-      System.out.println("new id: " + id);
+      Task id = new Task();
+      Task[] ids = new Task[]{id};
+      MPI.COMM_WORLD.Send(ids, 0, 1, MPI.OBJECT, 1, 99);
+      MPI.COMM_WORLD.Recv(ids, 0, 1, MPI.OBJECT, MPI.ANY_SOURCE, 99);
+      System.out.println("new id: " + ids[0].id);
       
     } else {
-      int[] ids = new int[]{};
-      MPI.COMM_WORLD.Recv(ids, 0, 1, MPI.INT, MPI.ANY_SOURCE, 99);
+      Task[] ids = new Task[]{new Task()};
+      MPI.COMM_WORLD.Recv(ids, 0, 1, MPI.OBJECT, MPI.ANY_SOURCE, 99);
       
-      ids[0]++;
-      System.out.println(rank + ": set id to: " + ids[0]);
-      
-      MPI.COMM_WORLD.Send(ids, 0, 1, MPI.INT, 0, 99);
+      ids[0].id++;;
+      System.out.println(rank + ": set id to: " + ids[0].id);
+      MPI.COMM_WORLD.Send(ids, 0, 1, MPI.OBJECT, 0, 99);
     }
     
     MPI.Finalize();
@@ -36,6 +46,5 @@ public class MPITest {
       e.printStackTrace();
     }
     
-    return 1;
 	}
 }

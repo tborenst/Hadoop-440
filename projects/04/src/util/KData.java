@@ -1,3 +1,4 @@
+package util;
 /*
  * Implement this interface for your own data point class.
  * By Vansi Vallabhaneni

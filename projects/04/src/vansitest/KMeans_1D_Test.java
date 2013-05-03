@@ -1,10 +1,10 @@
 package vansitest;
 
-import KData;
 
 import java.util.ArrayList;
 
 import serial.KMeans;
+import util.KData;
 
 public class KMeans_1D_Test {
 	public static void test1() throws Throwable {
