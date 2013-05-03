@@ -1,6 +1,5 @@
-package tests;
 
-import util.KData;
+
 
 public class K2D implements KData {
 	private static final long serialVersionUID = 8088351904681221275L;

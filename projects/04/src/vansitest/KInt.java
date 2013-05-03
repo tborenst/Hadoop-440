@@ -1,6 +1,6 @@
 package vansitest;
 
-import util.KData;
+import KData;
 
 public class KInt implements KData {
 	private static final long serialVersionUID = -6564149080288645958L;

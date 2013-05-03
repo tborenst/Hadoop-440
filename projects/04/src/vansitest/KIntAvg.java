@@ -1,7 +1,7 @@
 package vansitest;
 
-import util.KAvg;
-import util.KData;
+import KAvg;
+import KData;
 
 public class KIntAvg implements KAvg {
 	private static final long serialVersionUID = 7562285511477180314L;

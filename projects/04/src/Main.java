@@ -1,12 +1,7 @@
 
+import mpi.*;
 import java.util.ArrayList;
 import java.util.Random;
-
-import parallel.KMeansMaster;
-
-import tests.K2D;
-import tests.K2DAvg;
-import util.KData;
 
 public class Main {
 

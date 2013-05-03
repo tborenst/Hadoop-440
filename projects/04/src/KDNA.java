@@ -1,6 +1,5 @@
-package tests;
 
-import util.KData;
+
 
 public class KDNA implements KData{
 	

@@ -1,10 +1,13 @@
 package tests;
 
+import KDNA;
+import KDNAAvg;
+import KData;
+
 import java.util.ArrayList;
 
 import serial.KMeans;
 import util.DNAGenerator;
-import util.KData;
 
 public class KDNATest {
 	public static void test1() throws Throwable {

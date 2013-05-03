@@ -1,10 +1,13 @@
 package tests;
 
+import K2D;
+import K2DAvg;
+import KData;
+
 import java.util.ArrayList;
 import java.util.Random;
 
 import serial.KMeans;
-import util.KData;
 
 public class K2DTest {
 	public static void test1() throws Throwable {
