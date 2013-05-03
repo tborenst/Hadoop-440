@@ -1,16 +1,14 @@
 package parallel;
 
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-
-
-import java.util.Random;
 
 import util.KAvg;
 import util.KCluster;
 import util.KData;
 import util.Util;
+
+import java.util.Random;
 
 public class KMeansMaster {
 	private ArrayList<KData> dataset;
@@ -104,6 +102,8 @@ public class KMeansMaster {
 	 * Add the data to the closest cluster.
 	 */
 	private void clusterDataset() {
+    
+  
 		for(int d = 0; d < dataset.size(); d++) {
 			KData dataPt = dataset.get(d);
 			KCluster closestCluster = findClosestCluster(dataPt);
