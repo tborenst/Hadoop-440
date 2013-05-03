@@ -31,7 +31,7 @@ public class KDNATest {
 		int size = 20;
 		
 		// 100000 datapoints
-		for(int i = 0; i < 100000; i++) {
+		for(int i = 0; i < 1000000; i++) {
 			KDNA dataPt = new KDNA(DNAGenerator.generateDNA(size));
 			data.add(dataPt);
 		}
@@ -39,7 +39,7 @@ public class KDNATest {
 		
 		Date date1 = new Date();
 		long start = date1.getTime();
-		KMeans k = new KMeans(data, KDNAAvg.class, 4, 1);
+		KMeans k = new KMeans(data, KDNAAvg.class, 10, 0);
 		Date date2 = new Date();
 		long end   = date2.getTime();
 

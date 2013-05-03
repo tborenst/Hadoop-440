@@ -31,16 +31,15 @@ public class K2DTest {
 		int xRange = 100;
 		int yRange = 100;
 		
-		// 100000 datapoints
 		Random randGen = new Random();
-		for(int i = 0; i < 100000; i++) {
+		for(int i = 0; i < 1000000; i++) {
 			K2D dataPt = new K2D(randGen.nextInt(xRange) - xRange/2, randGen.nextInt(yRange) - yRange/2);
 			data.add(dataPt);
 		}
 		
 		Date date1 = new Date();
 		long start = date1.getTime();
-		KMeans k = new KMeans(data, K2DAvg.class, 2, 0.5);
+		KMeans k = new KMeans(data, K2DAvg.class, 10, 0);
 		Date date2 = new Date();
 		long end   = date2.getTime();
 		
