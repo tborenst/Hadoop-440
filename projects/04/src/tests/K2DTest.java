@@ -10,8 +10,8 @@ public class K2DTest {
 	public static void test1() throws Throwable {
 		ArrayList<KData> data = new ArrayList<KData>();
 		
-		int xRange = 20;
-		int yRange = 20;
+		int xRange = 100000;
+		int yRange = 100000000;
 		Random randGen = new Random();		
 		for(int d = 0; d < 100; d++) {
 			K2D dataPt = new K2D(randGen.nextInt(xRange) - xRange/2, randGen.nextInt(yRange) - yRange/2);
@@ -19,7 +19,7 @@ public class K2DTest {
 		}
 		
 		
-		KMeans k = new KMeans(data, K2DAvg.class, 2, 10);
+		KMeans k = new KMeans(data, K2DAvg.class, 10, 0);
 		
 		System.out.println(k.toString());
 	}

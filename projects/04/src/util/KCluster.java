@@ -1,21 +1,22 @@
+/*
+ * By Vansi Vallabhaneni
+ */
+
 package util;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class KCluster implements Serializable {
-	private static final long serialVersionUID = 3950930551187321015L;
-	
+	private static final long serialVersionUID = 3950930551187321015L;	
 	private ArrayList<KData> data;
 	private KData centroid;
-	private double maxDistance;
 	private KAvg runningAvg;
 	
 	public KCluster(KData centroid, KAvg runningAvg) {
 		this.centroid = centroid;
 		this.data = new ArrayList<KData>();
 		this.runningAvg = runningAvg;
-		this.maxDistance = -1;
 	}
 	
 	public KCluster(KData centroid, ArrayList<KData> data, KAvg runningAvg) {
@@ -24,23 +25,29 @@ public class KCluster implements Serializable {
 		setData(data);
 	}
 	
+	/**
+	 * Calculate the running average of this cluster.
+	 * @return
+	 */
 	public KData getAverage() {
 		return runningAvg.getAverage();
 	}
 	
-	public boolean distancesWithin(double targetDistance) {
-		return maxDistance <= targetDistance;
-	}
-	
+	/**
+	 * Getter for this cluster's data.
+	 * @return
+	 */
 	public ArrayList<KData> getData() {
 		return data;
 	}
 	
+	/**
+	 * Setter for this cluster's data.
+	 * @param newData
+	 */
 	public void setData(ArrayList<KData> newData) {
 		data = new ArrayList<KData>();
-		runningAvg.clear();
-		maxDistance = -1;
-		
+		runningAvg.clear();		
 		
 		for(int d = 0; d < newData.size(); d++) {
 			addDataPt(newData.get(d));
@@ -48,24 +55,34 @@ public class KCluster implements Serializable {
 		
 	}
 	
+	/**
+	 * Add a data point to this cluster.
+	 * @param dataPt
+	 */
 	public void addDataPt(KData dataPt) {
 		data.add(dataPt);
 		runningAvg.addDataPt(dataPt);
-		
-		double distance = centroid.distanceTo(dataPt);
-		if(maxDistance == -1 || maxDistance < distance) {
-			maxDistance = distance;
-		}
 	}
 	
+	/**
+	 * Getter for this cluster's centroid.
+	 * @return
+	 */
 	public KData getCentroid() {
 		return centroid;
 	}
 	
+	/**
+	 * Setter for this cluster's centroid.
+	 * @param newCentroid
+	 */
 	public void setCentroid(KData newCentroid) {
 		centroid = newCentroid;
 	}
 	
+	/**
+	 * For Debugging.
+	 */
 	public String toString() {
 		String result = "Centered around: " + centroid.toString() + "\n";
 		
