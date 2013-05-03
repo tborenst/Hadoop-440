@@ -2,6 +2,7 @@ package tests;
 
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import serial.KMeans;
 import util.DNAGenerator;
@@ -24,7 +25,27 @@ public class KDNATest {
 		System.out.println(k.toString());
 	}
 	
+	public static void timeTest() throws Throwable {
+		ArrayList<KData> data = new ArrayList<KData>();
+		
+		int size = 20;
+
+		for(int i = 0; i < 1000000; i++) {
+			KDNA dataPt = new KDNA(DNAGenerator.generateDNA(size));
+			data.add(dataPt);
+		}
+		
+		
+		Date date1 = new Date();
+		long start = date1.getTime();
+		KMeans k = new KMeans(data, KDNAAvg.class, 50, 0);
+		Date date2 = new Date();
+		long end   = date2.getTime();
+
+		System.out.println("Duration: " + (end-start));
+	}
+	
 	public static void main(String[] args) throws Throwable {
-		test1();
+		timeTest();
 	}
 }
