@@ -19,7 +19,7 @@ public class K2DTest {
 		}
 		
 		
-		KMeans k = new KMeans(data, K2DAvg.class, 2, 10);
+		KMeans k = new KMeans(data, K2DAvg.class, 2, 0.5);
 		
 		System.out.println(k.toString());
 	}

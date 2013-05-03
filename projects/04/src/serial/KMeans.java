@@ -18,7 +18,6 @@ public class KMeans {
 	private int ctr;
 	
 	public KMeans(ArrayList<KData> dataset, Class<?> KAvgClass, int k, double centroidEpsilon) throws Throwable {
-		// TODO: throw error if k <= 0
 		if(k <= 0) {
 			throw new Throwable("KMeans: k must be greater than 0.");
 		}
