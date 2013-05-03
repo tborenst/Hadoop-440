@@ -18,8 +18,11 @@ public class KMeansMaster {
 	private ArrayList<Double> centroidEpsilons;
 	private Class<?> KAvgClass;
 	private int ctr;
+	private int numProcs;
+	private int masterRank;
+	private KMeansSlave masterSlave;
 	
-	public KMeansMaster(ArrayList<KData> dataset, Class<?> KAvgClass, int k, double centroidEpsilon) throws Throwable {
+	public KMeansMaster(ArrayList<KData> dataset, Class<?> KAvgClass, int k, double centroidEpsilon, int masterRank, int numProcs) throws Throwable {
 		if(k <= 0) {
 			throw new Throwable("KMeansMaster: k must be greater than 0.");
 		}
@@ -46,6 +49,9 @@ public class KMeansMaster {
 		this.clusterDataset();
 		
 		this.ctr = 0;
+		this.numProcs = numProcs;
+		this.masterRank = masterRank;
+		
 		while(!this.withinRange(centroidEpsilon)) {
 			this.findNewClusters();
 			this.clusterDataset();
@@ -104,31 +110,35 @@ public class KMeansMaster {
 	 * Add the data to the closest cluster.
 	 */
 	private void clusterDataset() {
-		for(int d = 0; d < dataset.size(); d++) {
-			KData dataPt = dataset.get(d);
-			KCluster closestCluster = findClosestCluster(dataPt);
-			closestCluster.addDataPt(dataPt);
-		}
+		KMessage[] clusterWork = generateClusterWork();
+		
+		
+		
 	}
 	
-	/**
-	 * Find the closest cluster based off the data point.
-	 * @param dataPt
-	 * @return
-	 */
-	private KCluster findClosestCluster(KData dataPt) {
-		KCluster closestCluster = clusters.get(0);
-		double minDist = dataPt.distanceTo(closestCluster.getCentroid());
-		for(int c = 0; c < clusters.size(); c++) {
-			KCluster cluster = clusters.get(c);
-			double distance = dataPt.distanceTo(cluster.getCentroid());
-			if(minDist > distance) {
-				minDist = distance;
-				closestCluster = cluster;
-			}
+	private KMessage[] generateClusterWork() {
+		ArrayList<ArrayList<KData>> dataPartitions = partitionDataset(numProcs);
+		KMessage[] work = new KMessage[numProcs];
+		
+		for(int i = 0; i < dataPartitions.size(); i++) {
+			work[i] = new KMessage(clusters, dataPartitions.get(i));
 		}
 		
-		return closestCluster;
+		return work;
+	}
+	
+	private ArrayList<ArrayList<KData>> partitionDataset(int numPartitions) {
+		int datasetSize = dataset.size();
+		int partitionSize = (datasetSize + numPartitions - 1)/numPartitions;
+		ArrayList<ArrayList<KData>> partitions = new ArrayList<ArrayList<KData>>();
+		
+		for(int p = 0; p < datasetSize; p += partitionSize) {
+			int endPt = p + partitionSize;
+			if(endPt >= datasetSize) {endPt = datasetSize - 1;}
+			partitions.add((ArrayList<KData>) dataset.subList(p, endPt));
+		}
+		
+		return partitions;
 	}
 
 	/**
