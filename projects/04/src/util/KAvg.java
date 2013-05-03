@@ -1,9 +1,10 @@
+package util;
 /*
  * Implement KAvg for your own running averager to work with your own KData.
  * By Vansi Vallabhaneni
  */
 
-package util;
+
 
 import java.io.Serializable;
 

@@ -1,7 +1,9 @@
 package tests;
-
 import util.KAvg;
 import util.KData;
+
+
+
 
 public class KDNAAvg implements KAvg{
 	private int datasize; // length of datapoint

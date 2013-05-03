@@ -1,25 +1,23 @@
-package serial;
-
+package parallel;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-
-
-import java.util.Random;
 
 import util.KAvg;
 import util.KCluster;
 import util.KData;
 import util.Util;
 
-public class KMeans {
+import java.util.Random;
+
+public class KMeansMaster {
 	private ArrayList<KData> dataset;
 	private ArrayList<KCluster> clusters;
 	private ArrayList<Double> centroidEpsilons;
 	private Class<?> KAvgClass;
 	private int ctr;
 	
-	public KMeans(ArrayList<KData> dataset, Class<?> KAvgClass, int k, double centroidEpsilon) throws Throwable {
+	public KMeansMaster(ArrayList<KData> dataset, Class<?> KAvgClass, int k, double centroidEpsilon) throws Throwable {
 		if(k <= 0) {
 			throw new Throwable("KMeansMaster: k must be greater than 0.");
 		}
@@ -104,6 +102,8 @@ public class KMeans {
 	 * Add the data to the closest cluster.
 	 */
 	private void clusterDataset() {
+    
+  
 		for(int d = 0; d < dataset.size(); d++) {
 			KData dataPt = dataset.get(d);
 			KCluster closestCluster = findClosestCluster(dataPt);

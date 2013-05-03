@@ -8,5 +8,5 @@ k=2
 
 
 		echo ********GENERATING $b INPUT POINTS EACH IN $k CLUSTERS 
-		./randomclustergen/generaterawdata.py -c $k  -p $b -o input/cluster.csv
+		python ./randomclustergen/generaterawdata.py -c $k  -p $b -o input/cluster.csv
 

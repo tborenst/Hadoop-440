@@ -1,7 +1,9 @@
 package tests;
-
 import util.KAvg;
 import util.KData;
+
+
+
 
 public class K2DAvg implements KAvg {
 	static final long serialVersionUID = -7742823639326789071L;
