@@ -10,13 +10,13 @@ import java.util.ArrayList;
 
 public class KCluster implements Serializable {
 	private static final long serialVersionUID = 3950930551187321015L;	
-	private ArrayList<KData> data;
+	private ArrayList<KData> dataset;
 	private KData centroid;
 	private KAvg runningAvg;
 	
 	public KCluster(KData centroid, KAvg runningAvg) {
 		this.centroid = centroid;
-		this.data = new ArrayList<KData>();
+		this.dataset = new ArrayList<KData>();
 		this.runningAvg = runningAvg;
 	}
 	
@@ -35,19 +35,27 @@ public class KCluster implements Serializable {
 	}
 	
 	/**
-	 * Getter for this cluster's data.
+	 * Getter for the averager object.
 	 * @return
 	 */
-	public ArrayList<KData> getData() {
-		return data;
+	public KAvg getAverager() {
+		return runningAvg;
 	}
 	
 	/**
-	 * Setter for this cluster's data.
+	 * Getter for this cluster's dataset.
+	 * @return
+	 */
+	public ArrayList<KData> getData() {
+		return dataset;
+	}
+	
+	/**
+	 * Setter for this cluster's dataset.
 	 * @param newData
 	 */
 	public void setData(ArrayList<KData> newData) {
-		data = new ArrayList<KData>();
+		dataset = new ArrayList<KData>();
 		runningAvg.clear();		
 		
 		for(int d = 0; d < newData.size(); d++) {
@@ -57,11 +65,11 @@ public class KCluster implements Serializable {
 	}
 	
 	/**
-	 * Add a data point to this cluster.
+	 * Add a dataset point to this cluster.
 	 * @param dataPt
 	 */
 	public void addDataPt(KData dataPt) {
-		data.add(dataPt);
+		dataset.add(dataPt);
 		runningAvg.addDataPt(dataPt);
 	}
 	
@@ -81,6 +89,13 @@ public class KCluster implements Serializable {
 		centroid = newCentroid;
 	}
 	
+
+	public void mergeWith(KCluster otherCluster) {
+		assert(centroid.distanceTo(otherCluster.getCentroid()) <= 0.000001);
+		dataset.addAll(otherCluster.getData());
+		runningAvg.mergeWith(otherCluster.getAverager());
+	}
+	
 	/**
 	 * For Debugging.
 	 */
@@ -93,11 +108,12 @@ public class KCluster implements Serializable {
 		
 		result += "Avg: " + avgString + "\n";
 		
-		for(int d = 0; d < data.size(); d++) {
-			result += d + ": " + data.get(d).toString() + "\n";
+		for(int d = 0; d < dataset.size(); d++) {
+			result += d + ": " + dataset.get(d).toString() + "\n";
 		}
 		
 		return result;
 	}
+
 	
 }
