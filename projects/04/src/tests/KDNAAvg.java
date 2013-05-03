@@ -29,8 +29,8 @@ public class KDNAAvg implements KAvg{
 	}
 	
 	public KData getAverage() {
-		if(datasize < 0){
-			(new Exception("KDNAAvg was not initialized.")).printStackTrace();
+		if(datasize <= 0){
+			return null;
 		}
 		
 		String[] result = new String[datasize];

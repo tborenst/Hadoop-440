@@ -1,13 +1,14 @@
 
+import mpi.*;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Date;
 
 import parallel.KMeansMaster;
 import parallel.KMeansSlave;
 
-import tests.K2D;
-import tests.K2DAvg;
-import util.KData;
+import util.*;
+import tests.*;
 
 
 public class Main {
@@ -15,7 +16,7 @@ public class Main {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Throwable {
 		try {
 			MPI.Init(args);
 			int rank = MPI.COMM_WORLD.Rank();
@@ -26,16 +27,25 @@ public class Main {
 				System.out.println("Master started");
 				ArrayList<KData> data = new ArrayList<KData>();
 				
-				int xRange = 100000;
-				int yRange = 100000000;
+				int xRange = 100;
+				int yRange = 100;
 				Random randGen = new Random();		
-				for(int d = 0; d < 100; d++) {
-					K2D dataPt = new K2D(randGen.nextInt(xRange) - xRange/2, randGen.nextInt(yRange) - yRange/2);
-					data.add(dataPt);
+				for(int d = 0; d < 10000000; d++) {
+					//K2D dataPt = new K2D(randGen.nextInt(xRange) - xRange/2, randGen.nextInt(yRange) - yRange/2);
+					KDNA dataPt = new KDNA(DNAGenerator.generateDNA(5));
+          data.add(dataPt);
 				}
 				
-				
-				KMeansMaster k = new KMeansMaster(data, K2DAvg.class, 2, 0.5, masterRank, procs);
+				Date date1 = new Date();
+        long start = date1.getTime();
+        
+				KMeansMaster k = new KMeansMaster(data, /*K2DAvg.class*/ KDNAAvg.class, 100, 0, masterRank, procs);
+        
+        Date date2 = new Date();
+        long end   = date2.getTime();
+        System.out.println("Duration: " + (end-start));
+    
+        //System.out.println(k.toString());
 
 			} else {
 				System.out.println("Started slave " + rank);

@@ -92,7 +92,7 @@ public class KCluster implements Serializable {
 
 	public void mergeWith(KCluster otherCluster) {
 		assert(centroid.distanceTo(otherCluster.getCentroid()) <= 0.000001);
-		dataset.addAll(otherCluster.getData());
+		//dataset.addAll(otherCluster.getData());
 		runningAvg.mergeWith(otherCluster.getAverager());
 	}
 	

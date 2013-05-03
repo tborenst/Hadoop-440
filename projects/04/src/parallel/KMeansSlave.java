@@ -19,7 +19,7 @@ public class KMeansSlave {
 		this.loop = false;
 	}
 	
-	public void startListening() {
+	public void startListening() throws MPIException {
 		loop = true;
 		while(loop) {
 			listenForWork();
@@ -30,7 +30,7 @@ public class KMeansSlave {
 		loop = false;
 	}
 	
-	public void listenForWork() {
+	public void listenForWork() throws MPIException {
 		KMessage[] messages = new KMessage[1];
 		MPI.COMM_WORLD.Scatter(messages, 0, 1, MPI.OBJECT, messages, 0, 1, MPI.OBJECT, masterRank);
 		handleMessage(messages[0]);
@@ -39,6 +39,7 @@ public class KMeansSlave {
 	}
 	
 	public void handleMessage(KMessage message) {
+    //System.out.println("Slave " + rank + " recieved a message.");
 		// TODO: change to a better stop message
 		if(message == null) {
 			stopListening();

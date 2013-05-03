@@ -13,6 +13,7 @@ import java.util.Random;
 
 public class KMeansMaster {
 	private ArrayList<KData> dataset;
+  private ArrayList<ArrayList<KData>> dataPartitions;
 	private ArrayList<KCluster> clusters;
 	private ArrayList<Double> centroidEpsilons;
 	private Class<?> KAvgClass;
@@ -27,6 +28,7 @@ public class KMeansMaster {
 		}
 		
 		this.dataset = dataset;
+    this.dataPartitions = partitionDataset(numProcs);
 
 		if(!Util.classImplements(KAvgClass, KAvg.class)) {
 			throw new Throwable("KMeansMaster: KAvgClass must implement util.KAvg.");
@@ -54,15 +56,16 @@ public class KMeansMaster {
 		this.clusterDataset();
 				
 		while(!this.withinRange(centroidEpsilon)) {
+			this.ctr++;
+      System.out.println("Running iteration " + this.ctr + "...");
 			this.findNewClusters();
 			this.clusterDataset();
-			this.ctr++;
 		}
 		
 		killSlaves();
 	}
 	
-	private void killSlaves() {
+	private void killSlaves() throws MPIException {
 		KMessage[] messages = new KMessage[numProcs];
 		sendMessages(messages);
 	}
@@ -71,7 +74,7 @@ public class KMeansMaster {
 	 * Send messages to the slaves using gather and scatter.
 	 * @param messages
 	 */
-	private void sendMessages(KMessage[] messages) {
+	private void sendMessages(KMessage[] messages) throws MPIException {
 		MPI.COMM_WORLD.Scatter(messages, 0, 1, MPI.OBJECT, messages, 0, 1, MPI.OBJECT, masterRank);
 		masterSlave.handleMessage(messages[0]);
 		MPI.COMM_WORLD.Gather(messages, 0, 1, MPI.OBJECT, messages, 0, 1, MPI.OBJECT, masterRank);
@@ -132,7 +135,7 @@ public class KMeansMaster {
 	/**
 	 * Add the data to the closest cluster.
 	 */
-	private void clusterDataset() {
+	private void clusterDataset() throws MPIException {
 		KMessage[] clusterWork = generateClusterWork();
 		sendMessages(clusterWork);
 		
@@ -149,7 +152,6 @@ public class KMeansMaster {
 	}
 	
 	private KMessage[] generateClusterWork() {
-		ArrayList<ArrayList<KData>> dataPartitions = partitionDataset(numProcs);
 		KMessage[] work = new KMessage[numProcs];
 		
 		for(int i = 0; i < dataPartitions.size(); i++) {
@@ -167,7 +169,7 @@ public class KMeansMaster {
 		for(int p = 0; p < datasetSize; p += partitionSize) {
 			int endPt = p + partitionSize;
 			if(endPt >= datasetSize) {endPt = datasetSize - 1;}
-			partitions.add((ArrayList<KData>) dataset.subList(p, endPt));
+			partitions.add((new ArrayList<KData>(dataset.subList(p, endPt))));
 		}
 		
 		return partitions;
