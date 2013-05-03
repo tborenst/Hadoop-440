@@ -1,4 +1,4 @@
-package serial;
+package parallel;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -10,14 +10,14 @@ import util.Util;
 
 import java.util.Random;
 
-public class KMeans {
+public class KMeansMaster {
 	private ArrayList<KData> dataset;
 	private ArrayList<KCluster> clusters;
 	private ArrayList<Double> centroidEpsilons;
 	private Class<?> KAvgClass;
 	private int ctr;
 	
-	public KMeans(ArrayList<KData> dataset, Class<?> KAvgClass, int k, double centroidEpsilon) throws Throwable {
+	public KMeansMaster(ArrayList<KData> dataset, Class<?> KAvgClass, int k, double centroidEpsilon) throws Throwable {
 		if(k <= 0) {
 			throw new Throwable("KMeansMaster: k must be greater than 0.");
 		}
