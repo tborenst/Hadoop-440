@@ -12,7 +12,7 @@ import util.Util;
 import java.util.Random;
 
 public class KMeansMaster {
-	private ArrayList<KData> dataset;
+	//private ArrayList<KData> dataset;
   private ArrayList<ArrayList<KData>> dataPartitions;
 	private ArrayList<KCluster> clusters;
 	private ArrayList<Double> centroidEpsilons;
@@ -27,8 +27,8 @@ public class KMeansMaster {
 			throw new Throwable("KMeansMaster: k must be greater than 0.");
 		}
 		
-		this.dataset = dataset;
-    this.dataPartitions = partitionDataset(numProcs);
+		//this.dataset = dataset;
+    this.dataPartitions = partitionDataset(dataset, numProcs);
 
 		if(!Util.classImplements(KAvgClass, KAvg.class)) {
 			throw new Throwable("KMeansMaster: KAvgClass must implement util.KAvg.");
@@ -161,7 +161,7 @@ public class KMeansMaster {
 		return work;
 	}
 	
-	private ArrayList<ArrayList<KData>> partitionDataset(int numPartitions) {
+	private ArrayList<ArrayList<KData>> partitionDataset(ArrayList<KData> dataset, int numPartitions) {
 		int datasetSize = dataset.size();
 		int partitionSize = (datasetSize + numPartitions - 1)/numPartitions;
 		ArrayList<ArrayList<KData>> partitions = new ArrayList<ArrayList<KData>>();

@@ -32,7 +32,7 @@ public class Main {
 				Random randGen = new Random();		
 				for(int d = 0; d < 10000000; d++) {
 					//K2D dataPt = new K2D(randGen.nextInt(xRange) - xRange/2, randGen.nextInt(yRange) - yRange/2);
-					KDNA dataPt = new KDNA(DNAGenerator.generateDNA(5));
+					KDNA dataPt = new KDNA(DNAGenerator.generateDNA(7));
           data.add(dataPt);
 				}
 				
