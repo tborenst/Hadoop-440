@@ -1,3 +1,0 @@
-nifest-Version: 1.0
-Main-Class: processManager.Main
-Created-By: 1.2 (Tomer Borenstein and Vansi Vallabhaneini)
